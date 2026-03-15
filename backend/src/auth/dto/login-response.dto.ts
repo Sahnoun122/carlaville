@@ -1,11 +1,11 @@
-import { Role } from '../../common/enums/role.enum';
+import type { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
 
-class LoginUserDto {
+export class LoginUserDto implements AuthenticatedUser {
   id!: string;
   email!: string;
   firstName!: string;
   lastName!: string;
-  roles!: Role[];
+  roles!: AuthenticatedUser['roles'];
 }
 
 export class LoginResponseDto {
