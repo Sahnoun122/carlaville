@@ -1,7 +1,7 @@
 import { IsEnum } from 'class-validator';
-import { UserRole } from '../../common/enums/user-role.enum';
+import { Role } from '../../common/enums/role.enum';
 
 export class AssignRoleDto {
-  @IsEnum(UserRole)
-  role: UserRole;
+  @IsEnum(Role)
+  role: Role;
 }

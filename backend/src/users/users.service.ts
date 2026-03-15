@@ -68,8 +68,18 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const payload: UpdateUserDto = { ...updateUserDto };
+
+    if (payload.email) {
+      payload.email = payload.email.trim().toLowerCase();
+    }
+
+    if (payload.password) {
+      payload.password = await bcrypt.hash(payload.password, 10);
+    }
+
     const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .findByIdAndUpdate(id, payload, { new: true })
       .select('-password')
       .exec();
 
