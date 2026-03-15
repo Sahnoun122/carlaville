@@ -4,9 +4,11 @@ export enum DeliveryType {
 }
 
 export enum DeliveryStatus {
-  SCHEDULED = 'scheduled',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  DELAYED = 'delayed',
+  PENDING = 'pending',
+  ASSIGNED = 'assigned',
+  ON_THE_WAY = 'on-the-way',
+  ARRIVED = 'arrived',
+  CONFIRMED = 'confirmed',
+  FAILED = 'failed',
   CANCELLED = 'cancelled',
 }

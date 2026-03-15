@@ -38,7 +38,7 @@ export class Delivery {
   @Prop({
     type: String,
     enum: Object.values(DeliveryStatus),
-    default: DeliveryStatus.SCHEDULED,
+    default: DeliveryStatus.PENDING,
   })
   status: DeliveryStatus;
 
