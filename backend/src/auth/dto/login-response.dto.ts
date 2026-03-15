@@ -1,16 +1,8 @@
-import type { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
-
-export class LoginUserDto implements AuthenticatedUser {
-  id!: string;
-  email!: string;
-  firstName!: string;
-  lastName!: string;
-  roles!: AuthenticatedUser['roles'];
-}
+import { AuthenticatedUser } from '../interfaces/authenticated-user.interface';
 
 export class LoginResponseDto {
   accessToken!: string;
   tokenType!: 'Bearer';
   expiresIn!: string;
-  user!: LoginUserDto;
+  user!: AuthenticatedUser;
 }

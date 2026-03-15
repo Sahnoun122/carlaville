@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../common/enums/user-role.enum';
+import { Role } from '../common/enums/role.enum';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { AgenciesService } from './agencies.service';
 import { CreateAgencyDto } from './dto/create-agency.dto';
@@ -20,7 +20,7 @@ import { FilterAgencyDto } from './dto/filter-agency.dto';
 import { UpdateAgencyDto } from './dto/update-agency.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+@Roles(Role.ADMIN)
 @Controller('admin/agencies')
 export class AgenciesController {
   constructor(private readonly agenciesService: AgenciesService) {}

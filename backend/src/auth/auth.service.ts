@@ -16,38 +16,35 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async validateUser(
-    email: string,
-    password: string,
-  ): Promise<AuthenticatedUser> {
-    const user = await this.usersService.findOneByEmailWithPassword(email);
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+    const user = await this.usersService.findOneByEmailWithPassword(
+      loginDto.email,
+    );
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    return this.usersService.toAuthenticatedUser(user);
-  }
+    const { id, email, name, role } = user;
+    const authUser: AuthenticatedUser = { id, email, name: name || '', role };
 
-  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
     const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      roles: user.roles,
+      sub: authUser.id,
+      email: authUser.email,
+      role: authUser.role,
     };
 
     return {
       accessToken: await this.jwtService.signAsync(payload),
       tokenType: 'Bearer',
       expiresIn: this.configService.get<string>('jwt.expiresIn', '1d'),
-      user,
+      user: authUser,
     };
   }
 }

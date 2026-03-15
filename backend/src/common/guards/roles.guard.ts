@@ -30,13 +30,7 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Authenticated user context is missing');
     }
 
-    if (user.roles.includes(Role.SUPER_ADMIN)) {
-      return true;
-    }
-
-    const hasRequiredRole = requiredRoles.some((role) =>
-      user.roles?.includes(role),
-    );
+    const hasRequiredRole = requiredRoles.some((role) => user.role === role);
 
     if (!hasRequiredRole) {
       throw new ForbiddenException(

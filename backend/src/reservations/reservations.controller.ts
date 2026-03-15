@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../common/enums/user-role.enum';
+import { Role } from '../common/enums/role.enum';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -28,7 +28,7 @@ export class ReservationsController {
   /**
    * @example POST http://localhost:3000/admin/reservations
    */
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() createDto: CreateReservationDto) {
     return this.reservationsService.create(createDto);
@@ -37,7 +37,7 @@ export class ReservationsController {
   /**
    * @example GET http://localhost:3000/admin/reservations?status=pending
    */
-  @Roles(UserRole.ADMIN, UserRole.AGENCY_OWNER)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Get()
   findAll(
     @Query() filterDto: FilterReservationDto,
@@ -50,7 +50,7 @@ export class ReservationsController {
   /**
    * @example GET http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3
    */
-  @Roles(UserRole.ADMIN, UserRole.AGENCY_OWNER)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservationsService.findById(id);
@@ -59,7 +59,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/confirm
    */
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id/confirm')
   confirm(@Param('id') id: string) {
     return this.reservationsService.confirm(id);
@@ -68,7 +68,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/reject
    */
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id/reject')
   reject(@Param('id') id: string) {
     return this.reservationsService.reject(id);
@@ -77,7 +77,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/assign-agent
    */
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id/assign-agent')
   assignDeliveryAgent(
     @Param('id') id: string,
@@ -92,7 +92,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/ready-for-delivery
    */
-  @Roles(UserRole.ADMIN, UserRole.AGENCY_OWNER)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Patch(':id/ready-for-delivery')
   markReadyForDelivery(@Param('id') id: string) {
     return this.reservationsService.markReadyForDelivery(id);
@@ -101,7 +101,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/delivered
    */
-  @Roles(UserRole.DELIVERY_AGENT)
+  @Roles(Role.DELIVERY_AGENT)
   @Patch(':id/delivered')
   markDelivered(@Param('id') id: string) {
     return this.reservationsService.markDelivered(id);
@@ -110,7 +110,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/returned
    */
-  @Roles(UserRole.DELIVERY_AGENT)
+  @Roles(Role.DELIVERY_AGENT)
   @Patch(':id/returned')
   markReturned(@Param('id') id: string) {
     return this.reservationsService.markReturned(id);
@@ -119,7 +119,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/complete
    */
-  @Roles(UserRole.ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id/complete')
   complete(@Param('id') id: string) {
     return this.reservationsService.complete(id);
@@ -128,7 +128,7 @@ export class ReservationsController {
   /**
    * @example POST http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/notes
    */
-  @Roles(UserRole.ADMIN, UserRole.AGENCY_OWNER)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Post(':id/notes')
   addInternalNote(@Param('id') id: string, @Body() addNoteDto: AddNoteDto) {
     return this.reservationsService.addInternalNote(id, addNoteDto.note);

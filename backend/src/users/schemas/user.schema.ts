@@ -11,13 +11,13 @@ export type UserDocument = HydratedDocument<User>;
   toJSON: {
     virtuals: true,
     transform: (doc, ret) => {
-      delete ret._id;
+      delete (ret as any)._id;
     },
   },
   toObject: {
     virtuals: true,
     transform: (doc, ret) => {
-      delete ret._id;
+      delete (ret as any)._id;
     },
   },
 })
@@ -56,5 +56,8 @@ UserSchema.pre('save', async function () {
     return;
   }
 
-  this.password = await bcrypt.hash(this.password, 12);
+  // Only hash if the password is not already hashed (doesn't start with $2b$)
+  if (!this.password.startsWith('$2b$')) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
 });

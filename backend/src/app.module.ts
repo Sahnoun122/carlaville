@@ -1,40 +1,40 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 import { AgenciesModule } from './agencies/agencies.module';
 import { CarsModule } from './cars/cars.module';
 import { ReservationsModule } from './reservations/reservations.module';
-import { DeliveriesModule } from './deliveries/deliveries.module';
 import { PricingModule } from './pricing/pricing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import configuration from './config/configuration';
+import { DeliveriesModule } from './deliveries/deliveries.module';
 import { RolesModule } from './roles/roles.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration from './config/configuration';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [configuration],
       isGlobal: true,
+      envFilePath: '.env',
+      load: [configuration],
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('database.uri'),
-      }),
       inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('database.uri') || 'mongodb://localhost:27017/carlaville',
+      }),
     }),
-    AuthModule,
     UsersModule,
+    AuthModule,
     AgenciesModule,
     CarsModule,
     ReservationsModule,
-    DeliveriesModule,
     PricingModule,
     DashboardModule,
+    DeliveriesModule,
     RolesModule,
   ],
   controllers: [AppController],

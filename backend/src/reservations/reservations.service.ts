@@ -101,8 +101,11 @@ export class ReservationsService {
         'Cannot assign agent to a non-confirmed reservation.',
       );
     }
-    reservation.assignedDeliveryAgentId = agentId as any;
-    return reservation.save();
+    const updatedReservation = await this.reservationModel.findByIdAndUpdate(id, { assignedDeliveryAgentId: agentId }, { new: true });
+    if (!updatedReservation) {
+      throw new NotFoundException(`Reservation with id ${id} not found`);
+    }
+    return updatedReservation;
   }
 
   async markReadyForDelivery(id: string): Promise<Reservation> {
@@ -132,10 +135,14 @@ export class ReservationsService {
 
   async addInternalNote(id: string, note: string): Promise<Reservation> {
     const reservation = await this.findById(id);
-    reservation.internalNotes = reservation.internalNotes
+    const newNote = reservation.internalNotes
       ? `${reservation.internalNotes}\n${note}`
       : note;
-    return reservation.save();
+    const updatedReservation = await this.reservationModel.findByIdAndUpdate(id, { internalNotes: newNote }, { new: true });
+    if (!updatedReservation) {
+      throw new NotFoundException(`Reservation with id ${id} not found`);
+    }
+    return updatedReservation;
   }
 
   private async updateStatus(
@@ -149,8 +156,15 @@ export class ReservationsService {
         `Cannot transition from ${reservation.status} to ${newStatus}`,
       );
     }
-    reservation.status = newStatus;
-    return reservation.save();
+    const updated = await this.reservationModel.findByIdAndUpdate(
+      id,
+      { status: newStatus },
+      { new: true },
+    );
+    if (!updated) {
+      throw new NotFoundException(`Reservation with id ${id} not found`);
+    }
+    return updated;
   }
 
   private calculateRentalDays(pickupDate: string, returnDate: string): number {

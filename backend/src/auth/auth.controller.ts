@@ -20,4 +20,10 @@ export class AuthController {
   getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
     return user;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@CurrentUser() user: AuthenticatedUser) {
+    return user;
+  }
 }

@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '../common/enums/user-role.enum';
+import { Role } from '../common/enums/role.enum';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { PricingService } from './pricing.service';
 import { CreatePricingConfigDto } from './dto/create-pricing-config.dto';
@@ -29,35 +29,35 @@ export class PricingController {
 
   // Admin routes for pricing config
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post('config')
   createConfig(@Body() createDto: CreatePricingConfigDto) {
     return this.pricingService.createConfig(createDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Get('config')
   findAllConfigs() {
     return this.pricingService.findAllConfigs();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Get('config/active')
   getActiveConfig() {
     return this.pricingService.getActiveConfig();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Get('config/:id')
   findConfigById(@Param('id') id: string) {
     return this.pricingService.findConfigById(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch('config/:id')
   updateConfig(
     @Param('id') id: string,
