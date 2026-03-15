@@ -12,6 +12,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import configuration from './config/configuration';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import configuration from './config/configuration';
     DeliveriesModule,
     PricingModule,
     DashboardModule,
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

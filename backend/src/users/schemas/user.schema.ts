@@ -10,24 +10,19 @@ export type UserDocument = HydratedDocument<User>;
   versionKey: false,
   toJSON: {
     virtuals: true,
-    transform: (_doc, ret) => {
-      const normalizedRet = ret as Record<string, unknown>;
-      delete normalizedRet._id;
-      delete normalizedRet.password;
-      return ret;
+    transform: (doc, ret) => {
+      delete ret._id;
     },
   },
   toObject: {
     virtuals: true,
-    transform: (_doc, ret) => {
-      const normalizedRet = ret as Record<string, unknown>;
-      delete normalizedRet._id;
-      delete normalizedRet.password;
-      return ret;
+    transform: (doc, ret) => {
+      delete ret._id;
     },
   },
 })
 export class User {
+  id?: string;
   @Prop({ required: true, unique: true, lowercase: true, trim: true, index: true })
   email!: string;
 
@@ -35,20 +30,26 @@ export class User {
   password!: string;
 
   @Prop({
-    type: [String],
+    type: String,
     enum: Object.values(Role),
-    default: [Role.DELIVERY_AGENT],
+    default: Role.DELIVERY_AGENT,
   })
-  roles!: Role[];
+  role!: Role;
 
   @Prop({ required: true, trim: true })
   firstName!: string;
 
   @Prop({ required: true, trim: true })
   lastName!: string;
+
+  name?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('name').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 UserSchema.pre('save', async function () {
   if (!this.isModified('password')) {
