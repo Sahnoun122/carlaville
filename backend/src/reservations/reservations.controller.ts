@@ -1,4 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
+import { RolesGuard } from '../common/guards/roles.guard';
 
-@Controller('reservations')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.RESERVATION_MANAGER)
+@Controller('operations/reservations')
 export class ReservationsController {}

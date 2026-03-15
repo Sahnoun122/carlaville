@@ -1,32 +1,53 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { UsersService } from '../users/users.service';
+import { LoginDto } from './dto/login.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOneByEmail(email);
-    if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user;
-      return result;
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<AuthenticatedUser> {
+    const user = await this.usersService.findOneByEmailWithPassword(email);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
     }
-    return null;
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return this.usersService.toAuthenticatedUser(user);
   }
 
-  async login(user: any) {
-    const payload = {
-      username: user.username,
-      sub: user.userId,
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
       roles: user.roles,
     };
+
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: await this.jwtService.signAsync(payload),
+      tokenType: 'Bearer',
+      expiresIn: this.configService.get<string>('jwt.expiresIn', '1d'),
+      user,
     };
   }
 }

@@ -1,4 +1,10 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
+import { RolesGuard } from '../common/guards/roles.guard';
 
-@Controller('deliveries')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.DELIVERY_AGENT)
+@Controller('operations/deliveries')
 export class DeliveriesController {}

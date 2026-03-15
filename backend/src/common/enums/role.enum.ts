@@ -1,5 +1,8 @@
 export enum Role {
-  SUPER_ADMIN = 'super_admin',
-  ADMIN = 'admin',
-  RESERVATION_MANAGER = 'reservation_manager',
-  DELIVERY_AGENT = 'delivery_agent',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  RESERVATION_MANAGER = 'RESERVATION_MANAGER',
+  DELIVERY_AGENT = 'DELIVERY_AGENT',
+}
+
+export const ADMIN_ACCESS_ROLES = [Role.SUPER_ADMIN, Role.ADMIN];
