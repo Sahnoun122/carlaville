@@ -1,9 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
+import { FilterUserDto } from './dto/filter-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 
 @Injectable()
 export class UsersService {
@@ -11,25 +14,41 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const createdUser = await this.userModel.create({
       ...createUserDto,
+      password: hashedPassword,
       email: createUserDto.email.trim().toLowerCase(),
     });
 
-    return this.findOne(createdUser.id);
+    const { password, ...user } = createdUser.toObject();
+    return user;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().sort({ createdAt: -1 }).exec();
+  async findAll(filterDto: FilterUserDto, page: number, limit: number) {
+    const query = {};
+    if (filterDto.role) {
+      query['role'] = filterDto.role;
+    }
+    if (filterDto.status) {
+      query['active'] = filterDto.status === 'active';
+    }
+
+    const users = await this.userModel
+      .find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .exec();
+
+    const count = await this.userModel.countDocuments(query);
+    return { users, count };
   }
 
   async findById(id: string): Promise<User> {
-    return this.findOne(id);
-  }
-
-  async findOne(id: string): Promise<User> {
-    const user = await this.userModel.findById(id).exec();
+    const user = await this.userModel.findById(id).select('-password').exec();
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} was not found`);
@@ -38,8 +57,28 @@ export class UsersService {
     return user;
   }
 
-  async findOneByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email: email.trim().toLowerCase() }).exec();
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .select('-password')
+      .exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException(`User with id ${id} was not found`);
+    }
+    return updatedUser;
+  }
+
+  async activate(id: string): Promise<User> {
+    return this.update(id, { active: true });
+  }
+
+  async deactivate(id: string): Promise<User> {
+    return this.update(id, { active: false });
+  }
+
+  async assignRole(id: string, assignRoleDto: AssignRoleDto): Promise<User> {
+    return this.update(id, { role: assignRoleDto.role });
   }
 
   async findOneByEmailWithPassword(email: string): Promise<UserDocument | null> {
@@ -47,20 +86,5 @@ export class UsersService {
       .findOne({ email: email.trim().toLowerCase() })
       .select('+password')
       .exec();
-  }
-
-  async findAuthUserById(id: string): Promise<AuthenticatedUser | null> {
-    const user = await this.userModel.findById(id).exec();
-    return user ? this.toAuthenticatedUser(user) : null;
-  }
-
-  toAuthenticatedUser(user: UserDocument): AuthenticatedUser {
-    return {
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      roles: user.roles,
-    };
   }
 }

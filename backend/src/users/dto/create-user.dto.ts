@@ -1,32 +1,30 @@
 import {
-  IsArray,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
   IsString,
-  MinLength,
+  IsEmail,
+  IsNotEmpty,
+  IsEnum,
+  IsOptional,
 } from 'class-validator';
-import { Role } from '../../common/enums/role.enum';
+import { UserRole } from '../../common/enums/user-role.enum';
 
 export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
   @IsEmail()
   @IsNotEmpty()
-  email!: string;
+  email: string;
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(8)
-  password!: string;
+  phone: string;
 
-  @IsArray()
-  @IsEnum(Role, { each: true })
-  roles!: Role[];
+  @IsEnum(UserRole)
+  @IsNotEmpty()
+  role: UserRole;
 
   @IsString()
   @IsNotEmpty()
-  firstName!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lastName!: string;
+  password: string;
 }

@@ -1,23 +1,18 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional, IsEnum, IsBoolean } from 'class-validator';
-import { Role } from '../../common/enums/role.enum';
+import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { UserRole } from '../../common/enums/user-role.enum';
 
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   name?: string;
-
-  @IsOptional()
-  @IsEmail()
-  email?: string;
 
   @IsOptional()
   @IsString()
   phone?: string;
 
   @IsOptional()
-  @IsEnum(Role)
-  role?: Role;
+  @IsEnum(UserRole)
+  role?: UserRole;
 
   @IsOptional()
   @IsBoolean()
