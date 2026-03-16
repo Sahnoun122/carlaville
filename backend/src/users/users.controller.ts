@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -102,5 +103,15 @@ export class UsersController {
   @Patch(':id/assign-role')
   assignRole(@Param('id') id: string, @Body() assignRoleDto: AssignRoleDto) {
     return this.usersService.assignRole(id, assignRoleDto);
+  }
+
+  /**
+   * @example DELETE http://localhost:3000/admin/users/60f7e1b3b3b3b3b3b3b3b3b3
+   * @param id
+   * @returns
+   */
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
   }
 }

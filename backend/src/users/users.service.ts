@@ -101,6 +101,16 @@ export class UsersService {
     return this.update(id, { role: assignRoleDto.role });
   }
 
+  async remove(id: string): Promise<{ message: string }> {
+    const deletedUser = await this.userModel.findByIdAndDelete(id).exec();
+
+    if (!deletedUser) {
+      throw new NotFoundException(`User with id ${id} was not found`);
+    }
+
+    return { message: 'User deleted successfully' };
+  }
+
   async findOneByEmailWithPassword(email: string): Promise<UserDocument | null> {
     return this.userModel
       .findOne({ email: email.trim().toLowerCase() })
