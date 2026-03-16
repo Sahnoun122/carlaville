@@ -111,7 +111,9 @@ export class UsersService {
     return { message: 'User deleted successfully' };
   }
 
-  async findOneByEmailWithPassword(email: string): Promise<UserDocument | null> {
+  async findOneByEmailWithPassword(
+    email: string,
+  ): Promise<UserDocument | null> {
     return this.userModel
       .findOne({ email: email.trim().toLowerCase() })
       .select('+password')

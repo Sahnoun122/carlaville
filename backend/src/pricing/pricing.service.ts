@@ -50,7 +50,9 @@ export class PricingService {
   }
 
   async getActiveConfig(): Promise<PricingConfig> {
-    const config = await this.pricingConfigModel.findOne({ active: true }).exec();
+    const config = await this.pricingConfigModel
+      .findOne({ active: true })
+      .exec();
     if (!config) {
       throw new NotFoundException('No active pricing configuration found.');
     }

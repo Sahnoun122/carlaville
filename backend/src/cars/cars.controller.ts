@@ -19,6 +19,8 @@ import { CarsService } from './cars.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { FilterCarDto } from './dto/filter-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
+import { StartMaintenanceDto } from './dto/start-maintenance.dto';
+import { CompleteMaintenanceDto } from './dto/complete-maintenance.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
@@ -91,5 +93,26 @@ export class CarsController {
   @Delete(':id')
   archive(@Param('id') id: string) {
     return this.carsService.archive(id);
+  }
+
+  @Patch(':id/maintenance/start')
+  startMaintenance(
+    @Param('id') id: string,
+    @Body() startMaintenanceDto: StartMaintenanceDto,
+  ) {
+    return this.carsService.startMaintenance(id, startMaintenanceDto);
+  }
+
+  @Patch(':id/maintenance/complete')
+  completeMaintenance(
+    @Param('id') id: string,
+    @Body() completeMaintenanceDto: CompleteMaintenanceDto,
+  ) {
+    return this.carsService.completeMaintenance(id, completeMaintenanceDto);
+  }
+
+  @Get(':id/maintenance/history')
+  getMaintenanceHistory(@Param('id') id: string) {
+    return this.carsService.getMaintenanceHistory(id);
   }
 }

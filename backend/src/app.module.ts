@@ -24,7 +24,9 @@ import configuration from './config/configuration';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('database.uri') || 'mongodb://localhost:27017/carlaville',
+        uri:
+          configService.get<string>('database.uri') ||
+          'mongodb://localhost:27017/carlaville',
       }),
     }),
     UsersModule,

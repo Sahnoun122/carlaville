@@ -6,10 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  Reservation,
-  ReservationDocument,
-} from './schemas/reservation.schema';
+import { Reservation, ReservationDocument } from './schemas/reservation.schema';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { FilterReservationDto } from './dto/filter-reservation.dto';
 import { ReservationStatus } from '../common/enums/reservation-status.enum';
@@ -22,7 +19,10 @@ export class ReservationsService {
     private reservationModel: Model<ReservationDocument>,
   ) {}
 
-  private readonly nanoid = customAlphabet('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ', 8);
+  private readonly nanoid = customAlphabet(
+    '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    8,
+  );
 
   async create(dto: CreateReservationDto): Promise<Reservation> {
     const bookingReference = `CRVL-${this.nanoid()}`;
@@ -91,17 +91,18 @@ export class ReservationsService {
     ]);
   }
 
-  async assignDeliveryAgent(
-    id: string,
-    agentId: string,
-  ): Promise<Reservation> {
+  async assignDeliveryAgent(id: string, agentId: string): Promise<Reservation> {
     const reservation = await this.findById(id);
     if (reservation.status !== ReservationStatus.CONFIRMED) {
       throw new BadRequestException(
         'Cannot assign agent to a non-confirmed reservation.',
       );
     }
-    const updatedReservation = await this.reservationModel.findByIdAndUpdate(id, { assignedDeliveryAgentId: agentId }, { new: true });
+    const updatedReservation = await this.reservationModel.findByIdAndUpdate(
+      id,
+      { assignedDeliveryAgentId: agentId },
+      { new: true },
+    );
     if (!updatedReservation) {
       throw new NotFoundException(`Reservation with id ${id} not found`);
     }
@@ -138,7 +139,11 @@ export class ReservationsService {
     const newNote = reservation.internalNotes
       ? `${reservation.internalNotes}\n${note}`
       : note;
-    const updatedReservation = await this.reservationModel.findByIdAndUpdate(id, { internalNotes: newNote }, { new: true });
+    const updatedReservation = await this.reservationModel.findByIdAndUpdate(
+      id,
+      { internalNotes: newNote },
+      { new: true },
+    );
     if (!updatedReservation) {
       throw new NotFoundException(`Reservation with id ${id} not found`);
     }

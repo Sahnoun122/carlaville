@@ -9,6 +9,16 @@ import {
 
 export type CarDocument = Car & Document;
 
+export class MaintenanceRecord {
+  startedAt: Date;
+  endedAt?: Date;
+  reason: string;
+  notes?: string;
+  estimatedCost?: number;
+  finalCost?: number;
+  status: 'ongoing' | 'completed';
+}
+
 @Schema({ timestamps: true })
 export class Car {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Agency' })
@@ -72,6 +82,27 @@ export class Car {
   @Prop([String])
   images: string[];
 
+  @Prop({
+    type: [
+      {
+        startedAt: { type: Date, required: true },
+        endedAt: { type: Date },
+        reason: { type: String, required: true },
+        notes: { type: String },
+        estimatedCost: { type: Number },
+        finalCost: { type: Number },
+        status: {
+          type: String,
+          enum: ['ongoing', 'completed'],
+          required: true,
+          default: 'ongoing',
+        },
+      },
+    ],
+    default: [],
+  })
+  maintenanceHistory: MaintenanceRecord[];
+
   @Prop({ default: true })
   active: boolean;
 }
@@ -82,3 +113,4 @@ CarSchema.index({ agencyId: 1 });
 CarSchema.index({ city: 1 });
 CarSchema.index({ category: 1 });
 CarSchema.index({ availabilityStatus: 1 });
+CarSchema.index({ 'maintenanceHistory.status': 1 });

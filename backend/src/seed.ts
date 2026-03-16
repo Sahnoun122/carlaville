@@ -55,7 +55,9 @@ async function bootstrap() {
   };
 
   try {
-    const reservationManagerUser = await usersService.create(reservationManagerDto);
+    const reservationManagerUser = await usersService.create(
+      reservationManagerDto,
+    );
     console.log('Reservation Manager user created:', reservationManagerUser);
   } catch (error) {
     if (error.message.includes('duplicate key error')) {

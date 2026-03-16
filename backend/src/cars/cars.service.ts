@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Car, CarDocument } from './schemas/car.schema';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { FilterCarDto } from './dto/filter-car.dto';
+import { StartMaintenanceDto } from './dto/start-maintenance.dto';
+import { CompleteMaintenanceDto } from './dto/complete-maintenance.dto';
+import { AvailabilityStatus } from '../common/enums/car.enum';
 
 @Injectable()
 export class CarsService {
@@ -72,5 +79,118 @@ export class CarsService {
       throw new NotFoundException(`Car with id ${id} not found`);
     }
     return archivedCar;
+  }
+
+  async startMaintenance(
+    id: string,
+    startMaintenanceDto: StartMaintenanceDto,
+  ): Promise<Car> {
+    const car = await this.carModel.findById(id).exec();
+
+    if (!car) {
+      throw new NotFoundException(`Car with id ${id} not found`);
+    }
+
+    const hasOngoingMaintenance = car.maintenanceHistory?.some(
+      (record) => record.status === 'ongoing',
+    );
+
+    if (
+      hasOngoingMaintenance ||
+      car.availabilityStatus === AvailabilityStatus.MAINTENANCE
+    ) {
+      throw new BadRequestException('Car is already in maintenance.');
+    }
+
+    car.maintenanceHistory = car.maintenanceHistory || [];
+    car.maintenanceHistory.push({
+      startedAt: new Date(),
+      reason: startMaintenanceDto.reason,
+      notes: startMaintenanceDto.notes,
+      estimatedCost: startMaintenanceDto.estimatedCost,
+      status: 'ongoing',
+    } as never);
+
+    car.availabilityStatus = AvailabilityStatus.MAINTENANCE;
+
+    await car.save();
+
+    return this.findById(id);
+  }
+
+  async completeMaintenance(
+    id: string,
+    completeMaintenanceDto: CompleteMaintenanceDto,
+  ): Promise<Car> {
+    const car = await this.carModel.findById(id).exec();
+
+    if (!car) {
+      throw new NotFoundException(`Car with id ${id} not found`);
+    }
+
+    const ongoingIndex = car.maintenanceHistory
+      ? [...car.maintenanceHistory]
+          .reverse()
+          .findIndex((record) => record.status === 'ongoing')
+      : -1;
+
+    if (ongoingIndex === -1) {
+      throw new BadRequestException(
+        'No ongoing maintenance found for this car.',
+      );
+    }
+
+    const realIndex = car.maintenanceHistory.length - 1 - ongoingIndex;
+    const targetRecord = car.maintenanceHistory[realIndex] as never as {
+      endedAt?: Date;
+      notes?: string;
+      finalCost?: number;
+      status: 'ongoing' | 'completed';
+    };
+
+    targetRecord.endedAt = completeMaintenanceDto.endedAt
+      ? new Date(completeMaintenanceDto.endedAt)
+      : new Date();
+
+    if (completeMaintenanceDto.notes) {
+      targetRecord.notes = completeMaintenanceDto.notes;
+    }
+
+    if (typeof completeMaintenanceDto.finalCost === 'number') {
+      targetRecord.finalCost = completeMaintenanceDto.finalCost;
+    }
+
+    targetRecord.status = 'completed';
+
+    car.availabilityStatus =
+      completeMaintenanceDto.nextAvailabilityStatus ||
+      AvailabilityStatus.AVAILABLE;
+
+    await car.save();
+
+    return this.findById(id);
+  }
+
+  async getMaintenanceHistory(id: string) {
+    const car = await this.carModel
+      .findById(id)
+      .select('maintenanceHistory brand model availabilityStatus')
+      .exec();
+
+    if (!car) {
+      throw new NotFoundException(`Car with id ${id} not found`);
+    }
+
+    const history = [...(car.maintenanceHistory || [])].sort(
+      (a, b) =>
+        new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
+    );
+
+    return {
+      carId: id,
+      carLabel: `${car.brand} ${car.model}`,
+      availabilityStatus: car.availabilityStatus,
+      history,
+    };
   }
 }

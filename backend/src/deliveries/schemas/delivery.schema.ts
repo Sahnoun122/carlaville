@@ -1,9 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
-import {
-  DeliveryStatus,
-  DeliveryType,
-} from '../../common/enums/delivery.enum';
+import { DeliveryStatus, DeliveryType } from '../../common/enums/delivery.enum';
 
 export type DeliveryDocument = Delivery & Document;
 

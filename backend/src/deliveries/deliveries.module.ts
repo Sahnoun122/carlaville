@@ -6,7 +6,9 @@ import { Delivery, DeliverySchema } from './schemas/delivery.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Delivery.name, schema: DeliverySchema }]),
+    MongooseModule.forFeature([
+      { name: Delivery.name, schema: DeliverySchema },
+    ]),
   ],
   controllers: [DeliveriesController],
   providers: [DeliveriesService],
