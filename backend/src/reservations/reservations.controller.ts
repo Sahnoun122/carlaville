@@ -19,6 +19,7 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { FilterReservationDto } from './dto/filter-reservation.dto';
 import { AssignAgentDto } from './dto/assign-agent.dto';
 import { AddNoteDto } from './dto/add-note.dto';
+import { UpdateDayControlSettingsDto } from './dto/update-day-control-settings.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('admin/reservations')
@@ -45,6 +46,18 @@ export class ReservationsController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     return this.reservationsService.findAll(filterDto, page, limit);
+  }
+
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
+  @Get('settings/day-control')
+  getDayControlSettings() {
+    return this.reservationsService.getDayControlSettings();
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch('settings/day-control')
+  updateDayControlSettings(@Body() dto: UpdateDayControlSettingsDto) {
+    return this.reservationsService.updateDayControlSettings(dto);
   }
 
   /**

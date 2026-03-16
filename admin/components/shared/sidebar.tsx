@@ -1,0 +1,53 @@
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const navLinks = {
+  admin: [
+    { name: 'Dashboard', href: '/admin' },
+    { name: 'Users', href: '/admin/users' },
+    { name: 'Agencies', href: '/admin/agencies' },
+    { name: 'Cars', href: '/admin/cars' },
+    { name: 'Maintenance', href: '/admin/maintenance' },
+    { name: 'Reservations', href: '/admin/reservations' },
+    { name: 'Deliveries', href: '/admin/deliveries' },
+    { name: 'Pricing', href: '/admin/pricing' },
+    { name: 'Profile', href: '/admin/profile' },
+  ],
+  operations: [
+    { name: 'Dashboard', href: '/operations' },
+    { name: 'Reservations', href: '/operations/reservations' },
+    { name: 'Deliveries', href: '/operations/deliveries' },
+  ],
+};
+
+export const Sidebar = () => {
+  const pathname = usePathname();
+  const role = pathname.startsWith('/admin') ? 'admin' : 'operations';
+
+  return (
+    <div className="flex flex-col w-64 h-screen px-4 py-8 bg-white border-r">
+      <h2 className="text-3xl font-semibold text-center text-indigo-600">
+        CarlaVille
+      </h2>
+      <div className="flex flex-col justify-between mt-6">
+        <aside>
+          <ul>
+            {navLinks[role].map((link) => (
+              <li key={link.name}>
+                <Link
+                  href={link.href}
+                  className={`flex items-center px-4 py-2 mt-5 text-gray-600 rounded-md hover:bg-gray-200 ${
+                    pathname === link.href ? 'bg-gray-200' : ''
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
+    </div>
+  );
+};

@@ -11,12 +11,19 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { FilterReservationDto } from './dto/filter-reservation.dto';
 import { ReservationStatus } from '../common/enums/reservation-status.enum';
 import { customAlphabet } from 'nanoid';
+import {
+  ReservationDayControl,
+  ReservationDayControlDocument,
+} from './schemas/reservation-day-control.schema';
+import { UpdateDayControlSettingsDto } from './dto/update-day-control-settings.dto';
 
 @Injectable()
 export class ReservationsService {
   constructor(
     @InjectModel(Reservation.name)
     private reservationModel: Model<ReservationDocument>,
+    @InjectModel(ReservationDayControl.name)
+    private reservationDayControlModel: Model<ReservationDayControlDocument>,
   ) {}
 
   private readonly nanoid = customAlphabet(
@@ -25,8 +32,11 @@ export class ReservationsService {
   );
 
   async create(dto: CreateReservationDto): Promise<Reservation> {
+    const settings = await this.getDayControlSettings();
     const bookingReference = `CRVL-${this.nanoid()}`;
     const rentalDays = this.calculateRentalDays(dto.pickupDate, dto.returnDate);
+
+    this.validateDayControlRules(dto, rentalDays, settings);
 
     const reservation = new this.reservationModel({
       ...dto,
@@ -35,6 +45,77 @@ export class ReservationsService {
       status: ReservationStatus.PENDING,
     });
     return reservation.save();
+  }
+
+  async getDayControlSettings(): Promise<ReservationDayControlDocument> {
+    const existing = await this.reservationDayControlModel.findOne().exec();
+    if (existing) {
+      return existing;
+    }
+
+    const defaultSettings = new this.reservationDayControlModel({
+      minRentalDays: 1,
+      maxRentalDays: 30,
+      maxAdvanceBookingDays: 365,
+      allowSameDayBooking: true,
+      blockedWeekdays: [],
+    });
+
+    return defaultSettings.save();
+  }
+
+  async updateDayControlSettings(
+    dto: UpdateDayControlSettingsDto,
+  ): Promise<ReservationDayControlDocument> {
+    const settings = await this.getDayControlSettings();
+
+    if (
+      typeof dto.minRentalDays === 'number' &&
+      typeof dto.maxRentalDays === 'number' &&
+      dto.minRentalDays > dto.maxRentalDays
+    ) {
+      throw new BadRequestException(
+        'minRentalDays cannot be greater than maxRentalDays.',
+      );
+    }
+
+    if (
+      typeof dto.minRentalDays === 'number' &&
+      dto.minRentalDays > settings.maxRentalDays
+    ) {
+      throw new BadRequestException(
+        'minRentalDays cannot be greater than current maxRentalDays.',
+      );
+    }
+
+    if (
+      typeof dto.maxRentalDays === 'number' &&
+      dto.maxRentalDays < settings.minRentalDays
+    ) {
+      throw new BadRequestException(
+        'maxRentalDays cannot be less than current minRentalDays.',
+      );
+    }
+
+    const { blockedWeekdays, ...updatableFields } = dto;
+
+    if (Array.isArray(blockedWeekdays)) {
+      const hasInvalidWeekday = blockedWeekdays.some(
+        (value) => !Number.isInteger(value) || value < 0 || value > 6,
+      );
+      if (hasInvalidWeekday) {
+        throw new BadRequestException(
+          'blockedWeekdays must contain values between 0 and 6.',
+        );
+      }
+
+      settings.blockedWeekdays = Array.from(
+        new Set(blockedWeekdays),
+      ).sort((a, b) => a - b);
+    }
+
+    Object.assign(settings, updatableFields);
+    return settings.save();
   }
 
   async findAll(filterDto: FilterReservationDto, page: number, limit: number) {
@@ -175,8 +256,82 @@ export class ReservationsService {
   private calculateRentalDays(pickupDate: string, returnDate: string): number {
     const start = new Date(pickupDate);
     const end = new Date(returnDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffTime = end.getTime() - start.getTime();
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+      throw new BadRequestException('Invalid pickup or return date.');
+    }
+
+    if (diffTime < 0) {
+      throw new BadRequestException(
+        'Return date must be greater than or equal to pickup date.',
+      );
+    }
+
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays === 0 ? 1 : diffDays;
+  }
+
+  private validateDayControlRules(
+    dto: CreateReservationDto,
+    rentalDays: number,
+    settings: ReservationDayControl,
+  ) {
+    if (rentalDays < settings.minRentalDays) {
+      throw new BadRequestException(
+        `Minimum reservation duration is ${settings.minRentalDays} day(s).`,
+      );
+    }
+
+    if (rentalDays > settings.maxRentalDays) {
+      throw new BadRequestException(
+        `Maximum reservation duration is ${settings.maxRentalDays} day(s).`,
+      );
+    }
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const pickup = new Date(dto.pickupDate);
+    const returnDate = new Date(dto.returnDate);
+
+    const pickupDay = new Date(
+      pickup.getFullYear(),
+      pickup.getMonth(),
+      pickup.getDate(),
+    );
+
+    if (pickupDay.getTime() < today.getTime()) {
+      throw new BadRequestException(
+        'Pickup date cannot be in the past.',
+      );
+    }
+
+    const advanceDays = Math.floor(
+      (pickupDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (!settings.allowSameDayBooking && advanceDays === 0) {
+      throw new BadRequestException(
+        'Same-day reservations are not allowed.',
+      );
+    }
+
+    if (advanceDays > settings.maxAdvanceBookingDays) {
+      throw new BadRequestException(
+        `Reservations can be created up to ${settings.maxAdvanceBookingDays} day(s) in advance.`,
+      );
+    }
+
+    if (settings.blockedWeekdays.includes(pickup.getDay())) {
+      throw new BadRequestException(
+        'Pickup day is blocked by reservation policy.',
+      );
+    }
+
+    if (settings.blockedWeekdays.includes(returnDate.getDay())) {
+      throw new BadRequestException(
+        'Return day is blocked by reservation policy.',
+      );
+    }
   }
 }
