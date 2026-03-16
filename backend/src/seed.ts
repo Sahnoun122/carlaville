@@ -20,6 +20,9 @@ import {
   ReservationDocument,
 } from './reservations/schemas/reservation.schema';
 import { ReservationStatus } from './common/enums/reservation-status.enum';
+import { Delivery, DeliveryDocument } from './deliveries/schemas/delivery.schema';
+import { DeliveryStatus, DeliveryType } from './common/enums/delivery.enum';
+import { User, UserDocument } from './users/schemas/user.schema';
 
 const addDays = (date: Date, days: number) => {
   const nextDate = new Date(date);
@@ -44,6 +47,10 @@ async function bootstrap() {
   const reservationModel = app.get<Model<ReservationDocument>>(
     getModelToken(Reservation.name),
   );
+  const deliveryModel = app.get<Model<DeliveryDocument>>(
+    getModelToken(Delivery.name),
+  );
+  const userModel = app.get<Model<UserDocument>>(getModelToken(User.name));
 
   console.log('Seeding database...');
 
@@ -343,6 +350,88 @@ async function bootstrap() {
       seedReservation as unknown as Record<string, unknown>,
     );
     console.log(`Reservation created: ${seedReservation.bookingReference}`);
+  }
+
+  console.log('Seeding deliveries...');
+
+  const deliveryAgent = await userModel
+    .findOne({ email: 'delivery@carlaville.com' })
+    .exec();
+
+  if (!deliveryAgent) {
+    throw new Error('Unable to seed deliveries: delivery agent not found.');
+  }
+
+  const seededReservations = await reservationModel
+    .find({ bookingReference: { $in: ['CRVL-SEED01', 'CRVL-SEED02', 'CRVL-SEED03'] } })
+    .exec();
+
+  const reservationMap = new Map(
+    seededReservations.map((reservation) => [reservation.bookingReference, reservation]),
+  );
+
+  const seedDeliveries = [
+    {
+      bookingReference: 'CRVL-SEED02',
+      type: DeliveryType.PICKUP,
+      scheduledDate: new Date(toDateString(addDays(today, 4))),
+      scheduledTime: '09:00',
+      status: DeliveryStatus.ASSIGNED,
+      notes: 'Pickup assignment for confirmed reservation.',
+    },
+    {
+      bookingReference: 'CRVL-SEED01',
+      type: DeliveryType.PICKUP,
+      scheduledDate: new Date(toDateString(addDays(today, 2))),
+      scheduledTime: '09:30',
+      status: DeliveryStatus.PENDING,
+      notes: 'Pending pickup assignment review.',
+    },
+  ];
+
+  for (const seedDelivery of seedDeliveries) {
+    const reservation = reservationMap.get(seedDelivery.bookingReference);
+
+    if (!reservation) {
+      console.log(
+        `Skipping delivery seed, reservation not found: ${seedDelivery.bookingReference}`,
+      );
+      continue;
+    }
+
+    const existingDelivery = await deliveryModel
+      .findOne({
+        reservationId: reservation._id,
+        type: seedDelivery.type,
+      } as unknown as Record<string, unknown>)
+      .exec();
+
+    if (existingDelivery) {
+      console.log(
+        `Delivery already exists: ${seedDelivery.bookingReference} (${seedDelivery.type})`,
+      );
+      continue;
+    }
+
+    await deliveryModel.create({
+      reservationId: reservation._id,
+      assignedAgentId: deliveryAgent._id,
+      type: seedDelivery.type,
+      scheduledDate: seedDelivery.scheduledDate,
+      scheduledTime: seedDelivery.scheduledTime,
+      status: seedDelivery.status,
+      notes: seedDelivery.notes,
+    } as unknown as Record<string, unknown>);
+
+    reservation.assignedDeliveryAgentId = deliveryAgent._id as never;
+    if (seedDelivery.type === DeliveryType.PICKUP) {
+      reservation.status = ReservationStatus.READY_FOR_DELIVERY;
+    }
+    await reservation.save();
+
+    console.log(
+      `Delivery created: ${seedDelivery.bookingReference} (${seedDelivery.type})`,
+    );
   }
 
   await app.close();
