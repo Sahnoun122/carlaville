@@ -15,9 +15,9 @@ import {
 } from '../../common/enums/car.enum';
 
 export class CreateCarDto {
+  @IsOptional()
   @IsMongoId()
-  @IsNotEmpty()
-  agencyId: string;
+  agencyId?: string;
 
   @IsString()
   @IsNotEmpty()
