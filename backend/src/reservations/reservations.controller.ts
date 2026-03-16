@@ -87,6 +87,12 @@ export class ReservationsController {
     return this.reservationsService.reject(id);
   }
 
+  @Roles(Role.ADMIN)
+  @Patch(':id/pending')
+  markPending(@Param('id') id: string) {
+    return this.reservationsService.markPending(id);
+  }
+
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/assign-agent
    */

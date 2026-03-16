@@ -172,6 +172,13 @@ export class ReservationsService {
     ]);
   }
 
+  async markPending(id: string): Promise<Reservation> {
+    return this.updateStatus(id, ReservationStatus.PENDING, [
+      ReservationStatus.CONFIRMED,
+      ReservationStatus.REJECTED,
+    ]);
+  }
+
   async assignDeliveryAgent(id: string, agentId: string): Promise<Reservation> {
     const reservation = await this.findById(id);
     if (reservation.status !== ReservationStatus.CONFIRMED) {

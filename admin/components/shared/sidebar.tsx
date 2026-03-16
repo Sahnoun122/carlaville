@@ -10,6 +10,7 @@ const navLinks = {
     { name: 'Cars', href: '/admin/cars' },
     { name: 'Maintenance', href: '/admin/maintenance' },
     { name: 'Reservations', href: '/admin/reservations' },
+    { name: 'Reservation Settings', href: '/admin/reservations/settings' },
     { name: 'Deliveries', href: '/admin/deliveries' },
     { name: 'Pricing', href: '/admin/pricing' },
     { name: 'Profile', href: '/admin/profile' },
