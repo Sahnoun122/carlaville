@@ -6,6 +6,7 @@ import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 import { Role } from '../common/enums/role.enum';
@@ -59,5 +60,15 @@ export class AuthService {
       role: Role.CLIENT,
     });
     return this.login({ email: registerDto.email, password: registerDto.password });
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    return this.usersService.update(userId, {
+      firstName: updateProfileDto.firstName,
+      lastName: updateProfileDto.lastName,
+      email: updateProfileDto.email,
+      phone: updateProfileDto.phone,
+      password: updateProfileDto.password,
+    });
   }
 }

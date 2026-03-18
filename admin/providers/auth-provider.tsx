@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { authService } from '@/features/auth/services/auth-service';
@@ -12,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   loading: boolean;
 }
 
@@ -21,6 +22,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const refreshUser = useCallback(async () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      setUser(null);
+      return;
+    }
+
+    setApiAuthToken(token);
+
+    try {
+      const currentUser = await authService.getMe();
+      setUser(currentUser);
+    } catch {
+      logoutApi();
+      setApiAuthToken();
+      setUser(null);
+      router.push('/login');
+    }
+  }, [router]);
 
   useEffect(() => {
     const hydrateUser = async () => {
@@ -33,8 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setApiAuthToken(token);
 
       try {
-        const currentUser = await authService.getMe();
-        setUser(currentUser);
+        await refreshUser();
       } catch {
         logoutApi();
         setApiAuthToken();
@@ -46,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     void hydrateUser();
-  }, [router]);
+  }, [refreshUser]);
 
   const login = async (email: string, password: string) => {
     const { accessToken, user } = await authService.login({ email, password });
@@ -75,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, refreshUser, loading }}>
       {children}
     </AuthContext.Provider>
   );

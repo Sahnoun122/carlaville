@@ -53,6 +53,7 @@ const formSchema = z.object({
   seats: z.coerce.number().int().min(1, 'Seats must be at least 1'),
   luggage: optionalNumberSchema,
   dailyPrice: z.coerce.number().min(1, 'Daily price must be greater than 0'),
+  minRentalDays: optionalNumberSchema,
   depositAmount: optionalNumberSchema,
   deliveryFee: optionalNumberSchema,
   city: z.string().min(1, 'City is required'),
@@ -97,6 +98,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
       seats: car?.seats || 5,
       luggage: car?.luggage,
       dailyPrice: car?.dailyPrice || 0,
+      minRentalDays: car?.minRentalDays,
       depositAmount: car?.depositAmount,
       deliveryFee: car?.deliveryFee,
       city: car?.city || '',
@@ -118,6 +120,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
       seats: car?.seats || 5,
       luggage: car?.luggage,
       dailyPrice: car?.dailyPrice || 0,
+      minRentalDays: car?.minRentalDays,
       depositAmount: car?.depositAmount,
       deliveryFee: car?.deliveryFee,
       city: car?.city || '',
@@ -176,6 +179,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
       seats: values.seats,
       luggage: values.luggage,
       dailyPrice: values.dailyPrice,
+      minRentalDays: values.minRentalDays,
       depositAmount: values.depositAmount,
       deliveryFee: values.deliveryFee,
       city: values.city,
@@ -412,7 +416,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <FormField
             control={form.control}
             name="dailyPrice"
@@ -421,6 +425,19 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
                 <FormLabel>Daily Price</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} disabled={isLoading} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="minRentalDays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Min Rental Days (optional)</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} value={field.value ?? ''} disabled={isLoading} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

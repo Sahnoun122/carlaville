@@ -6,6 +6,8 @@ import {
   IsOptional,
   IsArray,
   IsMongoId,
+  IsInt,
+  Min,
 } from 'class-validator';
 import {
   CarCategory,
@@ -54,6 +56,11 @@ export class CreateCarDto {
   @IsNumber()
   @IsNotEmpty()
   dailyPrice: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  minRentalDays?: number;
 
   @IsNumber()
   @IsOptional()

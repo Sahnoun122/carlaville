@@ -6,6 +6,8 @@ import {
   IsArray,
   IsMongoId,
   IsBoolean,
+  IsInt,
+  Min,
 } from 'class-validator';
 import {
   CarCategory,
@@ -54,6 +56,11 @@ export class UpdateCarDto {
   @IsOptional()
   @IsNumber()
   dailyPrice?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  minRentalDays?: number;
 
   @IsOptional()
   @IsNumber()

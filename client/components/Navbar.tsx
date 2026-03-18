@@ -1,7 +1,26 @@
+"use client";
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { User, Car, Calendar, Menu } from 'lucide-react';
 
 export default function Navbar() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const syncAuthState = () => {
+      const token = localStorage.getItem('carlaville_token');
+      setIsAuthenticated(Boolean(token));
+    };
+
+    syncAuthState();
+    window.addEventListener('storage', syncAuthState);
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState);
+    };
+  }, []);
+
   return (
     <header className="bg-primary text-primary-foreground sticky top-0 z-50 w-full shadow-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -16,16 +35,30 @@ export default function Navbar() {
           <Link href="/about" className="hover:text-white/80 transition-colors">À Propos</Link>
         </nav>
         <div className="hidden items-center gap-4 md:flex">
-          <Link href="/auth/login" className="text-sm font-semibold hover:underline flex items-center gap-1">
-            <User className="w-4 h-4" /> Connexion
-          </Link>
-          <Link href="/auth/register" className="text-sm font-semibold bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-colors">
-            S'inscrire
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/dashboard" className="text-sm font-semibold bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-colors">
+              Votre dashboard
+            </Link>
+          ) : (
+            <>
+              <Link href="/auth/login" className="text-sm font-semibold hover:underline flex items-center gap-1">
+                <User className="w-4 h-4" /> Connexion
+              </Link>
+              <Link href="/auth/register" className="text-sm font-semibold bg-white text-primary px-4 py-2 rounded-md hover:bg-gray-100 transition-colors">
+                S'inscrire
+              </Link>
+            </>
+          )}
         </div>
-        <button className="md:hidden">
-          <Menu className="w-6 h-6" />
-        </button>
+        {isAuthenticated ? (
+          <Link href="/dashboard" className="md:hidden text-sm font-semibold underline">
+            Dashboard
+          </Link>
+        ) : (
+          <button className="md:hidden">
+            <Menu className="w-6 h-6" />
+          </button>
+        )}
       </div>
     </header>
   );

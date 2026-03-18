@@ -16,6 +16,7 @@ import {
   ReservationDayControlDocument,
 } from './schemas/reservation-day-control.schema';
 import { UpdateDayControlSettingsDto } from './dto/update-day-control-settings.dto';
+import { Car, CarDocument } from '../cars/schemas/car.schema';
 
 @Injectable()
 export class ReservationsService {
@@ -24,6 +25,8 @@ export class ReservationsService {
     private reservationModel: Model<ReservationDocument>,
     @InjectModel(ReservationDayControl.name)
     private reservationDayControlModel: Model<ReservationDayControlDocument>,
+    @InjectModel(Car.name)
+    private carModel: Model<CarDocument>,
   ) {}
 
   private readonly nanoid = customAlphabet(
@@ -33,10 +36,26 @@ export class ReservationsService {
 
   async create(dto: CreateReservationDto): Promise<Reservation> {
     const settings = await this.getDayControlSettings();
+    const car = await this.carModel.findById(dto.carId).select('minRentalDays').exec();
+
+    if (!car) {
+      throw new NotFoundException(`Car with id ${dto.carId} not found`);
+    }
+
+    const effectiveMinRentalDays =
+      typeof car.minRentalDays === 'number' && car.minRentalDays > 0
+        ? car.minRentalDays
+        : settings.minRentalDays;
+
     const bookingReference = `CRVL-${this.nanoid()}`;
     const rentalDays = this.calculateRentalDays(dto.pickupDate, dto.returnDate);
 
-    this.validateDayControlRules(dto, rentalDays, settings);
+    this.validateDayControlRules(
+      dto,
+      rentalDays,
+      settings,
+      effectiveMinRentalDays,
+    );
 
     const reservation = new this.reservationModel({
       ...dto,
@@ -284,16 +303,22 @@ export class ReservationsService {
     dto: CreateReservationDto,
     rentalDays: number,
     settings: ReservationDayControl,
+    effectiveMinRentalDays: number,
   ) {
-    if (rentalDays < settings.minRentalDays) {
+    const effectiveMaxRentalDays = Math.max(
+      settings.maxRentalDays,
+      effectiveMinRentalDays,
+    );
+
+    if (rentalDays < effectiveMinRentalDays) {
       throw new BadRequestException(
-        `Minimum reservation duration is ${settings.minRentalDays} day(s).`,
+        `Minimum reservation duration is ${effectiveMinRentalDays} day(s).`,
       );
     }
 
-    if (rentalDays > settings.maxRentalDays) {
+    if (rentalDays > effectiveMaxRentalDays) {
       throw new BadRequestException(
-        `Maximum reservation duration is ${settings.maxRentalDays} day(s).`,
+        `Maximum reservation duration is ${effectiveMaxRentalDays} day(s).`,
       );
     }
 

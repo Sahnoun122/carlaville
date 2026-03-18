@@ -63,6 +63,9 @@ export class Car {
   @Prop({ required: true })
   dailyPrice: number;
 
+  @Prop({ min: 1 })
+  minRentalDays?: number;
+
   @Prop()
   depositAmount: number;
 

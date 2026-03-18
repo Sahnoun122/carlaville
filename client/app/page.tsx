@@ -1,6 +1,7 @@
 import VehicleCard from '../components/VehicleCard';
 import Link from 'next/link';
-import { Calendar, MapPin, Search, Star, Clock, Laptop, ShieldCheck, CreditCard, Compass, ChevronDown, Plane } from 'lucide-react';
+import { Star, Clock, Laptop, ShieldCheck, CreditCard, Compass, ChevronDown, Plane } from 'lucide-react';
+import HomeSearchWidget from '../components/HomeSearchWidget';
 
 async function getCars() {
   try {
@@ -55,35 +56,7 @@ export default async function Home() {
             Vos déplacements simplifiés avec Carlaville
           </p>
 
-          {/* Search/Booking Widget */}
-          <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 mb-[-180px] max-w-5xl mx-auto text-left transform translate-y-16 border border-gray-100 relative z-20">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><MapPin className="w-4 h-4 text-primary"/> Départ / Retour</label>
-                <input type="text" placeholder="Aéroport, Ville..." className="p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/> Date de départ</label>
-                <div className="flex gap-2">
-                  <input type="date" className="p-4 w-2/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium" />
-                  <input type="time" defaultValue="10:00" className="p-4 w-1/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium px-2" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><Calendar className="w-4 h-4 text-primary"/> Date de retour</label>
-                <div className="flex gap-2">
-                  <input type="date" className="p-4 w-2/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium" />
-                  <input type="time" defaultValue="10:00" className="p-4 w-1/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium px-2" />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <button className="w-full bg-primary text-white p-4 rounded-xl font-extrabold text-lg hover:bg-primary-hover transition-all flex justify-center items-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1">
-                  <Search className="w-6 h-6"/>
-                  Rechercher
-                </button>
-              </div>
-            </div>
-          </div>
+          <HomeSearchWidget />
         </div>
       </section>
 

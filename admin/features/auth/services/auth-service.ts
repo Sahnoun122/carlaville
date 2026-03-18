@@ -1,8 +1,16 @@
-import { post, get } from '@/lib/api';
+import { post, get, patch } from '@/lib/api';
 import { User } from '@/types/user';
 import { LoginDto, LoginResponseDto } from '@/types/dto/auth.dto';
 
 const BASE_URL = '/auth';
+
+export interface UpdateProfilePayload {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+}
 
 export const authService = {
   /**
@@ -18,4 +26,10 @@ export const authService = {
    * @returns A promise that resolves to the user object.
    */
   getMe: (): Promise<User> => get<User>(`${BASE_URL}/me`),
+
+  /**
+   * Updates authenticated user profile.
+   */
+  updateProfile: (payload: UpdateProfilePayload): Promise<User> =>
+    patch<User>(`${BASE_URL}/profile`, payload),
 };

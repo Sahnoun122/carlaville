@@ -3,8 +3,14 @@ import { useState, useMemo } from 'react';
 import { Search, Filter, SortAsc, SortDesc } from 'lucide-react';
 import VehicleCard from './VehicleCard';
 
-export default function CarsCatalog({ initialCars }: { initialCars: any[] }) {
-  const [search, setSearch] = useState('');
+export default function CarsCatalog({
+  initialCars,
+  initialSearch = '',
+}: {
+  initialCars: any[];
+  initialSearch?: string;
+}) {
+  const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState('ALL');
   const [transmission, setTransmission] = useState('ALL');
   const [fuel, setFuel] = useState('ALL');

@@ -20,6 +20,7 @@ export interface CarFormValues {
   seats: number;
   luggage?: number;
   dailyPrice: number;
+  minRentalDays?: number;
   depositAmount?: number;
   deliveryFee?: number;
   city: string;

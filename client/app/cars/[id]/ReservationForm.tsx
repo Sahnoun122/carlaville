@@ -10,28 +10,135 @@ const EXTRAS_CATALOG = [
   { id: 'insurance', label: 'Assurance Tous Risques', price: 100, perDay: true },
 ];
 
+interface DayControlSettings {
+  minRentalDays: number;
+  maxRentalDays: number;
+  maxAdvanceBookingDays: number;
+  allowSameDayBooking: boolean;
+}
+
+const toPositiveInt = (value: unknown): number | undefined => {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return undefined;
+  }
+
+  const parsed = Math.floor(value);
+  return parsed > 0 ? parsed : undefined;
+};
+
+const formatDate = (value: Date) => value.toISOString().split('T')[0];
+
+const addDaysToDateString = (dateString: string, days: number) => {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + days);
+  return formatDate(date);
+};
+
 export default function ReservationForm({ car }: { car: any }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [settings, setSettings] = useState<DayControlSettings | null>(null);
 
   // Form states for dynamic calculation
   const [pickupDate, setPickupDate] = useState<string>('');
   const [returnDate, setReturnDate] = useState<string>('');
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
 
+  const carMinRentalDays = toPositiveInt(car?.minRentalDays);
+  const globalMinRentalDays = Math.max(1, settings?.minRentalDays ?? 1);
+  const effectiveMinRentalDays = carMinRentalDays ?? globalMinRentalDays;
+
   useEffect(() => {
     setIsClient(true);
-    // Set default dates logic
-    const today = new Date();
-    const tmr = new Date(today);
-    tmr.setDate(tmr.getDate() + 1);
-    
-    setPickupDate(today.toISOString().split('T')[0]);
-    setReturnDate(tmr.toISOString().split('T')[0]);
+
+    const loadDayControlSettings = async () => {
+      try {
+        const res = await fetch('http://localhost:3009/api/reservations/settings/day-control', {
+          cache: 'no-store',
+        });
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        setSettings({
+          minRentalDays: data.minRentalDays,
+          maxRentalDays: data.maxRentalDays,
+          maxAdvanceBookingDays: data.maxAdvanceBookingDays,
+          allowSameDayBooking: data.allowSameDayBooking,
+        });
+      } catch {
+      }
+    };
+
+    loadDayControlSettings();
   }, []);
+
+  useEffect(() => {
+    const today = new Date();
+    const todayStr = formatDate(today);
+    const minPickupDate = settings?.allowSameDayBooking
+      ? todayStr
+      : addDaysToDateString(todayStr, 1);
+    const minDuration = effectiveMinRentalDays;
+
+    if (!pickupDate) {
+      setPickupDate(minPickupDate);
+      setReturnDate(addDaysToDateString(minPickupDate, minDuration - 1));
+      return;
+    }
+
+    if (pickupDate < minPickupDate) {
+      setPickupDate(minPickupDate);
+      setReturnDate(addDaysToDateString(minPickupDate, minDuration - 1));
+      return;
+    }
+
+    if (!returnDate) {
+      setReturnDate(addDaysToDateString(pickupDate, minDuration - 1));
+    }
+  }, [settings, pickupDate, returnDate, effectiveMinRentalDays]);
+
+  const todayStr = formatDate(new Date());
+  const minRentalDays = effectiveMinRentalDays;
+  const maxRentalDays = Math.max(minRentalDays, settings?.maxRentalDays ?? 30);
+  const pickupMinDate = settings?.allowSameDayBooking
+    ? todayStr
+    : addDaysToDateString(todayStr, 1);
+  const pickupMaxDate = settings
+    ? addDaysToDateString(todayStr, settings.maxAdvanceBookingDays)
+    : undefined;
+
+  const returnMinDate = pickupDate
+    ? addDaysToDateString(pickupDate, minRentalDays - 1)
+    : pickupMinDate;
+  const returnMaxDate = pickupDate
+    ? addDaysToDateString(pickupDate, maxRentalDays - 1)
+    : undefined;
+
+  const handlePickupDateChange = (value: string) => {
+    setPickupDate(value);
+
+    if (!value) {
+      return;
+    }
+
+    const minAllowedReturn = addDaysToDateString(value, minRentalDays - 1);
+    const maxAllowedReturn = addDaysToDateString(value, maxRentalDays - 1);
+
+    if (!returnDate || returnDate < minAllowedReturn) {
+      setReturnDate(minAllowedReturn);
+      return;
+    }
+
+    if (returnDate > maxAllowedReturn) {
+      setReturnDate(maxAllowedReturn);
+    }
+  };
 
   function toggleExtra(id: string) {
     setSelectedExtras(prev => ({ ...prev, [id]: !prev[id] }));
@@ -44,6 +151,15 @@ export default function ReservationForm({ car }: { car: any }) {
   if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
     const diffTime = d2.getTime() - d1.getTime();
     days = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  let calendarRuleError = '';
+  if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
+    if (days < minRentalDays) {
+      calendarRuleError = `Durée minimale autorisée: ${minRentalDays} jour(s).`;
+    } else if (days > maxRentalDays) {
+      calendarRuleError = `Durée maximale autorisée: ${maxRentalDays} jour(s).`;
+    }
   }
 
   // Calculate prices
@@ -114,7 +230,11 @@ export default function ReservationForm({ car }: { car: any }) {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Erreur lors de la réservation');
+        const backendMessage = Array.isArray(errorData?.message)
+          ? errorData.message.join(', ')
+          : errorData?.message;
+
+        throw new Error(backendMessage || 'Erreur lors de la réservation');
       }
 
       setSuccess(true);
@@ -126,8 +246,6 @@ export default function ReservationForm({ car }: { car: any }) {
       setLoading(false);
     }
   }
-
-  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="bg-white rounded-2xl shadow-xl shadow-red-900/5 p-8 border-t-4 border-t-primary sticky top-24">
@@ -141,11 +259,21 @@ export default function ReservationForm({ car }: { car: any }) {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="bg-red-50 text-primary p-3 rounded-lg text-sm font-semibold">{error}</div>}
+
+          <div className="rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-800">
+            <p className="font-bold">Règles de réservation</p>
+            <p>
+              Durée autorisée: {minRentalDays} à {maxRentalDays} jour(s)
+              {carMinRentalDays ? ' (spécifique à ce véhicule)' : ''}
+              {settings ? ` • Réservation jusqu’à ${settings.maxAdvanceBookingDays} jour(s) à l’avance` : ''}
+              {settings && !settings.allowSameDayBooking ? ' • Réservation le jour même non autorisée' : ''}
+            </p>
+          </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Date départ</label>
-              <input required name="pickupDate" type="date" min={todayStr} value={pickupDate} onChange={e => setPickupDate(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
+              <input required name="pickupDate" type="date" min={pickupMinDate} max={pickupMaxDate} value={pickupDate} onChange={e => handlePickupDateChange(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Heure</label>
@@ -156,13 +284,19 @@ export default function ReservationForm({ car }: { car: any }) {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Date retour</label>
-              <input required name="returnDate" type="date" min={pickupDate || todayStr} value={returnDate} onChange={e => setReturnDate(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
+              <input required name="returnDate" type="date" min={returnMinDate} max={returnMaxDate} value={returnDate} onChange={e => setReturnDate(e.target.value)} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-1">Heure</label>
               <input required name="returnTime" type="time" defaultValue="10:00" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:outline-none" />
             </div>
           </div>
+
+          {calendarRuleError && (
+            <div className="rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700">
+              {calendarRuleError}
+            </div>
+          )}
           
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Lieu de départ & Retour</label>
@@ -221,7 +355,7 @@ export default function ReservationForm({ car }: { car: any }) {
 
           <button 
             type="submit" 
-            disabled={loading}
+            disabled={loading || Boolean(calendarRuleError)}
             className="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary-hover shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:hover:translate-y-0"
           >
             {loading ? 'Traitement en cours...' : 'Confirmer au prix de ' + totalPrice + ' MAD'}

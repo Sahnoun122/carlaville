@@ -6,4 +6,6 @@ export interface AuthenticatedUser {
   name: string;
   role: Role;
   phone?: string;
+  firstName?: string;
+  lastName?: string;
 }

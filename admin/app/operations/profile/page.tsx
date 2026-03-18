@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import { PageHeader } from '@/components/shared/page-header';
 import { EditProfileForm } from '@/components/admin/profile/edit-profile-form';
+import { PageHeader } from '@/components/shared/page-header';
 
-const ProfilePage = () => {
-
+const OperationsProfilePage = () => {
   return (
     <div>
       <PageHeader title="My Profile" />
@@ -15,4 +14,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default OperationsProfilePage;
