@@ -35,7 +35,13 @@ const resolveAgencyName = (car: Car) => {
   return 'No agency';
 };
 
-export const CarMaintenanceManagement = () => {
+interface CarMaintenanceManagementProps {
+  readOnly?: boolean;
+}
+
+export const CarMaintenanceManagement = ({
+  readOnly = false,
+}: CarMaintenanceManagementProps) => {
   const queryClient = useQueryClient();
   const [page] = useState(1);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -199,27 +205,28 @@ export const CarMaintenanceManagement = () => {
                     <td className="px-4 py-3">{resolveAgencyName(car)}</td>
                     <td className="px-4 py-3">{car.availabilityStatus}</td>
                     <td className="px-4 py-3">
-                      {car.availabilityStatus === AvailabilityStatus.MAINTENANCE ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenCompleteMaintenance(car)}
-                        >
-                          Complete
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenStartMaintenance(car)}
-                        >
-                          Start
-                        </Button>
-                      )}
+                      {!readOnly &&
+                        (car.availabilityStatus === AvailabilityStatus.MAINTENANCE ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenCompleteMaintenance(car)}
+                          >
+                            Complete
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenStartMaintenance(car)}
+                          >
+                            Start
+                          </Button>
+                        ))}
                       <Button
                         variant="outline"
                         size="sm"
-                        className="ml-2"
+                        className={!readOnly ? 'ml-2' : ''}
                         onClick={() => handleViewMaintenanceHistory(car)}
                       >
                         History

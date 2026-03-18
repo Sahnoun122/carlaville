@@ -29,7 +29,7 @@ export class ReservationsController {
   /**
    * @example POST http://localhost:3000/admin/reservations
    */
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Post()
   create(@Body() createDto: CreateReservationDto) {
     return this.reservationsService.create(createDto);
@@ -72,7 +72,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/confirm
    */
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Patch(':id/confirm')
   confirm(@Param('id') id: string) {
     return this.reservationsService.confirm(id);
@@ -81,13 +81,13 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/reject
    */
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Patch(':id/reject')
   reject(@Param('id') id: string) {
     return this.reservationsService.reject(id);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Patch(':id/pending')
   markPending(@Param('id') id: string) {
     return this.reservationsService.markPending(id);

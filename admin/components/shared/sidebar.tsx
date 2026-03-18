@@ -1,9 +1,11 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/providers/auth-provider';
+import { Role } from '@/types';
 
 const navLinks = {
-  admin: [
+  [Role.ADMIN]: [
     { name: 'Dashboard', href: '/admin' },
     { name: 'Users', href: '/admin/users' },
     { name: 'Agencies', href: '/admin/agencies' },
@@ -15,16 +17,26 @@ const navLinks = {
     { name: 'Pricing', href: '/admin/pricing' },
     { name: 'Profile', href: '/admin/profile' },
   ],
-  operations: [
+  [Role.RESERVATION_MANAGER]: [
     { name: 'Dashboard', href: '/operations' },
     { name: 'Reservations', href: '/operations/reservations' },
+    { name: 'Maintenance', href: '/operations/maintenance' },
+  ],
+  [Role.DELIVERY_AGENT]: [
+    { name: 'Dashboard', href: '/operations' },
     { name: 'Deliveries', href: '/operations/deliveries' },
   ],
 };
 
 export const Sidebar = () => {
   const pathname = usePathname();
-  const role = pathname.startsWith('/admin') ? 'admin' : 'operations';
+  const { user } = useAuth();
+
+  const links = user?.role
+    ? navLinks[user.role as keyof typeof navLinks] ?? []
+    : pathname.startsWith('/admin')
+      ? navLinks[Role.ADMIN]
+      : navLinks[Role.RESERVATION_MANAGER];
 
   return (
     <div className="flex flex-col w-64 h-screen px-4 py-8 bg-white border-r">
@@ -34,7 +46,7 @@ export const Sidebar = () => {
       <div className="flex flex-col justify-between mt-6">
         <aside>
           <ul>
-            {navLinks[role].map((link) => (
+            {links.map((link) => (
               <li key={link.name}>
                 <Link
                   href={link.href}

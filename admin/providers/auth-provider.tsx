@@ -59,6 +59,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    if (user.role === Role.DELIVERY_AGENT) {
+      router.push('/operations/deliveries');
+      return;
+    }
+
     router.push('/operations');
   };
 

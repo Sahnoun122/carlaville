@@ -55,6 +55,7 @@ export class CarsController {
    * @description Returns a paginated list of cars with optional filters.
    * @returns { "cars": [...], "count": 1 }
    */
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Get()
   findAll(
     @Query() filterDto: FilterCarDto,
@@ -111,6 +112,7 @@ export class CarsController {
     return this.carsService.completeMaintenance(id, completeMaintenanceDto);
   }
 
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Get(':id/maintenance/history')
   getMaintenanceHistory(@Param('id') id: string) {
     return this.carsService.getMaintenanceHistory(id);

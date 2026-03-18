@@ -3,14 +3,17 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { getCars } from '@/features/cars/services/car-service';
+import { Modal } from '@/components/ui/modal';
+import { getAgencies, getCars } from '@/features/cars/services/car-service';
 import {
   confirmReservation,
+  createReservation,
   getReservations,
   markReservationPending,
   rejectReservation,
 } from '@/features/reservations/services/reservation-service';
-import { Car, Reservation, ReservationStatus } from '@/types';
+import { useAuth } from '@/providers/auth-provider';
+import { Car, Reservation, ReservationStatus, Role } from '@/types';
 
 const resolveCarId = (car: Car) => car.id || (car as Car & { _id?: string })._id || '';
 
@@ -33,11 +36,32 @@ const statusOptions = [
 ];
 
 export const ReservationManagement = () => {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [page] = useState(1);
   const [selectedCarId, setSelectedCarId] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [actionError, setActionError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    agencyId: '',
+    carId: '',
+    pickupLocation: '',
+    returnLocation: '',
+    pickupDate: '',
+    returnDate: '',
+    pickupTime: '',
+    returnTime: '',
+    selectedExtras: '',
+    estimatedTotal: '',
+  });
+
+  const canManageReservationStatus =
+    user?.role === Role.ADMIN || user?.role === Role.RESERVATION_MANAGER;
 
   const reservationsQuery = useQuery({
     queryKey: ['reservations', page, selectedCarId, selectedStatus],
@@ -56,6 +80,46 @@ export const ReservationManagement = () => {
   const carsQuery = useQuery({
     queryKey: ['cars', 'reservation-filter'],
     queryFn: () => getCars({ page: 1, limit: 100 }),
+  });
+
+  const agenciesQuery = useQuery({
+    queryKey: ['agencies', 'reservation-create'],
+    queryFn: () => getAgencies(),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: createReservation,
+    onSuccess: () => {
+      setCreateError(null);
+      setFormData({
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        agencyId: '',
+        carId: '',
+        pickupLocation: '',
+        returnLocation: '',
+        pickupDate: '',
+        returnDate: '',
+        pickupTime: '',
+        returnTime: '',
+        selectedExtras: '',
+        estimatedTotal: '',
+      });
+      setIsCreateModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+    },
+    onError: (error: unknown) => {
+      const message =
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message?: unknown }).message === 'string'
+          ? (error as { message: string }).message
+          : 'Failed to create reservation.';
+
+      setCreateError(message);
+    },
   });
 
   const onMutationSuccess = () => {
@@ -114,6 +178,59 @@ export const ReservationManagement = () => {
   const isActionPending =
     confirmMutation.isPending || rejectMutation.isPending || pendingMutation.isPending;
 
+  const handleCreateReservation = () => {
+    if (
+      !formData.customerName ||
+      !formData.customerEmail ||
+      !formData.customerPhone ||
+      !formData.agencyId ||
+      !formData.carId ||
+      !formData.pickupLocation ||
+      !formData.returnLocation ||
+      !formData.pickupDate ||
+      !formData.returnDate ||
+      !formData.pickupTime ||
+      !formData.returnTime
+    ) {
+      setCreateError('Please fill in all required fields.');
+      return;
+    }
+
+    createMutation.mutate({
+      customerName: formData.customerName,
+      customerEmail: formData.customerEmail,
+      customerPhone: formData.customerPhone,
+      agencyId: formData.agencyId,
+      carId: formData.carId,
+      pickupLocation: formData.pickupLocation,
+      returnLocation: formData.returnLocation,
+      pickupDate: formData.pickupDate,
+      returnDate: formData.returnDate,
+      pickupTime: formData.pickupTime,
+      returnTime: formData.returnTime,
+      selectedExtras: formData.selectedExtras
+        .split(',')
+        .map((extra) => extra.trim())
+        .filter((extra) => extra.length > 0),
+      pricingBreakdown: {
+        estimatedTotal: formData.estimatedTotal
+          ? Number(formData.estimatedTotal)
+          : 0,
+      },
+    });
+  };
+
+  const openCreateModal = () => {
+    setCreateError(null);
+    setIsCreateModalOpen(true);
+  };
+
+  const closeCreateModal = () => {
+    if (!createMutation.isPending) {
+      setIsCreateModalOpen(false);
+    }
+  };
+
   const vehicleFilterOptions = useMemo(
     () =>
       (carsQuery.data?.cars ?? []).map((car) => ({
@@ -125,6 +242,152 @@ export const ReservationManagement = () => {
 
   return (
     <div className="space-y-4">
+      <div className="rounded-md border bg-white p-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Reservation Operations</h2>
+          <p className="text-sm text-gray-500">Create and manage all reservations from one place.</p>
+        </div>
+        <Button onClick={openCreateModal}>Create Reservation</Button>
+      </div>
+
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={closeCreateModal}
+        title="Create Reservation"
+        contentClassName="max-w-4xl"
+      >
+        {createError && <p className="text-sm text-red-600 mb-3">{createError}</p>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-1">
+          <input
+            placeholder="Customer name"
+            value={formData.customerName}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, customerName: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            type="email"
+            placeholder="Customer email"
+            value={formData.customerEmail}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, customerEmail: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            placeholder="Customer phone"
+            value={formData.customerPhone}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, customerPhone: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <select
+            value={formData.agencyId}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, agencyId: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="">Select agency</option>
+            {(agenciesQuery.data?.agencies ?? []).map((agency) => (
+              <option key={agency.id || agency._id} value={agency.id || agency._id}>
+                {agency.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={formData.carId}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, carId: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          >
+            <option value="">Select vehicle</option>
+            {(carsQuery.data?.cars ?? []).map((car) => {
+              const carId = resolveCarId(car);
+
+              return (
+                <option key={carId} value={carId}>
+                  {car.brand} {car.model}
+                </option>
+              );
+            })}
+          </select>
+          <input
+            placeholder="Pickup location"
+            value={formData.pickupLocation}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, pickupLocation: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            placeholder="Return location"
+            value={formData.returnLocation}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, returnLocation: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            type="date"
+            value={formData.pickupDate}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, pickupDate: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            type="date"
+            value={formData.returnDate}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, returnDate: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            type="time"
+            value={formData.pickupTime}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, pickupTime: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            type="time"
+            value={formData.returnTime}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, returnTime: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            placeholder="Extras (comma separated)"
+            value={formData.selectedExtras}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, selectedExtras: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+          <input
+            type="number"
+            placeholder="Estimated total"
+            value={formData.estimatedTotal}
+            onChange={(event) =>
+              setFormData((previous) => ({ ...previous, estimatedTotal: event.target.value }))
+            }
+            className="w-full px-3 py-2 border rounded"
+          />
+        </div>
+        <div className="flex justify-end mt-4">
+          <Button onClick={handleCreateReservation} disabled={createMutation.isPending}>
+            Create Reservation
+          </Button>
+        </div>
+      </Modal>
+
       {actionError && <p className="text-sm text-red-600">{actionError}</p>}
 
       <div className="rounded-md border bg-white p-4">
@@ -202,7 +465,7 @@ export const ReservationManagement = () => {
                     </td>
                     <td className="px-4 py-3">{reservation.status}</td>
                     <td className="px-4 py-3">
-                      {reservation.status === ReservationStatus.PENDING && (
+                      {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
                         <>
                           <Button
                             size="sm"
@@ -223,7 +486,7 @@ export const ReservationManagement = () => {
                         </>
                       )}
 
-                      {(reservation.status === ReservationStatus.CONFIRMED ||
+                      {canManageReservationStatus && (reservation.status === ReservationStatus.CONFIRMED ||
                         reservation.status === ReservationStatus.REJECTED) && (
                         <Button
                           size="sm"
@@ -235,7 +498,10 @@ export const ReservationManagement = () => {
                         </Button>
                       )}
 
-                      {reservation.status !== ReservationStatus.PENDING &&
+                      {!canManageReservationStatus && <span className="text-xs text-gray-500">View only</span>}
+
+                      {canManageReservationStatus &&
+                        reservation.status !== ReservationStatus.PENDING &&
                         reservation.status !== ReservationStatus.CONFIRMED &&
                         reservation.status !== ReservationStatus.REJECTED && (
                           <span className="text-xs text-gray-500">No action</span>
