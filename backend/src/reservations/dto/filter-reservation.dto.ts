@@ -27,4 +27,8 @@ export class FilterReservationDto {
   @IsOptional()
   @IsString()
   bookingReference?: string;
+
+  @IsOptional()
+  @IsString()
+  customerEmail?: string;
 }

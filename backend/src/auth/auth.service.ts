@@ -4,9 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { AuthenticatedUser } from './interfaces/authenticated-user.interface';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { Role } from '../common/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -49,5 +51,13 @@ export class AuthService {
       expiresIn: this.configService.get<string>('jwt.expiresIn', '1d'),
       user: authUser,
     };
+  }
+
+  async register(registerDto: RegisterDto): Promise<LoginResponseDto> {
+    await this.usersService.create({
+      ...registerDto,
+      role: Role.CLIENT,
+    });
+    return this.login({ email: registerDto.email, password: registerDto.password });
   }
 }

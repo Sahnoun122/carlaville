@@ -1,0 +1,37 @@
+import { Controller, UseGuards, Post, Body, Get, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../common/enums/role.enum';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { ReservationsService } from './reservations.service';
+import { CreateReservationDto } from './dto/create-reservation.dto';
+import { FilterReservationDto } from './dto/filter-reservation.dto';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.CLIENT, Role.ADMIN)
+@Controller('client/reservations')
+export class ClientReservationsController {
+  constructor(private readonly reservationsService: ReservationsService) {}
+
+  @Post()
+  create(@Body() createDto: CreateReservationDto, @CurrentUser() user: AuthenticatedUser) {
+    createDto.customerEmail = user.email;
+    if (!createDto.customerName) {
+      createDto.customerName = user.name || 'Client';
+    }
+    return this.reservationsService.create(createDto);
+  }
+
+  @Get()
+  findMyReservations(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    const filterDto = new FilterReservationDto();
+    filterDto.customerEmail = user.email;
+    return this.reservationsService.findAll(filterDto, page, limit);
+  }
+}

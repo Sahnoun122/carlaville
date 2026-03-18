@@ -132,6 +132,7 @@ export class ReservationsService {
         $lt: new Date(searchDate.setHours(23, 59, 59, 999)),
       };
     }
+    if (filterDto.customerEmail) query.customerEmail = filterDto.customerEmail;
 
     const reservations = await this.reservationModel
       .find(query)
