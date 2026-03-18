@@ -17,18 +17,15 @@ const navLinks = {
     { name: 'Paramètres de réservation', href: '/admin/reservations/settings' },
     { name: 'Livraisons', href: '/admin/deliveries' },
     { name: 'Tarification', href: '/admin/pricing' },
-    { name: 'Profil', href: '/admin/profile' },
   ],
   [Role.RESERVATION_MANAGER]: [
     { name: 'Tableau de bord', href: '/operations' },
     { name: 'Réservations', href: '/operations/reservations' },
     { name: 'Maintenance', href: '/operations/maintenance' },
-    { name: 'Profil', href: '/operations/profile' },
   ],
   [Role.DELIVERY_AGENT]: [
     { name: 'Tableau de bord', href: '/operations' },
     { name: 'Livraisons', href: '/operations/deliveries' },
-    { name: 'Profil', href: '/operations/profile' },
   ],
 };
 
@@ -45,6 +42,9 @@ export const Sidebar = () => {
   const initials = (user?.name || user?.email || 'A').charAt(0).toUpperCase();
   const displayName = user?.name || 'Admin User';
   const displayEmail = user?.email || 'admin@carlaville.ma';
+  const profileLink = pathname.startsWith('/admin')
+    ? '/admin/profile'
+    : '/operations/profile';
 
   const iconByName: Record<string, ComponentType<{ className?: string }>> = {
     'Tableau de bord': LayoutDashboard,
@@ -56,12 +56,11 @@ export const Sidebar = () => {
     'Paramètres de réservation': Settings,
     Livraisons: Truck,
     Tarification: Settings,
-    Profil: UserRound,
   };
 
   return (
     <div className="flex h-screen w-64 flex-col border-r border-gray-200 bg-gray-100">
-      <div className="px-6 pt-8 pb-6">
+      <Link href={profileLink} className="block px-6 pt-8 pb-6">
         <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full border border-red-100 bg-red-50 text-2xl font-black text-primary shadow-sm">
           {initials}
         </div>
@@ -69,7 +68,7 @@ export const Sidebar = () => {
           {displayName}
         </h2>
         <p className="mt-1 text-sm text-gray-500">{displayEmail}</p>
-      </div>
+      </Link>
 
       <div className="border-t border-gray-200" />
 
