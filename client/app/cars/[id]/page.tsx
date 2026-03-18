@@ -1,10 +1,9 @@
-import Image from 'next/image';
 import { Users, Fuel, Settings, MapPin, Check } from 'lucide-react';
 import ReservationForm from './ReservationForm';
 
 async function getCar(id: string) {
   try {
-    const res = await fetch(`http://localhost:3000/cars/${id}`, { next: { revalidate: 0 } });
+    const res = await fetch(`http://localhost:3009/api/cars/${id}`, { next: { revalidate: 0 } });
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {
@@ -15,6 +14,7 @@ async function getCar(id: string) {
 export default async function CarDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const car = await getCar(id);
+  const previewImage = car?.images?.[0] || car?.imageUrl;
 
   if (!car) {
     return (
@@ -32,8 +32,8 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <div className="w-full lg:w-2/3 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-10">
             <div className="relative h-[300px] md:h-[450px] w-full bg-gray-50 rounded-2xl flex items-center justify-center p-8 mb-8 border border-gray-100">
-              {car.imageUrl ? (
-                <Image src={car.imageUrl} alt={`${car.brand} ${car.model}`} fill className="object-contain" />
+              {previewImage ? (
+                <img src={previewImage} alt={`${car.brand} ${car.model}`} className="h-full w-full object-contain" />
               ) : (
                 <div className="text-gray-400 font-semibold text-xl">{car.brand} {car.model}</div>
               )}

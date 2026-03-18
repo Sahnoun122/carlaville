@@ -36,8 +36,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const { id, email, name, role } = user;
-    const authUser: AuthenticatedUser = { id, email, name: name || '', role };
+    const { id, email, name, role, phone } = user;
+    const authUser: AuthenticatedUser = { id, email, name: name || '', role, phone };
 
     const payload: JwtPayload = {
       sub: authUser.id,

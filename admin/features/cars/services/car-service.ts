@@ -56,6 +56,10 @@ export const getCars = async (params: {
   return get<{ cars: Car[]; count: number }>('/admin/cars', { params });
 };
 
+export const getCarById = async (id: string) => {
+  return get<Car>(`/admin/cars/${id}`);
+};
+
 export const getAgencies = async () => {
   const response = await get<{ agencies: Agency[]; count: number }>('/admin/agencies', {
     params: { page: 1, limit: 100 },

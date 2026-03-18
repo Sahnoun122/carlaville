@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -30,6 +30,7 @@ import {
   Transmission,
 } from '@/types';
 import type { CarFormValues } from '@/features/cars/services/car-service';
+import { uploadImages } from '@/features/uploads/services/upload-service';
 
 const optionalNumberSchema = z
   .preprocess((value) => {
@@ -80,6 +81,9 @@ const splitImages = (imagesText?: string): string[] => {
 };
 
 export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) => {
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+
   const form = useForm<CarFormInput>({
     resolver: zodResolver(formSchema) as never,
     defaultValues: {
@@ -102,6 +106,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
   });
 
   useEffect(() => {
+    setUploadError(null);
     form.reset({
       agencyId: car?.agencyId || '',
       brand: car?.brand || '',
@@ -120,6 +125,41 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
       imagesText: car?.images?.join('\n') || '',
     });
   }, [car, form]);
+
+  const handleImagesUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(event.target.files ?? []);
+
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    setUploadError(null);
+    setIsUploadingImages(true);
+
+    try {
+      const uploaded = await uploadImages(selectedFiles);
+      const existing = form.getValues('imagesText') || '';
+      const newUrls = uploaded.map((file) => file.url).join('\n');
+      const separator = existing.trim().length > 0 ? '\n' : '';
+      form.setValue('imagesText', `${existing}${separator}${newUrls}`, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    } catch (error: unknown) {
+      const message =
+        typeof error === 'object' &&
+        error !== null &&
+        'message' in error &&
+        typeof (error as { message?: unknown }).message === 'string'
+          ? (error as { message: string }).message
+          : 'Image upload failed.';
+
+      setUploadError(message);
+    } finally {
+      setIsUploadingImages(false);
+      event.target.value = '';
+    }
+  };
 
   const handleSubmit = (values: CarFormInput) => {
     onSubmit({
@@ -424,16 +464,29 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
                 <textarea
                   className="w-full min-h-24 px-3 py-2 border rounded"
                   {...field}
-                  disabled={isLoading}
+                  disabled={isLoading || isUploadingImages}
                 />
               </FormControl>
+              <div className="mt-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImagesUpload}
+                  disabled={isLoading || isUploadingImages}
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Upload one or multiple photos. URLs are added automatically.
+                </p>
+              </div>
+              {uploadError ? <p className="text-sm text-rose-600">{uploadError}</p> : null}
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save Vehicle'}
+        <Button type="submit" disabled={isLoading || isUploadingImages}>
+          {isLoading || isUploadingImages ? 'Saving...' : 'Save Vehicle'}
         </Button>
       </form>
     </Form>

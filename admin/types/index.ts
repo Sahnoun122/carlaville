@@ -6,5 +6,6 @@ export * from './agency';
 export * from './reservation';
 export * from './reservation-settings';
 export * from './delivery';
+export * from './blog';
 // export * from './reservation';
 // Add other type exports here

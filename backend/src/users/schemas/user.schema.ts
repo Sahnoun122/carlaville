@@ -48,6 +48,9 @@ export class User {
   @Prop({ required: true, trim: true })
   lastName!: string;
 
+  @Prop({ required: true, trim: true })
+  phone!: string;
+
   name?: string;
 }
 

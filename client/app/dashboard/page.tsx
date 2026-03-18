@@ -11,7 +11,7 @@ export default function DashboardPage() {
     async function fetchReservations() {
       const token = localStorage.getItem('carlaville_token');
       try {
-        const res = await fetch('http://localhost:3000/client/reservations', {
+        const res = await fetch('http://localhost:3009/api/client/reservations', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -50,8 +50,8 @@ export default function DashboardPage() {
           {reservations.map((res: any) => (
             <div key={res._id} className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm hover:shadow-lg transition-all flex flex-col lg:flex-row gap-8 items-center lg:items-start group">
               <div className="w-full lg:w-48 h-32 bg-gray-50 rounded-2xl flex items-center justify-center p-4 border border-gray-100 group-hover:border-primary/20 transition-colors">
-                {res.carId?.imageUrl ? (
-                  <img src={res.carId.imageUrl} alt="Car" className="max-w-full max-h-full object-contain" />
+                {(res.carId?.images?.[0] || res.carId?.imageUrl) ? (
+                  <img src={res.carId?.images?.[0] || res.carId?.imageUrl} alt="Car" className="max-w-full max-h-full object-contain" />
                 ) : (
                   <Car className="w-16 h-16 text-gray-300" />
                 )}

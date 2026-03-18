@@ -11,6 +11,8 @@ import { PricingModule } from './pricing/pricing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DeliveriesModule } from './deliveries/deliveries.module';
 import { RolesModule } from './roles/roles.module';
+import { BlogsModule } from './blogs/blogs.module';
+import { UploadsModule } from './uploads/uploads.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 
@@ -38,6 +40,8 @@ import configuration from './config/configuration';
     DashboardModule,
     DeliveriesModule,
     RolesModule,
+    BlogsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

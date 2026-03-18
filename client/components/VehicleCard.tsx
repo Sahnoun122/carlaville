@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Users, Fuel, Settings, MapPin } from 'lucide-react';
 
@@ -14,15 +13,18 @@ interface VehicleCardProps {
     seats: number;
     city: string;
     imageUrl?: string;
+    images?: string[];
   };
 }
 
 export default function VehicleCard({ car }: VehicleCardProps) {
+  const previewImage = car.images?.[0] || car.imageUrl;
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col border border-gray-100 hover:shadow-lg transition-shadow">
       <div className="relative h-48 w-full bg-gray-100 flex items-center justify-center p-4">
-        {car.imageUrl ? (
-          <Image src={car.imageUrl} alt={`${car.brand} ${car.model}`} fill className="object-contain" />
+        {previewImage ? (
+          <img src={previewImage} alt={`${car.brand} ${car.model}`} className="h-full w-full object-contain" />
         ) : (
           <div className="text-gray-400 font-semibold text-center">{car.brand} {car.model}<br/><span className="text-xs font-normal">Image indéponible</span></div>
         )}

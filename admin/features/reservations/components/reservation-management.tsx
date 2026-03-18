@@ -35,6 +35,12 @@ const statusOptions = [
   { label: 'Rejected', value: ReservationStatus.REJECTED },
 ];
 
+const reservationStatusBadgeClass: Record<string, string> = {
+  [ReservationStatus.PENDING]: 'bg-amber-100 text-amber-800 border border-amber-200',
+  [ReservationStatus.CONFIRMED]: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+  [ReservationStatus.REJECTED]: 'bg-rose-100 text-rose-800 border border-rose-200',
+};
+
 export const ReservationManagement = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -241,13 +247,13 @@ export const ReservationManagement = () => {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="rounded-md border bg-white p-4 flex items-center justify-between">
+    <div className="space-y-5">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Reservation Operations</h2>
-          <p className="text-sm text-gray-500">Create and manage all reservations from one place.</p>
+          <h2 className="text-lg font-semibold text-slate-800">Reservation Operations</h2>
+          <p className="text-sm text-slate-500">Create and manage all reservations from one place.</p>
         </div>
-        <Button onClick={openCreateModal}>Create Reservation</Button>
+        <Button className="shadow-sm" onClick={openCreateModal}>Create Reservation</Button>
       </div>
 
       <Modal
@@ -256,7 +262,7 @@ export const ReservationManagement = () => {
         title="Create Reservation"
         contentClassName="max-w-4xl"
       >
-        {createError && <p className="text-sm text-red-600 mb-3">{createError}</p>}
+        {createError && <p className="text-sm text-rose-600 mb-3">{createError}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-1">
           <input
             placeholder="Customer name"
@@ -264,7 +270,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, customerName: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             type="email"
@@ -273,7 +279,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, customerEmail: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             placeholder="Customer phone"
@@ -281,14 +287,14 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, customerPhone: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <select
             value={formData.agencyId}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, agencyId: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           >
             <option value="">Select agency</option>
             {(agenciesQuery.data?.agencies ?? []).map((agency) => (
@@ -302,7 +308,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, carId: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           >
             <option value="">Select vehicle</option>
             {(carsQuery.data?.cars ?? []).map((car) => {
@@ -321,7 +327,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, pickupLocation: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             placeholder="Return location"
@@ -329,7 +335,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, returnLocation: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             type="date"
@@ -337,7 +343,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, pickupDate: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             type="date"
@@ -345,7 +351,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, returnDate: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             type="time"
@@ -353,7 +359,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, pickupTime: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             type="time"
@@ -361,7 +367,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, returnTime: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             placeholder="Extras (comma separated)"
@@ -369,7 +375,7 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, selectedExtras: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
             type="number"
@@ -378,26 +384,26 @@ export const ReservationManagement = () => {
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, estimatedTotal: event.target.value }))
             }
-            className="w-full px-3 py-2 border rounded"
+            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
         </div>
         <div className="flex justify-end mt-4">
-          <Button onClick={handleCreateReservation} disabled={createMutation.isPending}>
+          <Button className="shadow-sm" onClick={handleCreateReservation} disabled={createMutation.isPending}>
             Create Reservation
           </Button>
         </div>
       </Modal>
 
-      {actionError && <p className="text-sm text-red-600">{actionError}</p>}
+      {actionError && <p className="text-sm text-rose-600">{actionError}</p>}
 
-      <div className="rounded-md border bg-white p-4">
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block mb-1 text-sm font-medium">Filter by vehicle</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Filter by vehicle</label>
             <select
               value={selectedCarId}
               onChange={(event) => setSelectedCarId(event.target.value)}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
             >
               <option value="all">All vehicles</option>
               {vehicleFilterOptions.map((car) => (
@@ -409,11 +415,11 @@ export const ReservationManagement = () => {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium">Filter by status</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Filter by status</label>
             <select
               value={selectedStatus}
               onChange={(event) => setSelectedStatus(event.target.value)}
-              className="w-full px-3 py-2 border rounded"
+              className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
             >
               {statusOptions.map((status) => (
                 <option key={status.value} value={status.value}>
@@ -424,20 +430,20 @@ export const ReservationManagement = () => {
           </div>
 
           <div className="flex items-end">
-            <Button onClick={() => queryClient.invalidateQueries({ queryKey: ['reservations'] })}>
+            <Button className="shadow-sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['reservations'] })}>
               Refresh
             </Button>
           </div>
         </div>
       </div>
 
-      {reservationsQuery.isLoading && <p>Loading reservations...</p>}
-      {reservationsQuery.isError && <p>Error loading reservations.</p>}
+      {reservationsQuery.isLoading && <p className="text-sm text-slate-600">Loading reservations...</p>}
+      {reservationsQuery.isError && <p className="text-sm text-rose-600">Error loading reservations.</p>}
 
       {reservationsQuery.data && (
-        <div className="overflow-x-auto rounded-md border bg-white">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-left">
+            <thead className="bg-slate-50 text-left text-slate-600">
               <tr>
                 <th className="px-4 py-3 font-medium">Reference</th>
                 <th className="px-4 py-3 font-medium">Vehicle</th>
@@ -452,23 +458,32 @@ export const ReservationManagement = () => {
                 const reservationId = resolveReservationId(reservation);
 
                 return (
-                  <tr key={reservationId} className="border-t">
-                    <td className="px-4 py-3 font-medium">{reservation.bookingReference}</td>
-                    <td className="px-4 py-3">{resolveVehicleLabel(reservation)}</td>
-                    <td className="px-4 py-3">
+                  <tr key={reservationId} className="border-t border-slate-200 hover:bg-slate-50/70 transition-colors">
+                    <td className="px-4 py-3 font-semibold text-slate-800">{reservation.bookingReference}</td>
+                    <td className="px-4 py-3 text-slate-700">{resolveVehicleLabel(reservation)}</td>
+                    <td className="px-4 py-3 text-slate-700">
                       <div>{reservation.customerName}</div>
-                      <div className="text-xs text-gray-500">{reservation.customerPhone}</div>
+                      <div className="text-xs text-slate-500">{reservation.customerPhone}</div>
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">
+                      <div>{new Date(reservation.pickupDate).toLocaleDateString()} → {new Date(reservation.returnDate).toLocaleDateString()}</div>
+                      <div className="text-xs text-slate-500">{reservation.rentalDays} day(s)</div>
                     </td>
                     <td className="px-4 py-3">
-                      <div>{new Date(reservation.pickupDate).toLocaleDateString()} → {new Date(reservation.returnDate).toLocaleDateString()}</div>
-                      <div className="text-xs text-gray-500">{reservation.rentalDays} day(s)</div>
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          reservationStatusBadgeClass[reservation.status] ?? 'bg-slate-100 text-slate-700 border border-slate-200'
+                        }`}
+                      >
+                        {reservation.status}
+                      </span>
                     </td>
-                    <td className="px-4 py-3">{reservation.status}</td>
                     <td className="px-4 py-3">
                       {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
                         <>
                           <Button
                             size="sm"
+                            className="shadow-sm"
                             onClick={() => confirmMutation.mutate(reservationId)}
                             disabled={isActionPending}
                           >
@@ -477,7 +492,7 @@ export const ReservationManagement = () => {
                           <Button
                             size="sm"
                             variant="destructive"
-                            className="ml-2"
+                            className="ml-2 shadow-sm"
                             onClick={() => rejectMutation.mutate(reservationId)}
                             disabled={isActionPending}
                           >
@@ -491,6 +506,7 @@ export const ReservationManagement = () => {
                         <Button
                           size="sm"
                           variant="outline"
+                          className="border-slate-300 text-slate-700 hover:bg-slate-100"
                           onClick={() => pendingMutation.mutate(reservationId)}
                           disabled={isActionPending}
                         >
@@ -498,13 +514,13 @@ export const ReservationManagement = () => {
                         </Button>
                       )}
 
-                      {!canManageReservationStatus && <span className="text-xs text-gray-500">View only</span>}
+                      {!canManageReservationStatus && <span className="text-xs text-slate-500">View only</span>}
 
                       {canManageReservationStatus &&
                         reservation.status !== ReservationStatus.PENDING &&
                         reservation.status !== ReservationStatus.CONFIRMED &&
                         reservation.status !== ReservationStatus.REJECTED && (
-                          <span className="text-xs text-gray-500">No action</span>
+                          <span className="text-xs text-slate-500">No action</span>
                         )}
                     </td>
                   </tr>

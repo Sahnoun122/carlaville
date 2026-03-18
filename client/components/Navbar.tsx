@@ -12,9 +12,10 @@ export default function Navbar() {
         <nav className="hidden md:flex gap-6 font-medium">
           <Link href="/" className="hover:text-white/80 transition-colors">Accueil</Link>
           <Link href="/cars" className="hover:text-white/80 transition-colors">Véhicules</Link>
+          <Link href="/blogs" className="hover:text-white/80 transition-colors">Blogs</Link>
           <Link href="/about" className="hover:text-white/80 transition-colors">À Propos</Link>
         </nav>
-        <div className="flex items-center gap-4 hidden md:flex">
+        <div className="hidden items-center gap-4 md:flex">
           <Link href="/auth/login" className="text-sm font-semibold hover:underline flex items-center gap-1">
             <User className="w-4 h-4" /> Connexion
           </Link>

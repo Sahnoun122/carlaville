@@ -7,8 +7,8 @@ interface PageHeaderProps {
 }
 
 export const PageHeader = ({ title, children }: PageHeaderProps) => (
-  <div className="flex items-center justify-between mb-6">
-    <h1 className="text-2xl font-bold">{title}</h1>
+  <div className="flex items-center justify-between mb-6 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+    <h1 className="text-2xl font-bold text-slate-800">{title}</h1>
     {children ? <div>{children}</div> : null}
   </div>
 );

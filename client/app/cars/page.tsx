@@ -1,8 +1,9 @@
 import VehicleCard from '@/components/VehicleCard';
+import CarsCatalog from '@/components/CarsCatalog';
 
 async function getCars() {
   try {
-    const res = await fetch('http://localhost:3000/cars', { next: { revalidate: 60 } });
+    const res = await fetch('http://localhost:3009/api/cars', { next: { revalidate: 60 } });
     if (!res.ok) return { cars: [] };
     const data = await res.json();
     return data;
@@ -23,14 +24,10 @@ export default async function CarsPage() {
         <p className="text-gray-500 mb-12 text-lg md:text-xl max-w-3xl">Découvrez notre gamme complète et choisissez le véhicule parfaitement adapté à vos besoins et à votre budget.</p>
         
         {cars && cars.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {cars.map((car: any) => (
-              <VehicleCard key={car._id} car={car} />
-            ))}
-          </div>
+          <CarsCatalog initialCars={cars} />
         ) : (
           <div className="text-center py-24 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
-            <p className="text-gray-500 text-xl font-medium">Aucun véhicule trouvé.</p>
+            <p className="text-gray-500 text-xl font-medium">Aucun véhicule disponible pour le moment.</p>
           </div>
         )}
       </div>
