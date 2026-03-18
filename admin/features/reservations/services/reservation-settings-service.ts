@@ -9,6 +9,7 @@ const toSettings = (
 ): ReservationDayControlSettings => ({
   ...input,
   id: input.id || input._id || '',
+  extras: input.extras || [],
 });
 
 export const getReservationDayControlSettings = async () => {

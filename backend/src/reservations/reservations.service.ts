@@ -14,6 +14,9 @@ import { customAlphabet } from 'nanoid';
 import {
   ReservationDayControl,
   ReservationDayControlDocument,
+  ReservationExtraBillingType,
+  ReservationExtraOption,
+  ReservationExtraScope,
 } from './schemas/reservation-day-control.schema';
 import { UpdateDayControlSettingsDto } from './dto/update-day-control-settings.dto';
 import { Car, CarDocument } from '../cars/schemas/car.schema';
@@ -36,7 +39,10 @@ export class ReservationsService {
 
   async create(dto: CreateReservationDto): Promise<Reservation> {
     const settings = await this.getDayControlSettings();
-    const car = await this.carModel.findById(dto.carId).select('minRentalDays').exec();
+    const car = await this.carModel
+      .findById(dto.carId)
+      .select('minRentalDays dailyPrice')
+      .exec();
 
     if (!car) {
       throw new NotFoundException(`Car with id ${dto.carId} not found`);
@@ -57,10 +63,33 @@ export class ReservationsService {
       effectiveMinRentalDays,
     );
 
+    const applicableExtras = this.getApplicableExtras(
+      settings,
+      dto.carId,
+    );
+    const selectedExtras = this.normalizeSelectedExtras(
+      dto.selectedExtras,
+      applicableExtras,
+    );
+    const extrasTotal = this.calculateExtrasTotal(selectedExtras, applicableExtras, rentalDays);
+    const dailyPrice = Number(car.dailyPrice) || 0;
+    const basePrice = dailyPrice * rentalDays;
+    const total = basePrice + extrasTotal;
+
     const reservation = new this.reservationModel({
       ...dto,
       bookingReference,
       rentalDays,
+      selectedExtras,
+      pricingBreakdown: {
+        ...(dto.pricingBreakdown || {}),
+        daily: dailyPrice,
+        days: rentalDays,
+        basePrice,
+        extrasTotal,
+        extrasPrice: extrasTotal,
+        total,
+      },
       status: ReservationStatus.PENDING,
     });
     return reservation.save();
@@ -78,6 +107,7 @@ export class ReservationsService {
       maxAdvanceBookingDays: 365,
       allowSameDayBooking: true,
       blockedWeekdays: [],
+      extras: [],
     });
 
     return defaultSettings.save();
@@ -116,7 +146,7 @@ export class ReservationsService {
       );
     }
 
-    const { blockedWeekdays, ...updatableFields } = dto;
+    const { blockedWeekdays, extras, ...updatableFields } = dto;
 
     if (Array.isArray(blockedWeekdays)) {
       const hasInvalidWeekday = blockedWeekdays.some(
@@ -131,6 +161,46 @@ export class ReservationsService {
       settings.blockedWeekdays = Array.from(
         new Set(blockedWeekdays),
       ).sort((a, b) => a - b);
+    }
+
+    if (Array.isArray(extras)) {
+      const seenIds = new Set<string>();
+      const normalizedExtras = extras.map((extra) => {
+        const normalizedId = extra.id.trim().toLowerCase();
+
+        if (seenIds.has(normalizedId)) {
+          throw new BadRequestException(
+            `Duplicate extra id detected: ${normalizedId}`,
+          );
+        }
+
+        seenIds.add(normalizedId);
+
+        const normalizedCarIds = Array.isArray(extra.carIds)
+          ? Array.from(new Set(extra.carIds.map((carId) => carId.trim())))
+          : [];
+
+        if (
+          extra.scope === ReservationExtraScope.SELECTED_CARS &&
+          normalizedCarIds.length === 0
+        ) {
+          throw new BadRequestException(
+            `Extra "${extra.label}" must target at least one car when scope is SELECTED_CARS.`,
+          );
+        }
+
+        return {
+          id: normalizedId,
+          label: extra.label.trim(),
+          price: Number(extra.price) || 0,
+          billingType: extra.billingType,
+          scope: extra.scope,
+          carIds: normalizedCarIds,
+          active: extra.active ?? true,
+        };
+      });
+
+      settings.extras = normalizedExtras;
     }
 
     Object.assign(settings, updatableFields);
@@ -366,5 +436,76 @@ export class ReservationsService {
         'Return day is blocked by reservation policy.',
       );
     }
+  }
+
+  private getApplicableExtras(
+    settings: ReservationDayControl,
+    carId: string,
+  ): ReservationExtraOption[] {
+    return (settings.extras || []).filter((extra) => {
+      if (!extra.active) {
+        return false;
+      }
+
+      if (extra.scope === ReservationExtraScope.ALL_CARS) {
+        return true;
+      }
+
+      return (extra.carIds || []).includes(carId);
+    });
+  }
+
+  private normalizeSelectedExtras(
+    selectedExtras: string[] | undefined,
+    applicableExtras: ReservationExtraOption[],
+  ): string[] {
+    if (!Array.isArray(selectedExtras) || selectedExtras.length === 0) {
+      return [];
+    }
+
+    const byId = new Map(
+      applicableExtras.map((extra) => [extra.id.toLowerCase(), extra.id]),
+    );
+    const byLabel = new Map(
+      applicableExtras.map((extra) => [extra.label.toLowerCase(), extra.id]),
+    );
+
+    const normalizedIds = new Set<string>();
+
+    for (const rawValue of selectedExtras) {
+      const token = rawValue.trim().toLowerCase();
+
+      if (!token) {
+        continue;
+      }
+
+      const matchedId = byId.get(token) || byLabel.get(token);
+      if (matchedId) {
+        normalizedIds.add(matchedId);
+      }
+    }
+
+    return Array.from(normalizedIds);
+  }
+
+  private calculateExtrasTotal(
+    selectedExtraIds: string[],
+    applicableExtras: ReservationExtraOption[],
+    rentalDays: number,
+  ): number {
+    const selectedSet = new Set(selectedExtraIds);
+
+    return applicableExtras.reduce((sum, extra) => {
+      if (!selectedSet.has(extra.id)) {
+        return sum;
+      }
+
+      const unitPrice = Number(extra.price) || 0;
+      if (extra.billingType === ReservationExtraBillingType.PER_RENTAL) {
+        return sum + unitPrice;
+      }
+
+      return sum + unitPrice * rentalDays;
+    }, 0);
   }
 }

@@ -1,12 +1,14 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
+import { getCars } from '@/features/cars/services/car-service';
 import {
   getReservationDayControlSettings,
   updateReservationDayControlSettings,
 } from '@/features/reservations/services/reservation-settings-service';
+import type { ReservationExtraOption } from '@/types';
 
 const weekdayOptions = [
   { value: 0, label: 'Sunday' },
@@ -22,11 +24,30 @@ export const ReservationDayControlManagement = () => {
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+  const [extrasDraft, setExtrasDraft] = useState<ReservationExtraOption[]>([]);
 
   const settingsQuery = useQuery({
     queryKey: ['reservation-day-control-settings'],
     queryFn: getReservationDayControlSettings,
   });
+
+  const carsQuery = useQuery({
+    queryKey: ['cars', 'reservation-settings-extras'],
+    queryFn: () => getCars({ page: 1, limit: 200 }),
+  });
+
+  useEffect(() => {
+    if (!settingsQuery.data) {
+      return;
+    }
+
+    setExtrasDraft(
+      (settingsQuery.data.extras || []).map((extra) => ({
+        ...extra,
+        carIds: extra.carIds || [],
+      })),
+    );
+  }, [settingsQuery.data]);
 
   const updateMutation = useMutation({
     mutationFn: updateReservationDayControlSettings,
@@ -72,8 +93,44 @@ export const ReservationDayControlManagement = () => {
       .filter((value) => Number.isInteger(value) && value >= 0 && value <= 6)
       .sort((a, b) => a - b);
 
+    const normalizedExtras = extrasDraft
+      .map((extra) => {
+        const normalizedId = extra.id.trim().toLowerCase().replace(/\s+/g, '_');
+        const normalizedLabel = extra.label.trim();
+        const normalizedCarIds = Array.from(new Set((extra.carIds || []).filter(Boolean)));
+
+        return {
+          ...extra,
+          id: normalizedId,
+          label: normalizedLabel,
+          price: Number(extra.price) || 0,
+          carIds: normalizedCarIds,
+          active: extra.active ?? true,
+        };
+      })
+      .filter((extra) => extra.id.length > 0 && extra.label.length > 0);
+
     if (minRentalDays > maxRentalDays) {
       setSubmitError('Minimum rental days cannot be greater than maximum rental days.');
+      return;
+    }
+
+    const duplicateExtraId = normalizedExtras.find(
+      (extra, index) =>
+        normalizedExtras.findIndex((candidate) => candidate.id === extra.id) !== index,
+    );
+
+    if (duplicateExtraId) {
+      setSubmitError(`Duplicate extra id: ${duplicateExtraId.id}`);
+      return;
+    }
+
+    const missingScopedCars = normalizedExtras.find(
+      (extra) => extra.scope === 'SELECTED_CARS' && extra.carIds.length === 0,
+    );
+
+    if (missingScopedCars) {
+      setSubmitError(`Please select at least one car for "${missingScopedCars.label}".`);
       return;
     }
 
@@ -83,7 +140,72 @@ export const ReservationDayControlManagement = () => {
       maxAdvanceBookingDays,
       allowSameDayBooking,
       blockedWeekdays,
+      extras: normalizedExtras,
     });
+  };
+
+  const carOptions = useMemo(
+    () =>
+      (carsQuery.data?.cars || []).map((car) => ({
+        id: car.id || (car as { _id?: string })._id || '',
+        label: `${car.brand} ${car.model} (${car.city})`,
+      })),
+    [carsQuery.data?.cars],
+  );
+
+  const addExtra = () => {
+    setExtrasDraft((previous) => [
+      ...previous,
+      {
+        id: '',
+        label: '',
+        price: 0,
+        billingType: 'PER_DAY',
+        scope: 'ALL_CARS',
+        carIds: [],
+        active: true,
+      },
+    ]);
+  };
+
+  const removeExtra = (index: number) => {
+    setExtrasDraft((previous) => previous.filter((_, itemIndex) => itemIndex !== index));
+  };
+
+  const updateExtra = <K extends keyof ReservationExtraOption>(
+    index: number,
+    key: K,
+    value: ReservationExtraOption[K],
+  ) => {
+    setExtrasDraft((previous) =>
+      previous.map((extra, itemIndex) =>
+        itemIndex === index
+          ? {
+              ...extra,
+              [key]: value,
+              ...(key === 'scope' && value === 'ALL_CARS' ? { carIds: [] } : {}),
+            }
+          : extra,
+      ),
+    );
+  };
+
+  const toggleCarForExtra = (index: number, carId: string) => {
+    setExtrasDraft((previous) =>
+      previous.map((extra, itemIndex) => {
+        if (itemIndex !== index) {
+          return extra;
+        }
+
+        const exists = (extra.carIds || []).includes(carId);
+        return {
+          ...extra,
+          carIds: exists
+            ? (extra.carIds || []).filter((id) => id !== carId)
+            : [...(extra.carIds || []), carId],
+        };
+      }),
+    );
   };
 
   return (
@@ -176,6 +298,132 @@ export const ReservationDayControlManagement = () => {
                 </label>
               ))}
             </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-800">Options & Extras</p>
+                <p className="text-xs text-slate-500">
+                  Configure selectable extras and target all vehicles or specific ones.
+                </p>
+              </div>
+              <Button type="button" variant="outline" onClick={addExtra}>
+                Add Extra
+              </Button>
+            </div>
+
+            {extrasDraft.length === 0 ? (
+              <div className="rounded-md border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
+                No extras configured yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {extrasDraft.map((extra, index) => (
+                  <div key={`${extra.id || 'new'}-${index}`} className="rounded-lg border border-slate-200 bg-white p-4">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">ID technique</label>
+                        <input
+                          value={extra.id}
+                          onChange={(event) => updateExtra(index, 'id', event.target.value)}
+                          placeholder="ex: baby_seat"
+                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Libellé</label>
+                        <input
+                          value={extra.label}
+                          onChange={(event) => updateExtra(index, 'label', event.target.value)}
+                          placeholder="ex: Siège bébé"
+                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Prix (MAD)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={extra.price}
+                          onChange={(event) => updateExtra(index, 'price', Number(event.target.value))}
+                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                      </div>
+                      <div className="flex items-end justify-between gap-2">
+                        <div className="w-full">
+                          <label className="mb-1 block text-xs font-medium text-slate-600">Facturation</label>
+                          <select
+                            value={extra.billingType}
+                            onChange={(event) =>
+                              updateExtra(index, 'billingType', event.target.value as ReservationExtraOption['billingType'])
+                            }
+                            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+                          >
+                            <option value="PER_DAY">Par jour</option>
+                            <option value="PER_RENTAL">Par location</option>
+                          </select>
+                        </div>
+                        <Button type="button" variant="destructive" size="sm" onClick={() => removeExtra(index)}>
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-xs font-medium text-slate-600">Portée</label>
+                        <select
+                          value={extra.scope}
+                          onChange={(event) =>
+                            updateExtra(index, 'scope', event.target.value as ReservationExtraOption['scope'])
+                          }
+                          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+                        >
+                          <option value="ALL_CARS">Toutes les voitures</option>
+                          <option value="SELECTED_CARS">Voitures spécifiques</option>
+                        </select>
+                      </div>
+
+                      <div className="flex items-end">
+                        <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={extra.active}
+                            onChange={(event) => updateExtra(index, 'active', event.target.checked)}
+                          />
+                          Option active
+                        </label>
+                      </div>
+                    </div>
+
+                    {extra.scope === 'SELECTED_CARS' && (
+                      <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+                        <p className="mb-2 text-xs font-medium text-slate-700">Voitures concernées</p>
+                        {carsQuery.isLoading ? (
+                          <p className="text-xs text-slate-500">Loading vehicles...</p>
+                        ) : carOptions.length === 0 ? (
+                          <p className="text-xs text-slate-500">No vehicles available.</p>
+                        ) : (
+                          <div className="max-h-36 space-y-1 overflow-y-auto pr-1">
+                            {carOptions.map((car) => (
+                              <label key={car.id} className="flex items-center gap-2 text-xs text-slate-700">
+                                <input
+                                  type="checkbox"
+                                  checked={(extra.carIds || []).includes(car.id)}
+                                  onChange={() => toggleCarForExtra(index, car.id)}
+                                />
+                                {car.label}
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end">

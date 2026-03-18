@@ -8,27 +8,27 @@ import { Role } from '@/types';
 
 const navLinks = {
   [Role.ADMIN]: [
-    { name: 'Dashboard', href: '/admin' },
+    { name: 'Tableau de bord', href: '/admin' },
     { name: 'Blogs', href: '/admin/blogs' },
-    { name: 'Users', href: '/admin/users' },
-    { name: 'Cars', href: '/admin/cars' },
+    { name: 'Utilisateurs', href: '/admin/users' },
+    { name: 'Véhicules', href: '/admin/cars' },
     { name: 'Maintenance', href: '/admin/maintenance' },
-    { name: 'Reservations', href: '/admin/reservations' },
-    { name: 'Reservation Settings', href: '/admin/reservations/settings' },
-    { name: 'Deliveries', href: '/admin/deliveries' },
-    { name: 'Pricing', href: '/admin/pricing' },
-    { name: 'Profile', href: '/admin/profile' },
+    { name: 'Réservations', href: '/admin/reservations' },
+    { name: 'Paramètres de réservation', href: '/admin/reservations/settings' },
+    { name: 'Livraisons', href: '/admin/deliveries' },
+    { name: 'Tarification', href: '/admin/pricing' },
+    { name: 'Profil', href: '/admin/profile' },
   ],
   [Role.RESERVATION_MANAGER]: [
-    { name: 'Dashboard', href: '/operations' },
-    { name: 'Reservations', href: '/operations/reservations' },
+    { name: 'Tableau de bord', href: '/operations' },
+    { name: 'Réservations', href: '/operations/reservations' },
     { name: 'Maintenance', href: '/operations/maintenance' },
-    { name: 'Profile', href: '/operations/profile' },
+    { name: 'Profil', href: '/operations/profile' },
   ],
   [Role.DELIVERY_AGENT]: [
-    { name: 'Dashboard', href: '/operations' },
-    { name: 'Deliveries', href: '/operations/deliveries' },
-    { name: 'Profile', href: '/operations/profile' },
+    { name: 'Tableau de bord', href: '/operations' },
+    { name: 'Livraisons', href: '/operations/deliveries' },
+    { name: 'Profil', href: '/operations/profile' },
   ],
 };
 
@@ -47,16 +47,16 @@ export const Sidebar = () => {
   const displayEmail = user?.email || 'admin@carlaville.ma';
 
   const iconByName: Record<string, ComponentType<{ className?: string }>> = {
-    Dashboard: LayoutDashboard,
+    'Tableau de bord': LayoutDashboard,
     Blogs: LayoutDashboard,
-    Users: Users,
-    Cars: CarFront,
+    Utilisateurs: Users,
+    Véhicules: CarFront,
     Maintenance: Wrench,
-    Reservations: CalendarDays,
-    'Reservation Settings': Settings,
-    Deliveries: Truck,
-    Pricing: Settings,
-    Profile: UserRound,
+    'Réservations': CalendarDays,
+    'Paramètres de réservation': Settings,
+    Livraisons: Truck,
+    Tarification: Settings,
+    Profil: UserRound,
   };
 
   return (

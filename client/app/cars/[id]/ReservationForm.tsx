@@ -2,19 +2,22 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const EXTRAS_CATALOG = [
-  { id: 'baby_seat', label: 'Siège bébé', price: 50, perDay: true },
-  { id: 'booster', label: 'Rehausseur', price: 30, perDay: true },
-  { id: 'gps', label: 'GPS Navigation', price: 50, perDay: true },
-  { id: 'additional_driver', label: 'Conducteur additionnel', price: 150, perDay: false },
-  { id: 'insurance', label: 'Assurance Tous Risques', price: 100, perDay: true },
-];
+type ReservationExtraOption = {
+  id: string;
+  label: string;
+  price: number;
+  billingType: 'PER_DAY' | 'PER_RENTAL';
+  scope: 'ALL_CARS' | 'SELECTED_CARS';
+  carIds?: string[];
+  active?: boolean;
+};
 
 interface DayControlSettings {
   minRentalDays: number;
   maxRentalDays: number;
   maxAdvanceBookingDays: number;
   allowSameDayBooking: boolean;
+  extras?: ReservationExtraOption[];
 }
 
 const toPositiveInt = (value: unknown): number | undefined => {
@@ -47,6 +50,8 @@ export default function ReservationForm({ car }: { car: any }) {
   const [returnDate, setReturnDate] = useState<string>('');
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
 
+  const carId = String(car?._id || car?.id || '');
+
   const carMinRentalDays = toPositiveInt(car?.minRentalDays);
   const globalMinRentalDays = Math.max(1, settings?.minRentalDays ?? 1);
   const effectiveMinRentalDays = carMinRentalDays ?? globalMinRentalDays;
@@ -70,6 +75,7 @@ export default function ReservationForm({ car }: { car: any }) {
           maxRentalDays: data.maxRentalDays,
           maxAdvanceBookingDays: data.maxAdvanceBookingDays,
           allowSameDayBooking: data.allowSameDayBooking,
+          extras: data.extras || [],
         });
       } catch {
       }
@@ -77,6 +83,31 @@ export default function ReservationForm({ car }: { car: any }) {
 
     loadDayControlSettings();
   }, []);
+
+  const applicableExtras = (settings?.extras || []).filter((extra) => {
+    if (extra.active === false) {
+      return false;
+    }
+
+    if (extra.scope === 'ALL_CARS') {
+      return true;
+    }
+
+    return (extra.carIds || []).includes(carId);
+  });
+
+  useEffect(() => {
+    if (applicableExtras.length === 0) {
+      setSelectedExtras({});
+      return;
+    }
+
+    const allowedIds = new Set(applicableExtras.map((extra) => extra.id));
+    setSelectedExtras((previous) => {
+      const nextEntries = Object.entries(previous).filter(([id, isSelected]) => isSelected && allowedIds.has(id));
+      return Object.fromEntries(nextEntries);
+    });
+  }, [carId, settings]);
 
   useEffect(() => {
     const today = new Date();
@@ -166,9 +197,9 @@ export default function ReservationForm({ car }: { car: any }) {
   const basePrice = car.dailyPrice * days;
   let extrasPrice = 0;
   
-  const activeExtras = EXTRAS_CATALOG.filter(e => selectedExtras[e.id]);
+  const activeExtras = applicableExtras.filter(e => selectedExtras[e.id]);
   activeExtras.forEach(e => {
-    extrasPrice += e.perDay ? e.price * days : e.price;
+    extrasPrice += e.billingType === 'PER_DAY' ? e.price * days : e.price;
   });
 
   const totalPrice = basePrice + extrasPrice;
@@ -193,12 +224,12 @@ export default function ReservationForm({ car }: { car: any }) {
     const userData = JSON.parse(localStorage.getItem('carlaville_user') || '{}');
     const customerPhone = userData.phone || '+212600000000';
 
-    const extrasArray = activeExtras.map(e => e.label);
+    const extrasArray = activeExtras.map((e) => e.id);
     const pricingBreakdown = {
       daily: car.dailyPrice,
       days,
       basePrice,
-      extrasPrice,
+      extrasTotal: extrasPrice,
       total: totalPrice
     };
 
@@ -259,16 +290,6 @@ export default function ReservationForm({ car }: { car: any }) {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && <div className="bg-red-50 text-primary p-3 rounded-lg text-sm font-semibold">{error}</div>}
-
-          <div className="rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-800">
-            <p className="font-bold">Règles de réservation</p>
-            <p>
-              Durée autorisée: {minRentalDays} à {maxRentalDays} jour(s)
-              {carMinRentalDays ? ' (spécifique à ce véhicule)' : ''}
-              {settings ? ` • Réservation jusqu’à ${settings.maxAdvanceBookingDays} jour(s) à l’avance` : ''}
-              {settings && !settings.allowSameDayBooking ? ' • Réservation le jour même non autorisée' : ''}
-            </p>
-          </div>
           
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -292,12 +313,7 @@ export default function ReservationForm({ car }: { car: any }) {
             </div>
           </div>
 
-          {calendarRuleError && (
-            <div className="rounded-lg bg-red-50 p-3 text-sm font-semibold text-red-700">
-              {calendarRuleError}
-            </div>
-          )}
-          
+
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-1">Lieu de départ & Retour</label>
             <div className="grid grid-cols-2 gap-4">
@@ -307,27 +323,29 @@ export default function ReservationForm({ car }: { car: any }) {
           </div>
 
           {/* Options & Extras */}
-          <div className="pt-4 border-t border-gray-100">
-            <h4 className="text-md font-bold text-gray-900 mb-3">Options & Extras</h4>
-            <div className="space-y-3">
-              {EXTRAS_CATALOG.map((extra) => (
-                <label key={extra.id} className="flex items-center justify-between cursor-pointer group">
-                  <div className="flex items-center gap-3">
-                    <input 
-                      type="checkbox" 
-                      className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary"
-                      checked={!!selectedExtras[extra.id]}
-                      onChange={() => toggleExtra(extra.id)}
-                    />
-                    <span className="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">{extra.label}</span>
-                  </div>
-                  <span className="text-sm font-bold text-gray-900">
-                    +{extra.price} MAD <span className="text-gray-400 font-normal text-xs">{extra.perDay ? '/ jour' : '/ loc.'}</span>
-                  </span>
-                </label>
-              ))}
+          {applicableExtras.length > 0 && (
+            <div className="pt-4 border-t border-gray-100">
+              <h4 className="text-md font-bold text-gray-900 mb-3">Options & Extras</h4>
+              <div className="space-y-3">
+                {applicableExtras.map((extra) => (
+                  <label key={extra.id} className="flex items-center justify-between cursor-pointer group">
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        className="w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary"
+                        checked={!!selectedExtras[extra.id]}
+                        onChange={() => toggleExtra(extra.id)}
+                      />
+                      <span className="text-sm font-medium text-gray-700 group-hover:text-primary transition-colors">{extra.label}</span>
+                    </div>
+                    <span className="text-sm font-bold text-gray-900">
+                      +{extra.price} MAD <span className="text-gray-400 font-normal text-xs">{extra.billingType === 'PER_DAY' ? '/ jour' : '/ loc.'}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Pricing Breakdown */}
           <div className="pt-4 mt-6 border-t border-gray-200 bg-gray-50 p-4 rounded-xl space-y-2">
