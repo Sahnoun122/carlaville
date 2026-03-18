@@ -2,6 +2,16 @@
 
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import type { ComponentType } from 'react';
+import {
+  CalendarCheck,
+  CalendarClock,
+  CalendarSync,
+  CheckCircle2,
+  ClipboardList,
+  Timer,
+  Wrench,
+} from 'lucide-react';
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { ReservationStatus } from '@/types';
@@ -13,13 +23,45 @@ import {
 const statsCards: Array<{
   key: keyof ReservationManagerDashboardStats['reservations'];
   label: string;
+  icon: ComponentType<{ className?: string }>;
+  tone: string;
 }> = [
-  { key: 'total', label: 'Total Reservations' },
-  { key: 'pending', label: 'Pending Reservations' },
-  { key: 'confirmed', label: 'Confirmed Reservations' },
-  { key: 'activeRentals', label: 'Active Rentals' },
-  { key: 'todayPickups', label: 'Today Pickups' },
-  { key: 'todayReturns', label: 'Today Returns' },
+  {
+    key: 'total',
+    label: 'Réservations totales',
+    icon: ClipboardList,
+    tone: 'from-red-50 to-white border-red-100',
+  },
+  {
+    key: 'pending',
+    label: 'En attente',
+    icon: Timer,
+    tone: 'from-amber-50 to-white border-amber-100',
+  },
+  {
+    key: 'confirmed',
+    label: 'Confirmées',
+    icon: CheckCircle2,
+    tone: 'from-emerald-50 to-white border-emerald-100',
+  },
+  {
+    key: 'activeRentals',
+    label: 'Locations actives',
+    icon: CalendarSync,
+    tone: 'from-sky-50 to-white border-sky-100',
+  },
+  {
+    key: 'todayPickups',
+    label: 'Départs du jour',
+    icon: CalendarClock,
+    tone: 'from-indigo-50 to-white border-indigo-100',
+  },
+  {
+    key: 'todayReturns',
+    label: 'Retours du jour',
+    icon: CalendarCheck,
+    tone: 'from-violet-50 to-white border-violet-100',
+  },
 ];
 
 const formatDate = (value: string) =>
@@ -65,76 +107,89 @@ export const ReservationManagerDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Reservation Manager Dashboard">
+      <PageHeader title="Dashboard Opérations">
         <div className="flex gap-2">
           <Link href="/operations/reservations">
-            <Button>Manage Reservations</Button>
+            <Button>Gérer les réservations</Button>
           </Link>
           <Link href="/operations/maintenance">
-            <Button variant="outline">View Maintenance</Button>
+            <Button variant="outline">Voir la maintenance</Button>
           </Link>
         </div>
       </PageHeader>
 
       {statsQuery.isLoading && (
-        <div className="rounded-md border bg-white p-4 text-sm text-gray-500">
-          Loading dashboard...
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 text-sm font-medium text-gray-500 shadow-sm">
+          Chargement du dashboard...
         </div>
       )}
 
       {statsQuery.isError && (
-        <div className="rounded-md border bg-white p-4 text-sm text-red-600">
-          Failed to load dashboard metrics. Please refresh.
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-semibold text-red-700 shadow-sm">
+          Impossible de charger les indicateurs. Veuillez actualiser.
         </div>
       )}
 
       {statsQuery.data && (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {statsCards.map((card) => (
-              <div key={card.key} className="rounded-md border bg-white p-4">
-                <p className="text-sm text-gray-500">{card.label}</p>
-                <p className="mt-1 text-2xl font-semibold">
-                  {statsQuery.data.reservations[card.key]}
-                </p>
-              </div>
-            ))}
+            {statsCards.map((card) => {
+              const Icon = card.icon;
 
-            <div className="rounded-md border bg-white p-4">
-              <p className="text-sm text-gray-500">Cars In Maintenance</p>
-              <p className="mt-1 text-2xl font-semibold">
+              return (
+                <div
+                  key={card.key}
+                  className={`rounded-2xl border bg-linear-to-br p-5 shadow-sm ${card.tone}`}
+                >
+                  <div className="mb-3 inline-flex rounded-lg bg-white p-2 text-primary shadow-sm">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-600">{card.label}</p>
+                  <p className="mt-2 text-3xl font-black tracking-tight text-gray-900">
+                    {statsQuery.data.reservations[card.key]}
+                  </p>
+                </div>
+              );
+            })}
+
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="mb-3 inline-flex rounded-lg bg-red-50 p-2 text-primary shadow-sm">
+                <Wrench className="h-4 w-4" />
+              </div>
+              <p className="text-sm font-semibold text-gray-600">Véhicules en maintenance</p>
+              <p className="mt-2 text-3xl font-black tracking-tight text-gray-900">
                 {statsQuery.data.maintenance.inProgressCars}
               </p>
             </div>
           </div>
 
-          <div className="rounded-md border bg-white p-4">
-            <h2 className="text-lg font-semibold">Recent Reservations</h2>
-            <p className="mb-4 text-sm text-gray-500">
-              Last created reservations to track current operations quickly.
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h2 className="text-lg font-black tracking-tight text-gray-900">Réservations récentes</h2>
+            <p className="mb-4 text-sm font-medium text-gray-500">
+              Dernières réservations créées pour un suivi opérationnel rapide.
             </p>
 
             {statsQuery.data.recentReservations.length === 0 ? (
-              <p className="text-sm text-gray-500">No reservations yet.</p>
+              <p className="text-sm text-gray-500">Aucune réservation pour le moment.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50 text-left">
                     <tr>
-                      <th className="px-3 py-2 font-medium">Reference</th>
-                      <th className="px-3 py-2 font-medium">Customer</th>
-                      <th className="px-3 py-2 font-medium">Pickup</th>
-                      <th className="px-3 py-2 font-medium">Return</th>
-                      <th className="px-3 py-2 font-medium">Status</th>
+                      <th className="px-3 py-2 font-semibold text-gray-600">Référence</th>
+                      <th className="px-3 py-2 font-semibold text-gray-600">Client</th>
+                      <th className="px-3 py-2 font-semibold text-gray-600">Départ</th>
+                      <th className="px-3 py-2 font-semibold text-gray-600">Retour</th>
+                      <th className="px-3 py-2 font-semibold text-gray-600">Statut</th>
                     </tr>
                   </thead>
                   <tbody>
                     {statsQuery.data.recentReservations.map((reservation) => (
-                      <tr key={reservation._id} className="border-t">
-                        <td className="px-3 py-2 font-medium">{reservation.bookingReference}</td>
-                        <td className="px-3 py-2">{reservation.customerName}</td>
-                        <td className="px-3 py-2">{formatDate(reservation.pickupDate)}</td>
-                        <td className="px-3 py-2">{formatDate(reservation.returnDate)}</td>
+                      <tr key={reservation._id} className="border-t border-gray-100 hover:bg-gray-50">
+                        <td className="px-3 py-2 font-semibold text-gray-900">{reservation.bookingReference}</td>
+                        <td className="px-3 py-2 text-gray-700">{reservation.customerName}</td>
+                        <td className="px-3 py-2 text-gray-700">{formatDate(reservation.pickupDate)}</td>
+                        <td className="px-3 py-2 text-gray-700">{formatDate(reservation.returnDate)}</td>
                         <td className="px-3 py-2">
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${

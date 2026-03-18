@@ -174,18 +174,18 @@ export const CarMaintenanceManagement = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {submitError && (
-        <p className="text-sm text-red-600">{submitError}</p>
+        <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>
       )}
 
-      {carsQuery.isLoading && <p>Loading vehicles...</p>}
-      {carsQuery.isError && <p>Error loading vehicles</p>}
+      {carsQuery.isLoading && <p className="text-sm text-slate-600">Loading vehicles...</p>}
+      {carsQuery.isError && <p className="text-sm text-rose-600">Error loading vehicles.</p>}
 
       {carsQuery.data && (
-        <div className="overflow-x-auto rounded-md border bg-white">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-left">
+            <thead className="bg-slate-50 text-left text-slate-600">
               <tr>
                 <th className="px-4 py-3 font-medium">Vehicle</th>
                 <th className="px-4 py-3 font-medium">Agency</th>
@@ -197,13 +197,17 @@ export const CarMaintenanceManagement = ({
               {carsQuery.data.cars.map((car) => {
                 const carId = resolveCarId(car);
                 return (
-                  <tr key={carId} className="border-t">
+                  <tr key={carId} className="border-t border-slate-200 text-slate-700 hover:bg-slate-50/60">
                     <td className="px-4 py-3">
-                      <div className="font-medium">{car.brand} {car.model}</div>
-                      <div className="text-xs text-gray-500">{car.year} · {car.city}</div>
+                      <div className="font-medium text-slate-800">{car.brand} {car.model}</div>
+                      <div className="text-xs text-slate-500">{car.year} · {car.city}</div>
                     </td>
                     <td className="px-4 py-3">{resolveAgencyName(car)}</td>
-                    <td className="px-4 py-3">{car.availabilityStatus}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        {car.availabilityStatus}
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       {!readOnly &&
                         (car.availabilityStatus === AvailabilityStatus.MAINTENANCE ? (
@@ -248,28 +252,28 @@ export const CarMaintenanceManagement = ({
         {maintenanceMode === 'start' && (
           <div className="space-y-3">
             <div>
-              <label className="block mb-1 text-sm font-medium">Reason</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Reason</label>
               <input
                 value={maintenanceReason}
                 onChange={(event) => setMaintenanceReason(event.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium">Estimated Cost</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Estimated Cost</label>
               <input
                 type="number"
                 value={maintenanceCost}
                 onChange={(event) => setMaintenanceCost(event.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium">Notes</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Notes</label>
               <textarea
                 value={maintenanceNotes}
                 onChange={(event) => setMaintenanceNotes(event.target.value)}
-                className="w-full min-h-24 px-3 py-2 border rounded"
+                className="w-full min-h-24 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
           </div>
@@ -278,30 +282,30 @@ export const CarMaintenanceManagement = ({
         {maintenanceMode === 'complete' && (
           <div className="space-y-3">
             <div>
-              <label className="block mb-1 text-sm font-medium">Final Cost</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Final Cost</label>
               <input
                 type="number"
                 value={maintenanceCost}
                 onChange={(event) => setMaintenanceCost(event.target.value)}
-                className="w-full px-3 py-2 border rounded"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium">Notes</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Notes</label>
               <textarea
                 value={maintenanceNotes}
                 onChange={(event) => setMaintenanceNotes(event.target.value)}
-                className="w-full min-h-24 px-3 py-2 border rounded"
+                className="w-full min-h-24 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium">Next Status</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Next Status</label>
               <select
                 value={maintenanceNextStatus}
                 onChange={(event) =>
                   setMaintenanceNextStatus(event.target.value as AvailabilityStatus)
                 }
-                className="w-full px-3 py-2 border rounded"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               >
                 <option value={AvailabilityStatus.AVAILABLE}>available</option>
                 <option value={AvailabilityStatus.UNAVAILABLE}>unavailable</option>
@@ -327,28 +331,24 @@ export const CarMaintenanceManagement = ({
         title={`Maintenance History - ${historyCarLabel}`}
       >
         {maintenanceHistory.length === 0 ? (
-          <p>No maintenance history found.</p>
+          <p className="text-sm text-slate-600">No maintenance history found.</p>
         ) : (
           <div className="space-y-3 max-h-[60vh] overflow-y-auto">
             {maintenanceHistory.map((record, index) => (
-              <div key={`${record.startedAt}-${index}`} className="border rounded p-3">
-                <p className="font-medium">{record.reason}</p>
-                <p className="text-xs text-gray-500">
+              <div key={`${record.startedAt}-${index}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <p className="font-medium text-slate-800">{record.reason}</p>
+                <p className="text-xs text-slate-500">
                   Start: {new Date(record.startedAt).toLocaleString()}
                 </p>
                 {record.endedAt && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-500">
                     End: {new Date(record.endedAt).toLocaleString()}
                   </p>
                 )}
-                {typeof record.estimatedCost === 'number' && (
-                  <p className="text-xs">Estimated: {record.estimatedCost}</p>
-                )}
-                {typeof record.finalCost === 'number' && (
-                  <p className="text-xs">Final: {record.finalCost}</p>
-                )}
-                {record.notes && <p className="text-xs mt-1">{record.notes}</p>}
-                <p className="text-xs mt-1">Status: {record.status}</p>
+                {typeof record.estimatedCost === 'number' && <p className="text-xs text-slate-700">Estimated: {record.estimatedCost}</p>}
+                {typeof record.finalCost === 'number' && <p className="text-xs text-slate-700">Final: {record.finalCost}</p>}
+                {record.notes && <p className="mt-1 text-xs text-slate-700">{record.notes}</p>}
+                <p className="mt-1 text-xs text-slate-700">Status: {record.status}</p>
               </div>
             ))}
           </div>

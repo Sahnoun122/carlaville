@@ -90,16 +90,16 @@ export const OperationsDeliveriesManagement = () => {
   };
 
   return (
-    <div className="rounded-md border bg-white p-4 space-y-3">
-      <h2 className="text-lg font-semibold">My Deliveries</h2>
-      {actionError && <p className="text-sm text-red-600">{actionError}</p>}
+    <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-sm">
+      <h2 className="text-lg font-semibold text-slate-800">My Deliveries</h2>
+      {actionError && <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{actionError}</p>}
 
       <div>
-        <label className="block mb-1 text-sm font-medium">Status Filter</label>
+        <label className="block mb-1 text-sm font-medium text-slate-700">Status Filter</label>
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value as 'all' | DeliveryStatus)}
-          className="w-full md:w-64 px-3 py-2 border rounded"
+          className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 md:w-64"
         >
           <option value="all">all</option>
           {Object.values(DeliveryStatus).map((status) => (
@@ -108,23 +108,23 @@ export const OperationsDeliveriesManagement = () => {
         </select>
       </div>
 
-      {deliveriesQuery.isLoading && <p>Loading your deliveries...</p>}
-      {deliveriesQuery.isError && <p>Error loading deliveries.</p>}
+      {deliveriesQuery.isLoading && <p className="text-sm text-slate-600">Loading your deliveries...</p>}
+      {deliveriesQuery.isError && <p className="text-sm text-rose-600">Error loading deliveries.</p>}
 
       {deliveriesQuery.data && (
         <div className="space-y-3">
           {deliveriesQuery.data.deliveries.map((delivery) => {
             const deliveryId = resolveDeliveryId(delivery);
             return (
-              <div key={deliveryId} className="border rounded p-3 space-y-3">
+              <div key={deliveryId} className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="font-medium">{resolveReservationLabel(delivery)}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="font-medium text-slate-800">{resolveReservationLabel(delivery)}</p>
+                    <p className="text-xs text-slate-500">
                       {delivery.type} • {new Date(delivery.scheduledDate).toLocaleDateString()} {delivery.scheduledTime}
                     </p>
                   </div>
-                  <span className="text-sm">{delivery.status}</span>
+                  <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">{delivery.status}</span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -145,7 +145,7 @@ export const OperationsDeliveriesManagement = () => {
                   onSubmit={(event) => handleStatusWithNotes(event, deliveryId)}
                   className="grid grid-cols-1 md:grid-cols-4 gap-2"
                 >
-                  <select name="status" className="px-3 py-2 border rounded">
+                  <select name="status" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200">
                     {Object.values(DeliveryStatus).map((status) => (
                       <option key={status} value={status}>{status}</option>
                     ))}
@@ -153,12 +153,12 @@ export const OperationsDeliveriesManagement = () => {
                   <input
                     name="gpsLocation"
                     placeholder="GPS location"
-                    className="px-3 py-2 border rounded"
+                    className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
                   />
                   <input
                     name="notes"
                     placeholder="Note"
-                    className="px-3 py-2 border rounded"
+                    className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
                   />
                   <Button type="submit" size="sm" disabled={updateMutation.isPending}>
                     Update

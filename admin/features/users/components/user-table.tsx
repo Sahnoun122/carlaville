@@ -33,21 +33,26 @@ export const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
       <TableBody>
         {users.map((user) => (
           <TableRow key={getUserId(user)}>
-            <TableCell>{user.name}</TableCell>
-            <TableCell>{user.email}</TableCell>
-            <TableCell>{user.role}</TableCell>
+            <TableCell className="font-medium text-slate-800">{user.name}</TableCell>
+            <TableCell className="text-slate-700">{user.email}</TableCell>
             <TableCell>
-              <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
-                Edit
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => onDelete(getUserId(user))}
-                className="ml-2"
-              >
-                Delete
-              </Button>
+              <span className="inline-flex rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                {user.role}
+              </span>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete(getUserId(user))}
+                >
+                  Delete
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}
