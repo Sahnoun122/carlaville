@@ -5,20 +5,18 @@ export const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white/95 px-6 py-4 backdrop-blur supports-backdrop-filter:bg-white/85">
-      <div className="flex items-center gap-3">
-        <span className="h-10 w-1.5 rounded-full bg-primary" />
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-gray-100 bg-white px-8 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
+      <div className="flex items-center">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Back Office</p>
-          <h2 className="text-lg font-bold text-gray-900">Bienvenue, {user?.name}</h2>
+          <h2 className="text-lg font-bold tracking-tight text-gray-900">Bienvenue, {user?.name || 'Admin'}</h2>
         </div>
       </div>
       <div className="flex items-center">
         <button
           onClick={logout}
-          className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-700 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+          className="rounded-xl px-4 py-2 text-sm font-semibold text-gray-500 transition-colors hover:bg-red-50 hover:text-red-700"
         >
-          Se déconnecter
+          Déconnexion
         </button>
       </div>
     </header>

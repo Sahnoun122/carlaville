@@ -17,6 +17,10 @@ export class CompleteMaintenanceDto {
   @IsOptional()
   notes?: string;
 
+  @IsString()
+  @IsOptional()
+  vehicleCondition?: string;
+
   @IsNumber()
   @Min(0)
   @IsOptional()

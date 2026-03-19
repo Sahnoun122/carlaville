@@ -9,6 +9,7 @@ import {
   getDeliveryAgentsForSelect,
   getReservationsForDeliverySelect,
 } from '@/features/deliveries/services/delivery-service';
+import { PageHeader } from '@/components/shared/page-header';
 import { Delivery, DeliveryStatus, DeliveryType } from '@/types';
 
 const resolveDeliveryId = (delivery: Delivery) =>
@@ -118,8 +119,10 @@ export const AdminDeliveriesManagement = () => {
   };
 
   return (
-    <div className="space-y-5">
-      <form className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4" onSubmit={handleSubmit}>
+    <div className="space-y-6">
+      <PageHeader title="Deliveries Management" description="Assign and manage delivery agents." />
+      
+      <form className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4" onSubmit={handleSubmit}>
         <h2 className="text-lg font-semibold text-slate-800">Create Delivery Assignment</h2>
         {submitError && <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
         {submitSuccess && <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{submitSuccess}</p>}
@@ -184,7 +187,7 @@ export const AdminDeliveriesManagement = () => {
         </div>
       </form>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-sm">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <h2 className="text-lg font-semibold text-slate-800">Delivery List</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -219,7 +222,7 @@ export const AdminDeliveriesManagement = () => {
         {deliveriesQuery.isError && <p className="text-sm text-rose-600">Error loading deliveries.</p>}
 
         {deliveriesQuery.data && (
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-2xl border border-gray-100">
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 text-left text-slate-600">
                 <tr>

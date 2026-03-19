@@ -25,6 +25,7 @@ export class DashboardService {
 			todayReturns,
 			maintenanceCars,
 			recentReservations,
+			revenueAggregation,
 		] = await Promise.all([
 			this.reservationModel.countDocuments(),
 			this.reservationModel.countDocuments({ status: ReservationStatus.PENDING }),
@@ -42,7 +43,35 @@ export class DashboardService {
 				.limit(5)
 				.select('bookingReference customerName pickupDate returnDate status createdAt')
 				.lean(),
+			this.reservationModel.aggregate([
+				{
+					$match: {
+						createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 5)) },
+						status: { $ne: ReservationStatus.REJECTED },
+					},
+				},
+				{
+					$group: {
+						_id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
+						totalRevenue: { $sum: '$pricingBreakdown.total' },
+					},
+				},
+			]),
 		]);
+
+		const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+		const revenue: Array<{ label: string; amount: number }> = [];
+		for (let i = 5; i >= 0; i--) {
+			const d = new Date();
+			d.setMonth(d.getMonth() - i);
+			const year = d.getFullYear();
+			const month = d.getMonth() + 1;
+			const found = revenueAggregation.find((item) => item._id.year === year && item._id.month === month);
+			revenue.push({
+				label: monthNames[month - 1],
+				amount: found ? found.totalRevenue || 0 : 0,
+			});
+		}
 
 		return {
 			reservations: {
@@ -57,6 +86,7 @@ export class DashboardService {
 				inProgressCars: maintenanceCars,
 			},
 			recentReservations,
+			revenue,
 		};
 	}
 

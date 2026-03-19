@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
+import { PageHeader } from '@/components/shared/page-header';
 import { Car, Agency } from '@/types';
 import {
   createCar,
@@ -157,12 +158,13 @@ export const CarManagement = () => {
   const agencies: Agency[] = agenciesQuery.data?.agencies ?? [];
 
   return (
-    <div>
-      <div className="flex justify-end mb-4">
-        <Button onClick={handleCreate}>
-          Add Vehicle
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Vehicle Management" 
+        description="Manage the rental fleet, add cars, and update statuses."
+      >
+        <Button onClick={handleCreate}>Add Vehicle</Button>
+      </PageHeader>
 
       {carsQuery.isLoading && <p>Loading vehicles...</p>}
       {carsQuery.isError && <p>Error loading vehicles</p>}
@@ -176,7 +178,7 @@ export const CarManagement = () => {
             return (
               <article
                 key={carId}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-1 hover:border-red-200 hover:shadow-lg"
               >
                 {previewImage ? (
                   <img

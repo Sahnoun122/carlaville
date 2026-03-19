@@ -36,12 +36,14 @@ export interface StartMaintenancePayload {
   id: string;
   reason: string;
   notes?: string;
+  vehicleCondition?: string;
   estimatedCost?: number;
 }
 
 export interface CompleteMaintenancePayload {
   id: string;
   notes?: string;
+  vehicleCondition?: string;
   finalCost?: number;
   endedAt?: string;
   nextAvailabilityStatus?: AvailabilityStatus;

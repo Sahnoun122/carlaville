@@ -107,6 +107,7 @@ export class CarsService {
       startedAt: new Date(),
       reason: startMaintenanceDto.reason,
       notes: startMaintenanceDto.notes,
+      vehicleCondition: startMaintenanceDto.vehicleCondition,
       estimatedCost: startMaintenanceDto.estimatedCost,
       status: 'ongoing',
     } as never);
@@ -144,6 +145,7 @@ export class CarsService {
     const targetRecord = car.maintenanceHistory[realIndex] as never as {
       endedAt?: Date;
       notes?: string;
+      vehicleCondition?: string;
       finalCost?: number;
       status: 'ongoing' | 'completed';
     };
@@ -158,6 +160,10 @@ export class CarsService {
 
     if (typeof completeMaintenanceDto.finalCost === 'number') {
       targetRecord.finalCost = completeMaintenanceDto.finalCost;
+    }
+
+    if (completeMaintenanceDto.vehicleCondition) {
+      targetRecord.vehicleCondition = completeMaintenanceDto.vehicleCondition;
     }
 
     targetRecord.status = 'completed';

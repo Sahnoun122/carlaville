@@ -10,6 +10,7 @@ export interface MaintenanceRecord {
   endedAt?: string;
   reason: string;
   notes?: string;
+  vehicleCondition?: string;
   estimatedCost?: number;
   finalCost?: number;
   status: 'ongoing' | 'completed';

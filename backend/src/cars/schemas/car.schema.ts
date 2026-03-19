@@ -14,6 +14,7 @@ export class MaintenanceRecord {
   endedAt?: Date;
   reason: string;
   notes?: string;
+  vehicleCondition?: string;
   estimatedCost?: number;
   finalCost?: number;
   status: 'ongoing' | 'completed';
@@ -92,6 +93,7 @@ export class Car {
         endedAt: { type: Date },
         reason: { type: String, required: true },
         notes: { type: String },
+        vehicleCondition: { type: String },
         estimatedCost: { type: Number },
         finalCost: { type: Number },
         status: {

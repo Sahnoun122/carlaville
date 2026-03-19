@@ -14,43 +14,48 @@ import {
 import { PageHeader } from '@/components/shared/page-header';
 import { Button } from '@/components/ui/button';
 import { getReservationManagerDashboardStats } from '@/features/reservations/services/reservation-service';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip as ChartTooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js';
+import { Bar, Doughnut } from 'react-chartjs-2';
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  ChartTooltip,
+  Legend
+);
 
 const overviewCards = [
   {
     key: 'total' as const,
     label: 'Réservations totales',
     hint: 'Volume global des réservations',
-    tone: 'from-red-50 to-white border-red-100',
   },
   {
     key: 'pending' as const,
     label: 'En attente',
     hint: 'Demandes à valider rapidement',
-    tone: 'from-amber-50 to-white border-amber-100',
   },
   {
     key: 'confirmed' as const,
     label: 'Confirmées',
     hint: 'Réservations prêtes pour exécution',
-    tone: 'from-emerald-50 to-white border-emerald-100',
   },
   {
     key: 'activeRentals' as const,
     label: 'Locations actives',
     hint: 'Contrats en cours actuellement',
-    tone: 'from-sky-50 to-white border-sky-100',
-  },
-  {
-    key: 'todayPickups' as const,
-    label: 'Départs du jour',
-    hint: 'Retraits planifiés aujourd’hui',
-    tone: 'from-indigo-50 to-white border-indigo-100',
-  },
-  {
-    key: 'todayReturns' as const,
-    label: 'Retours du jour',
-    hint: 'Retours attendus aujourd’hui',
-    tone: 'from-violet-50 to-white border-violet-100',
   },
 ];
 
@@ -121,38 +126,106 @@ export const AdminOverviewDashboard = () => {
 
       {statsQuery.data && (
         <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {overviewCards.map((card) => (
               <div
                 key={card.key}
-                className={`rounded-2xl border bg-linear-to-br p-5 shadow-sm ${card.tone}`}
+                className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md"
               >
-                <p className="text-sm font-semibold text-gray-600">{card.label}</p>
-                <p className="mt-2 text-3xl font-black tracking-tight text-gray-900">
-                  {statsQuery.data.reservations[card.key]}
-                </p>
-                <p className="mt-1 text-xs font-medium text-gray-500">{card.hint}</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-500">{card.label}</p>
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className="text-3xl font-black tracking-tight text-gray-900">
+                    {statsQuery.data.reservations[card.key]}
+                  </p>
+                </div>
+                <p className="mt-2 text-xs font-medium text-gray-400">{card.hint}</p>
               </div>
             ))}
+          </div>
 
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-              <p className="text-sm font-semibold text-gray-600">Véhicules en maintenance</p>
-              <p className="mt-2 text-3xl font-black tracking-tight text-gray-900">
-                {statsQuery.data.maintenance.inProgressCars}
-              </p>
-              <p className="mt-1 text-xs font-medium text-gray-500">
-                Véhicules actuellement indisponibles.
-              </p>
+          {/* Analyse & Statistiques */}
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
+            {/* Revenue Chart */}
+            <div className="col-span-1 xl:col-span-2 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-black tracking-tight text-gray-900">Revenus Estimés</h3>
+                  <p className="text-xs font-medium text-gray-400">Projection sur les 6 derniers mois (MAD)</p>
+                </div>
+              </div>
+              <div className="h-64">
+                <Bar
+                  data={{
+                    labels: statsQuery.data.revenue?.map((r) => r.label) || [],
+                    datasets: [
+                      {
+                        label: 'Revenus (MAD)',
+                        data: statsQuery.data.revenue?.map((r) => r.amount) || [],
+                        backgroundColor: '#ef4444',
+                        borderRadius: 4,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                      y: { beginAtZero: true, grid: { color: '#f3f4f6' }, border: { display: false } },
+                      x: { grid: { display: false }, border: { display: false } }
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Status Doughnut Chart */}
+            <div className="col-span-1 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-black tracking-tight text-gray-900">Répartition</h3>
+                  <p className="text-xs font-medium text-gray-400">Statut actuel des réservations</p>
+                </div>
+              </div>
+              <div className="h-64 relative">
+                <Doughnut
+                  data={{
+                    labels: ['En attente', 'Confirmées', 'En location'],
+                    datasets: [
+                      {
+                        data: [
+                          statsQuery.data.reservations.pending,
+                          statsQuery.data.reservations.confirmed,
+                          statsQuery.data.reservations.activeRentals,
+                        ],
+                        backgroundColor: ['#fcd34d', '#34d399', '#ef4444'],
+                        borderWidth: 0,
+                        hoverOffset: 4,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
+          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm mt-6">
+            <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
               <h2 className="text-lg font-black tracking-tight text-gray-900">Actions rapides</h2>
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">Back Office</span>
+              <span className="rounded-full bg-gray-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-500">Raccourcis</span>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {quickActions.map((action) => {
                 const Icon = action.icon;
 
@@ -160,17 +233,17 @@ export const AdminOverviewDashboard = () => {
                   <Link
                     key={action.href}
                     href={action.href}
-                    className="group rounded-xl border border-gray-200 bg-gray-50 p-4 transition-all hover:border-red-200 hover:bg-red-50"
+                    className="group rounded-2xl border border-gray-100 bg-gray-50/50 p-5 transition-all hover:border-red-200 hover:bg-white hover:shadow-md"
                   >
-                    <div className="mb-3 inline-flex rounded-lg bg-white p-2 text-primary shadow-sm">
-                      <Icon className="h-4 w-4" />
+                    <div className="mb-4 inline-flex rounded-xl bg-white p-3 text-gray-400 shadow-sm transition-colors border border-gray-100 group-hover:border-red-100 group-hover:bg-red-50 group-hover:text-red-600">
+                      <Icon className="h-5 w-5" />
                     </div>
-                    <p className="text-sm font-bold text-gray-900">{action.title}</p>
-                    <p className="mt-1 text-xs font-medium text-gray-600">{action.description}</p>
-                    <span className="mt-3 inline-flex items-center text-xs font-bold text-red-700">
+                    <p className="text-base font-bold text-gray-900">{action.title}</p>
+                    <p className="mt-1.5 text-sm font-medium text-gray-500 line-clamp-2">{action.description}</p>
+                    <div className="mt-4 flex items-center text-sm font-bold text-gray-400 transition-colors group-hover:text-red-600">
                       Ouvrir
-                      <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                    </span>
+                      <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
                   </Link>
                 );
               })}

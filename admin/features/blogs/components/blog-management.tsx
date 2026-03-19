@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
+import { PageHeader } from '@/components/shared/page-header';
 import { Blog } from '@/types';
 import {
   BlogFormValues,
@@ -199,10 +200,13 @@ export const BlogManagement = () => {
   const blogs = useMemo(() => blogsQuery.data?.blogs ?? [], [blogsQuery.data?.blogs]);
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+    <div className="space-y-6">
+      <PageHeader title="Blog Management" description="Create, edit, and publish content for the blog.">
+        <Button onClick={openCreateModal}>Add Blog</Button>
+      </PageHeader>
+
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Search</label>
               <input
@@ -227,10 +231,6 @@ export const BlogManagement = () => {
               </select>
             </div>
           </div>
-          <Button className="shadow-sm" onClick={openCreateModal}>
-            Add Blog
-          </Button>
-        </div>
       </div>
 
       {blogsQuery.isLoading && <p className="text-sm text-slate-600">Loading blogs...</p>}
@@ -248,7 +248,7 @@ export const BlogManagement = () => {
             return (
               <article
                 key={blogId}
-                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-1 hover:border-red-200 hover:shadow-lg"
               >
                 {previewImage ? (
                   <img

@@ -42,6 +42,10 @@ export interface ReservationManagerDashboardStats {
     status: ReservationStatus;
     createdAt: string;
   }>;
+  revenue: Array<{
+    label: string;
+    amount: number;
+  }>;
 }
 
 interface GetReservationsParams {

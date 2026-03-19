@@ -50,6 +50,7 @@ export const CarMaintenanceManagement = ({
   const [maintenanceCar, setMaintenanceCar] = useState<Car | null>(null);
   const [maintenanceReason, setMaintenanceReason] = useState('');
   const [maintenanceNotes, setMaintenanceNotes] = useState('');
+  const [maintenanceVehicleCondition, setMaintenanceVehicleCondition] = useState('');
   const [maintenanceCost, setMaintenanceCost] = useState('');
   const [maintenanceNextStatus, setMaintenanceNextStatus] = useState<AvailabilityStatus>(AvailabilityStatus.AVAILABLE);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
@@ -107,6 +108,7 @@ export const CarMaintenanceManagement = ({
     setMaintenanceMode('start');
     setMaintenanceReason('');
     setMaintenanceNotes('');
+    setMaintenanceVehicleCondition('');
     setMaintenanceCost('');
     setMaintenanceNextStatus(AvailabilityStatus.AVAILABLE);
     setIsMaintenanceModalOpen(true);
@@ -118,6 +120,7 @@ export const CarMaintenanceManagement = ({
     setMaintenanceMode('complete');
     setMaintenanceReason('');
     setMaintenanceNotes('');
+    setMaintenanceVehicleCondition('');
     setMaintenanceCost('');
     setMaintenanceNextStatus(AvailabilityStatus.AVAILABLE);
     setIsMaintenanceModalOpen(true);
@@ -156,6 +159,7 @@ export const CarMaintenanceManagement = ({
         id: carId,
         reason: maintenanceReason.trim(),
         notes: maintenanceNotes.trim() || undefined,
+        vehicleCondition: maintenanceVehicleCondition.trim() || undefined,
         estimatedCost:
           maintenanceCost.trim().length > 0
             ? Number(maintenanceCost)
@@ -167,6 +171,7 @@ export const CarMaintenanceManagement = ({
     completeMaintenanceMutation.mutate({
       id: carId,
       notes: maintenanceNotes.trim() || undefined,
+      vehicleCondition: maintenanceVehicleCondition.trim() || undefined,
       finalCost:
         maintenanceCost.trim().length > 0 ? Number(maintenanceCost) : undefined,
       nextAvailabilityStatus: maintenanceNextStatus,
@@ -269,6 +274,15 @@ export const CarMaintenanceManagement = ({
               />
             </div>
             <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">État exact du véhicule</label>
+              <input
+                value={maintenanceVehicleCondition}
+                onChange={(event) => setMaintenanceVehicleCondition(event.target.value)}
+                placeholder="Ex: Rayure aile droite, freins usés, pneu arrière à changer..."
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+              />
+            </div>
+            <div>
               <label className="block mb-1 text-sm font-medium text-slate-700">Notes</label>
               <textarea
                 value={maintenanceNotes}
@@ -296,6 +310,15 @@ export const CarMaintenanceManagement = ({
                 value={maintenanceNotes}
                 onChange={(event) => setMaintenanceNotes(event.target.value)}
                 className="w-full min-h-24 rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+              />
+            </div>
+            <div>
+              <label className="block mb-1 text-sm font-medium text-slate-700">État exact du véhicule</label>
+              <input
+                value={maintenanceVehicleCondition}
+                onChange={(event) => setMaintenanceVehicleCondition(event.target.value)}
+                placeholder="Ex: Entretien terminé, état validé, prêt à reprendre la route"
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
             <div>
@@ -347,6 +370,7 @@ export const CarMaintenanceManagement = ({
                 )}
                 {typeof record.estimatedCost === 'number' && <p className="text-xs text-slate-700">Estimated: {record.estimatedCost}</p>}
                 {typeof record.finalCost === 'number' && <p className="text-xs text-slate-700">Final: {record.finalCost}</p>}
+                {record.vehicleCondition && <p className="mt-1 text-xs text-slate-700">État exact: {record.vehicleCondition}</p>}
                 {record.notes && <p className="mt-1 text-xs text-slate-700">{record.notes}</p>}
                 <p className="mt-1 text-xs text-slate-700">Status: {record.status}</p>
               </div>

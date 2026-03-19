@@ -13,6 +13,7 @@ import { UserForm } from '@/features/users/components/user-form';
 import { UserTable } from './user-table';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
+import { PageHeader } from '@/components/shared/page-header';
 import { User } from '@/types';
 
 export const UserManagement = () => {
@@ -74,14 +75,13 @@ export const UserManagement = () => {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-800">Users Directory</h2>
-          <p className="text-sm text-slate-500">Create, update and manage platform users.</p>
-        </div>
-        <Button className="shadow-sm" onClick={handleCreate}>Add User</Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Users Directory" 
+        description="Create, update and manage platform users."
+      >
+        <Button onClick={handleCreate}>Add User</Button>
+      </PageHeader>
 
       {isLoading && (
         <div className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-600 shadow-sm">
@@ -94,13 +94,11 @@ export const UserManagement = () => {
         </div>
       )}
       {data && (
-        <div className="rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
-          <UserTable
-            users={data.users}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+        <UserTable
+          users={data.users}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
 
       <Modal

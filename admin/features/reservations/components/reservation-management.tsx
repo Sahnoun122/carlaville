@@ -13,6 +13,7 @@ import {
   rejectReservation,
 } from '@/features/reservations/services/reservation-service';
 import { useAuth } from '@/providers/auth-provider';
+import { PageHeader } from '@/components/shared/page-header';
 import { Car, Reservation, ReservationStatus, Role } from '@/types';
 
 const resolveCarId = (car: Car) => car.id || (car as Car & { _id?: string })._id || '';
@@ -247,14 +248,13 @@ export const ReservationManagement = () => {
   );
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-800">Reservation Operations</h2>
-          <p className="text-sm text-slate-500">Create and manage all reservations from one place.</p>
-        </div>
-        <Button className="shadow-sm" onClick={openCreateModal}>Create Reservation</Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader 
+        title="Reservation Operations" 
+        description="Create and manage all reservations from one place."
+      >
+        <Button onClick={openCreateModal}>Create Reservation</Button>
+      </PageHeader>
 
       <Modal
         isOpen={isCreateModalOpen}
@@ -396,7 +396,7 @@ export const ReservationManagement = () => {
 
       {actionError && <p className="text-sm text-rose-600">{actionError}</p>}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label className="block mb-1 text-sm font-medium text-slate-700">Filter by vehicle</label>
@@ -441,7 +441,7 @@ export const ReservationManagement = () => {
       {reservationsQuery.isError && <p className="text-sm text-rose-600">Error loading reservations.</p>}
 
       {reservationsQuery.data && (
-        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-600">
               <tr>
