@@ -41,7 +41,7 @@ export class ReservationsService {
     const settings = await this.getDayControlSettings();
     const car = await this.carModel
       .findById(dto.carId)
-      .select('minRentalDays dailyPrice')
+      .select('minRentalDays dailyPrice agencyId')
       .exec();
 
     if (!car) {
@@ -78,6 +78,7 @@ export class ReservationsService {
 
     const reservation = new this.reservationModel({
       ...dto,
+      agencyId: car.agencyId, // Enforce from car record
       bookingReference,
       rentalDays,
       selectedExtras,
@@ -226,7 +227,7 @@ export class ReservationsService {
     const reservations = await this.reservationModel
       .find(query)
       .populate('agencyId', 'name')
-      .populate('carId', 'brand model')
+      .populate('carId', 'brand model images')
       .populate('assignedDeliveryAgentId', 'name')
       .skip((page - 1) * limit)
       .limit(limit)

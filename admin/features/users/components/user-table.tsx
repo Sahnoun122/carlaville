@@ -24,9 +24,9 @@ export const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
+          <TableHead>Nom</TableHead>
+          <TableHead>E-mail</TableHead>
+          <TableHead>Rôle</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -43,14 +43,14 @@ export const UserTable = ({ users, onEdit, onDelete }: UserTableProps) => {
             <TableCell>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => onEdit(user)}>
-                  Edit
+                  Modifier
                 </Button>
                 <Button
                   variant="destructive"
                   size="sm"
                   onClick={() => onDelete(getUserId(user))}
                 >
-                  Delete
+                  Supprimer
                 </Button>
               </div>
             </TableCell>

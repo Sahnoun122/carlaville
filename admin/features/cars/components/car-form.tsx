@@ -44,19 +44,19 @@ const optionalNumberSchema = z
 
 const formSchema = z.object({
   agencyId: z.string().optional(),
-  brand: z.string().min(1, 'Brand is required'),
-  model: z.string().min(1, 'Model is required'),
-  year: z.coerce.number().int().min(1990, 'Year is invalid').max(2100),
+  brand: z.string().min(1, 'La marque est requise'),
+  model: z.string().min(1, 'Le modèle est requis'),
+  year: z.coerce.number().int().min(1990, 'L\'année est invalide').max(2100),
   category: z.nativeEnum(CarCategory),
   transmission: z.nativeEnum(Transmission),
   fuelType: z.nativeEnum(FuelType),
-  seats: z.coerce.number().int().min(1, 'Seats must be at least 1'),
+  seats: z.coerce.number().int().min(1, 'Le nombre de places doit être au moins de 1'),
   luggage: optionalNumberSchema,
-  dailyPrice: z.coerce.number().min(1, 'Daily price must be greater than 0'),
+  dailyPrice: z.coerce.number().min(1, 'Le prix journalier doit être supérieur à 0'),
   minRentalDays: optionalNumberSchema,
   depositAmount: optionalNumberSchema,
   deliveryFee: optionalNumberSchema,
-  city: z.string().min(1, 'City is required'),
+  city: z.string().min(1, 'La ville est requise'),
   availabilityStatus: z.nativeEnum(AvailabilityStatus),
   imagesText: z.string().optional(),
 });
@@ -155,7 +155,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Image upload failed.';
+          : 'L\'importation de l\'image a échoué.';
 
       setUploadError(message);
     } finally {
@@ -190,24 +190,24 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
         <FormField
           control={form.control}
           name="agencyId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Agency</FormLabel>
+              <FormLabel>Agence</FormLabel>
               <Select
                 onValueChange={(value) => field.onChange(value === '__none__' ? '' : value)}
                 value={field.value && field.value.length > 0 ? field.value : '__none__'}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="No agency" />
+                    <SelectValue placeholder="Aucune agence" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="__none__">No agency</SelectItem>
+                  <SelectItem value="__none__">Aucune agence</SelectItem>
                   {agencies.map((agency) => {
                     const agencyValue = agency.id || agency._id;
                     if (!agencyValue) {
@@ -227,13 +227,13 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="brand"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Brand</FormLabel>
+                <FormLabel>Marque</FormLabel>
                 <FormControl>
                   <Input {...field} disabled={isLoading} />
                 </FormControl>
@@ -246,7 +246,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="model"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Model</FormLabel>
+                <FormLabel>Modèle</FormLabel>
                 <FormControl>
                   <Input {...field} disabled={isLoading} />
                 </FormControl>
@@ -256,13 +256,13 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="year"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Year</FormLabel>
+                <FormLabel>Année</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} disabled={isLoading} />
                 </FormControl>
@@ -275,7 +275,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="city"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>City</FormLabel>
+                <FormLabel>Ville</FormLabel>
                 <FormControl>
                   <Input {...field} disabled={isLoading} />
                 </FormControl>
@@ -285,17 +285,17 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Catégorie</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Sélectionner une catégorie" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -315,11 +315,11 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="availabilityStatus"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Availability</FormLabel>
+                <FormLabel>Disponibilité</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Sélectionner un statut" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -336,17 +336,17 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="transmission"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Transmission</FormLabel>
+                <FormLabel>Boîte de vitesses</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select transmission" />
+                      <SelectValue placeholder="Sélectionner une boîte de vitesses" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -366,11 +366,11 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="fuelType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Fuel Type</FormLabel>
+                <FormLabel>Carburant</FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select fuel type" />
+                      <SelectValue placeholder="Sélectionner un carburant" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -387,13 +387,13 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="seats"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Seats</FormLabel>
+                <FormLabel>Places</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} disabled={isLoading} />
                 </FormControl>
@@ -406,7 +406,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="luggage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Luggage (optional)</FormLabel>
+                <FormLabel>Bagages (optionnel)</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} value={field.value ?? ''} disabled={isLoading} />
                 </FormControl>
@@ -416,13 +416,13 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           />
         </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <FormField
             control={form.control}
             name="dailyPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Daily Price</FormLabel>
+                <FormLabel>Prix journalier</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} disabled={isLoading} />
                 </FormControl>
@@ -435,7 +435,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="minRentalDays"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Min Rental Days (optional)</FormLabel>
+                <FormLabel>Jours de loc. min (optionnel)</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} value={field.value ?? ''} disabled={isLoading} />
                 </FormControl>
@@ -448,7 +448,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="depositAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Deposit (optional)</FormLabel>
+                <FormLabel>Caution (optionnelle)</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} value={field.value ?? ''} disabled={isLoading} />
                 </FormControl>
@@ -461,7 +461,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
             name="deliveryFee"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Delivery Fee (optional)</FormLabel>
+                <FormLabel>Frais de livraison (optionnels)</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} value={field.value ?? ''} disabled={isLoading} />
                 </FormControl>
@@ -476,7 +476,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
           name="imagesText"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Images URLs (one per line)</FormLabel>
+              <FormLabel>URLs des images (une par ligne)</FormLabel>
               <FormControl>
                 <textarea
                   className="w-full min-h-24 px-3 py-2 border rounded"
@@ -493,7 +493,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
                   disabled={isLoading || isUploadingImages}
                 />
                 <p className="mt-1 text-xs text-slate-500">
-                  Upload one or multiple photos. URLs are added automatically.
+                  Importez une ou plusieurs photos. Les URLs sont ajoutées automatiquement.
                 </p>
               </div>
               {uploadError ? <p className="text-sm text-rose-600">{uploadError}</p> : null}
@@ -503,7 +503,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
         />
 
         <Button type="submit" disabled={isLoading || isUploadingImages}>
-          {isLoading || isUploadingImages ? 'Saving...' : 'Save Vehicle'}
+          {isLoading || isUploadingImages ? 'Enregistrement...' : 'Enregistrer le véhicule'}
         </Button>
       </form>
     </Form>

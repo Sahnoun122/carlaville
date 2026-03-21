@@ -40,6 +40,13 @@ export class CarsService {
     if (filterDto.availability) {
       query.availabilityStatus = filterDto.availability;
     }
+    if (filterDto.q) {
+      query.$or = [
+        { brand: { $regex: filterDto.q, $options: 'i' } },
+        { model: { $regex: filterDto.q, $options: 'i' } },
+        { city: { $regex: filterDto.q, $options: 'i' } },
+      ];
+    }
 
     const cars = await this.carModel
       .find(query)

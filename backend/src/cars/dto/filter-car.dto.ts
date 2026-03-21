@@ -25,4 +25,8 @@ export class FilterCarDto {
   @IsOptional()
   @IsEnum(AvailabilityStatus)
   availability?: AvailabilityStatus;
+
+  @IsOptional()
+  @IsString()
+  q?: string;
 }

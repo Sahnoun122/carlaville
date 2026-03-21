@@ -7,7 +7,7 @@ const ProfilePage = () => {
 
   return (
     <div>
-      <PageHeader title="My Profile" />
+      <PageHeader title="Mon Profil" />
       <div className="p-6">
         <EditProfileForm />
       </div>

@@ -34,6 +34,13 @@ export class UsersService {
     if (filterDto.status) {
       query['active'] = filterDto.status === 'active';
     }
+    if (filterDto.q) {
+      query['$or'] = [
+        { firstName: { $regex: filterDto.q, $options: 'i' } },
+        { lastName: { $regex: filterDto.q, $options: 'i' } },
+        { email: { $regex: filterDto.q, $options: 'i' } },
+      ];
+    }
 
     const users = await this.userModel
       .find(query)

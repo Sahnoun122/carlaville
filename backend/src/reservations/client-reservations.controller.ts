@@ -25,13 +25,22 @@ export class ClientReservationsController {
   }
 
   @Get()
-  findMyReservations(
+  async findMyReservations(
     @CurrentUser() user: AuthenticatedUser,
+    @Query() filterDto: FilterReservationDto,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
-    const filterDto = new FilterReservationDto();
     filterDto.customerEmail = user.email;
-    return this.reservationsService.findAll(filterDto, page, limit);
+    const result = await this.reservationsService.findAll(filterDto, page, limit);
+    
+    return {
+      count: result.count,
+      reservations: result.reservations.map((res: any) => {
+        const obj = res.toObject ? res.toObject() : res;
+        delete obj.agencyId;
+        return obj;
+      }),
+    };
   }
 }

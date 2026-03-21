@@ -49,13 +49,17 @@ export interface CompleteMaintenancePayload {
   nextAvailabilityStatus?: AvailabilityStatus;
 }
 
-export const getCars = async (params: {
+export interface GetCarsParams {
   page: number;
   limit: number;
   city?: string;
   category?: CarCategory;
   availability?: AvailabilityStatus;
-}) => {
+  q?: string;
+  agencyId?: string;
+}
+
+export const getCars = async (params: GetCarsParams) => {
   return get<{ cars: Car[]; count: number }>('/admin/cars', { params });
 };
 
@@ -63,19 +67,7 @@ export const getCarById = async (id: string) => {
   return get<Car>(`/admin/cars/${id}`);
 };
 
-export const getAgencies = async () => {
-  const response = await get<{ agencies: Agency[]; count: number }>('/admin/agencies', {
-    params: { page: 1, limit: 100 },
-  });
-
-  return {
-    ...response,
-    agencies: response.agencies.map((agency) => ({
-      ...agency,
-      id: agency.id || agency._id || '',
-    })),
-  };
-};
+// getAgencies moved to agency-service.ts
 
 export const createCar = async (data: CarFormValues) => {
   const payload: Record<string, unknown> = {

@@ -9,4 +9,8 @@ export class FilterUserDto {
   @IsOptional()
   @IsString()
   status?: string;
+
+  @IsOptional()
+  @IsString()
+  q?: string;
 }

@@ -64,7 +64,7 @@ export const AdminDeliveriesManagement = () => {
     mutationFn: createDelivery,
     onSuccess: () => {
       setSubmitError(null);
-      setSubmitSuccess('Delivery created and assigned successfully.');
+      setSubmitSuccess('Livraison créée et attribuée avec succès.');
       queryClient.invalidateQueries({ queryKey: ['admin-deliveries'] });
     },
     onError: (error: unknown) => {
@@ -74,7 +74,7 @@ export const AdminDeliveriesManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to create delivery.';
+          : 'Échec de la création de la livraison.';
 
       setSubmitSuccess(null);
       setSubmitError(message);
@@ -102,7 +102,7 @@ export const AdminDeliveriesManagement = () => {
     const notes = String(formData.get('notes') || '');
 
     if (!reservationId || !assignedAgentId || !type || !scheduledDate || !scheduledTime) {
-      setSubmitError('All required fields must be filled.');
+      setSubmitError('Tous les champs obligatoires doivent être remplis.');
       return;
     }
 
@@ -120,23 +120,23 @@ export const AdminDeliveriesManagement = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Deliveries Management" description="Assign and manage delivery agents." />
+      <PageHeader title="Gestion des Livraisons" description="Attribuez et gérez les agents de livraison." />
       
       <form className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)] space-y-4" onSubmit={handleSubmit}>
-        <h2 className="text-lg font-semibold text-slate-800">Create Delivery Assignment</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Créer une Attribution de Livraison</h2>
         {submitError && <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
         {submitSuccess && <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{submitSuccess}</p>}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Reservation</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Réservation</label>
             <select
               name="reservationId"
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               disabled={isLoadingOptions}
               defaultValue=""
             >
-              <option value="" disabled>Select reservation</option>
+              <option value="" disabled>Sélectionner une réservation</option>
               {(reservationsQuery.data ?? []).map((item) => (
                 <option key={item.id} value={item.id}>{item.label}</option>
               ))}
@@ -144,14 +144,14 @@ export const AdminDeliveriesManagement = () => {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Delivery Agent</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Agent de Livraison</label>
             <select
               name="assignedAgentId"
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               disabled={isLoadingOptions}
               defaultValue=""
             >
-              <option value="" disabled>Select delivery agent</option>
+              <option value="" disabled>Sélectionner un agent de livraison</option>
               {(agentsQuery.data ?? []).map((item) => (
                 <option key={item.id} value={item.id}>{item.label}</option>
               ))}
@@ -161,18 +161,18 @@ export const AdminDeliveriesManagement = () => {
           <div>
             <label className="block mb-1 text-sm font-medium text-slate-700">Type</label>
             <select name="type" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200" defaultValue={DeliveryType.PICKUP}>
-              <option value={DeliveryType.PICKUP}>pickup</option>
-              <option value={DeliveryType.RETURN}>return</option>
+              <option value={DeliveryType.PICKUP}>récupération</option>
+              <option value={DeliveryType.RETURN}>retour</option>
             </select>
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Scheduled Date</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Date Prévue</label>
             <input name="scheduledDate" type="date" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200" />
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Scheduled Time</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Heure Prévue</label>
             <input name="scheduledTime" type="time" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200" />
           </div>
 
@@ -183,16 +183,16 @@ export const AdminDeliveriesManagement = () => {
         </div>
 
         <div className="flex justify-end">
-          <Button type="submit" disabled={createMutation.isPending}>Create Delivery</Button>
+          <Button type="submit" disabled={createMutation.isPending}>Créer la Livraison</Button>
         </div>
       </form>
 
       <div className="rounded-2xl border border-gray-100 bg-white p-6 space-y-4 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        <h2 className="text-lg font-semibold text-slate-800">Delivery List</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Liste des Livraisons</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Status</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Statut</label>
             <select
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as 'all' | DeliveryStatus)}
@@ -211,26 +211,26 @@ export const AdminDeliveriesManagement = () => {
               onChange={(event) => setTypeFilter(event.target.value as 'all' | DeliveryType)}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
             >
-              <option value="all">all</option>
-              <option value={DeliveryType.PICKUP}>pickup</option>
-              <option value={DeliveryType.RETURN}>return</option>
+              <option value="all">tous</option>
+              <option value={DeliveryType.PICKUP}>récupération</option>
+              <option value={DeliveryType.RETURN}>retour</option>
             </select>
           </div>
         </div>
 
-        {deliveriesQuery.isLoading && <p className="text-sm text-slate-600">Loading deliveries...</p>}
-        {deliveriesQuery.isError && <p className="text-sm text-rose-600">Error loading deliveries.</p>}
+        {deliveriesQuery.isLoading && <p className="text-sm text-slate-600">Chargement des livraisons...</p>}
+        {deliveriesQuery.isError && <p className="text-sm text-rose-600">Erreur lors du chargement des livraisons.</p>}
 
         {deliveriesQuery.data && (
           <div className="overflow-x-auto rounded-2xl border border-gray-100">
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 text-left text-slate-600">
                 <tr>
-                  <th className="px-3 py-2 font-medium">Reservation</th>
+                  <th className="px-3 py-2 font-medium">Réservation</th>
                   <th className="px-3 py-2 font-medium">Agent</th>
                   <th className="px-3 py-2 font-medium">Type</th>
-                  <th className="px-3 py-2 font-medium">Schedule</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
+                  <th className="px-3 py-2 font-medium">Programme</th>
+                  <th className="px-3 py-2 font-medium">Statut</th>
                 </tr>
               </thead>
               <tbody>

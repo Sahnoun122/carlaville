@@ -32,7 +32,7 @@ const resolveAgencyName = (car: Car) => {
     }
   }
 
-  return 'No agency';
+  return 'Aucune agence';
 };
 
 interface CarMaintenanceManagementProps {
@@ -76,7 +76,7 @@ export const CarMaintenanceManagement = ({
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to start maintenance.';
+          : 'Échec du démarrage de la maintenance.';
 
       setSubmitError(message);
     },
@@ -96,7 +96,7 @@ export const CarMaintenanceManagement = ({
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to complete maintenance.';
+          : 'Échec de la clôture de la maintenance.';
 
       setSubmitError(message);
     },
@@ -138,7 +138,7 @@ export const CarMaintenanceManagement = ({
       setMaintenanceHistory(response.history);
       setIsHistoryModalOpen(true);
     } catch {
-      setSubmitError('Failed to load maintenance history.');
+      setSubmitError('Échec du chargement de l\'historique.');
     }
   };
 
@@ -151,7 +151,7 @@ export const CarMaintenanceManagement = ({
 
     if (maintenanceMode === 'start') {
       if (!maintenanceReason.trim()) {
-        setSubmitError('Maintenance reason is required.');
+        setSubmitError('Le motif de maintenance est requis.');
         return;
       }
 
@@ -184,17 +184,17 @@ export const CarMaintenanceManagement = ({
         <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>
       )}
 
-      {carsQuery.isLoading && <p className="text-sm text-slate-600">Loading vehicles...</p>}
-      {carsQuery.isError && <p className="text-sm text-rose-600">Error loading vehicles.</p>}
+      {carsQuery.isLoading && <p className="text-sm text-slate-600">Chargement des véhicules...</p>}
+      {carsQuery.isError && <p className="text-sm text-rose-600">Erreur lors du chargement des véhicules.</p>}
 
       {carsQuery.data && (
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-600">
               <tr>
-                <th className="px-4 py-3 font-medium">Vehicle</th>
-                <th className="px-4 py-3 font-medium">Agency</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Véhicule</th>
+                <th className="px-4 py-3 font-medium">Agence</th>
+                <th className="px-4 py-3 font-medium">Statut</th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -221,7 +221,7 @@ export const CarMaintenanceManagement = ({
                             size="sm"
                             onClick={() => handleOpenCompleteMaintenance(car)}
                           >
-                            Complete
+                            Terminer
                           </Button>
                         ) : (
                           <Button
@@ -229,7 +229,7 @@ export const CarMaintenanceManagement = ({
                             size="sm"
                             onClick={() => handleOpenStartMaintenance(car)}
                           >
-                            Start
+                            Démarrer
                           </Button>
                         ))}
                       <Button
@@ -238,7 +238,7 @@ export const CarMaintenanceManagement = ({
                         className={!readOnly ? 'ml-2' : ''}
                         onClick={() => handleViewMaintenanceHistory(car)}
                       >
-                        History
+                        Historique
                       </Button>
                     </td>
                   </tr>
@@ -252,12 +252,12 @@ export const CarMaintenanceManagement = ({
       <Modal
         isOpen={isMaintenanceModalOpen}
         onClose={() => setIsMaintenanceModalOpen(false)}
-        title={maintenanceMode === 'start' ? 'Start Maintenance' : 'Complete Maintenance'}
+        title={maintenanceMode === 'start' ? 'Démarrer la maintenance' : 'Terminer la maintenance'}
       >
         {maintenanceMode === 'start' && (
           <div className="space-y-3">
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Reason</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Motif</label>
               <input
                 value={maintenanceReason}
                 onChange={(event) => setMaintenanceReason(event.target.value)}
@@ -265,7 +265,7 @@ export const CarMaintenanceManagement = ({
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Estimated Cost</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Coût estimé (MAD)</label>
               <input
                 type="number"
                 value={maintenanceCost}
@@ -283,7 +283,7 @@ export const CarMaintenanceManagement = ({
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Notes</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Remarques</label>
               <textarea
                 value={maintenanceNotes}
                 onChange={(event) => setMaintenanceNotes(event.target.value)}
@@ -296,7 +296,7 @@ export const CarMaintenanceManagement = ({
         {maintenanceMode === 'complete' && (
           <div className="space-y-3">
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Final Cost</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Coût final (MAD)</label>
               <input
                 type="number"
                 value={maintenanceCost}
@@ -305,7 +305,7 @@ export const CarMaintenanceManagement = ({
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Notes</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Remarques</label>
               <textarea
                 value={maintenanceNotes}
                 onChange={(event) => setMaintenanceNotes(event.target.value)}
@@ -322,7 +322,7 @@ export const CarMaintenanceManagement = ({
               />
             </div>
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Next Status</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Prochain statut</label>
               <select
                 value={maintenanceNextStatus}
                 onChange={(event) =>
@@ -343,7 +343,7 @@ export const CarMaintenanceManagement = ({
             onClick={handleSubmitMaintenance}
             disabled={startMaintenanceMutation.isPending || completeMaintenanceMutation.isPending}
           >
-            {maintenanceMode === 'start' ? 'Start' : 'Complete'} Maintenance
+            {maintenanceMode === 'start' ? 'Démarrer' : 'Terminer'}
           </Button>
         </div>
       </Modal>
@@ -351,28 +351,28 @@ export const CarMaintenanceManagement = ({
       <Modal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
-        title={`Maintenance History - ${historyCarLabel}`}
+        title={`Historique de maintenance - ${historyCarLabel}`}
       >
         {maintenanceHistory.length === 0 ? (
-          <p className="text-sm text-slate-600">No maintenance history found.</p>
+          <p className="text-sm text-slate-600">Aucun historique de maintenance trouvé.</p>
         ) : (
           <div className="space-y-3 max-h-[60vh] overflow-y-auto">
             {maintenanceHistory.map((record, index) => (
               <div key={`${record.startedAt}-${index}`} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                 <p className="font-medium text-slate-800">{record.reason}</p>
                 <p className="text-xs text-slate-500">
-                  Start: {new Date(record.startedAt).toLocaleString()}
+                  Début : {new Date(record.startedAt).toLocaleString('fr-FR')}
                 </p>
                 {record.endedAt && (
                   <p className="text-xs text-slate-500">
-                    End: {new Date(record.endedAt).toLocaleString()}
+                    Fin : {new Date(record.endedAt).toLocaleString('fr-FR')}
                   </p>
                 )}
-                {typeof record.estimatedCost === 'number' && <p className="text-xs text-slate-700">Estimated: {record.estimatedCost}</p>}
-                {typeof record.finalCost === 'number' && <p className="text-xs text-slate-700">Final: {record.finalCost}</p>}
-                {record.vehicleCondition && <p className="mt-1 text-xs text-slate-700">État exact: {record.vehicleCondition}</p>}
-                {record.notes && <p className="mt-1 text-xs text-slate-700">{record.notes}</p>}
-                <p className="mt-1 text-xs text-slate-700">Status: {record.status}</p>
+                {typeof record.estimatedCost === 'number' && <p className="text-xs text-slate-700">Estimé : {record.estimatedCost} MAD</p>}
+                {typeof record.finalCost === 'number' && <p className="text-xs text-slate-700">Final : {record.finalCost} MAD</p>}
+                {record.vehicleCondition && <p className="mt-1 text-xs text-slate-700">État exact : {record.vehicleCondition}</p>}
+                {record.notes && <p className="mt-1 text-xs text-slate-700">Remarques : {record.notes}</p>}
+                <p className="mt-1 text-xs text-slate-700">Statut : {record.status}</p>
               </div>
             ))}
           </div>

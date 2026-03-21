@@ -49,11 +49,11 @@ export const CarTable = ({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Vehicle</TableHead>
-          <TableHead>Agency</TableHead>
-          <TableHead>Specs</TableHead>
-          <TableHead>Pricing</TableHead>
-          <TableHead>Status</TableHead>
+          <TableHead>Véhicule</TableHead>
+          <TableHead>Agence</TableHead>
+          <TableHead>Spécifications</TableHead>
+          <TableHead>Tarification</TableHead>
+          <TableHead>Statut</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -69,18 +69,18 @@ export const CarTable = ({
               </TableCell>
               <TableCell>{resolveAgencyName(car)}</TableCell>
               <TableCell>
-                {car.category} · {car.transmission} · {car.fuelType} · {car.seats} seats
+                {car.category} · {car.transmission} · {car.fuelType} · {car.seats} places
               </TableCell>
               <TableCell>
-                <div>{car.dailyPrice} / day</div>
+                <div>{car.dailyPrice} / jour</div>
                 <div className="text-xs text-gray-500">
-                  Deposit: {car.depositAmount ?? 0} · Delivery: {car.deliveryFee ?? 0}
+                  Caution : {car.depositAmount ?? 0} · Livraison : {car.deliveryFee ?? 0}
                 </div>
               </TableCell>
               <TableCell>{car.availabilityStatus}</TableCell>
               <TableCell>
                 <Button variant="outline" size="sm" onClick={() => onEdit(car)}>
-                  Edit
+                  Modifier
                 </Button>
                 <Button
                   variant="destructive"
@@ -88,7 +88,7 @@ export const CarTable = ({
                   onClick={() => onDelete(carId)}
                   className="ml-2"
                 >
-                  Archive
+                  Archiver
                 </Button>
               </TableCell>
             </TableRow>

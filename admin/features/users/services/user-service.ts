@@ -13,7 +13,7 @@ interface UpdateUserPayload extends UserFormValues {
   id: string;
 }
 
-export const getUsers = async (params: { page: number; limit: number }) => {
+export const getUsers = async (params: { page: number; limit: number; q?: string }) => {
   return get<{ users: User[]; count: number }>('/admin/users', { params });
 };
 

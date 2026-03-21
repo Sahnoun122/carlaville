@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
-import { getAgencies, getCars } from '@/features/cars/services/car-service';
+import { getCars } from '@/features/cars/services/car-service';
+import { getAgencies } from '@/features/agencies/services/agency-service';
 import {
   confirmReservation,
   createReservation,
@@ -26,14 +27,14 @@ const resolveVehicleLabel = (reservation: Reservation) => {
     return `${reservation.carId.brand} ${reservation.carId.model}`;
   }
 
-  return 'Unknown vehicle';
+  return 'Véhicule inconnu';
 };
 
 const statusOptions = [
-  { label: 'All statuses', value: 'all' },
-  { label: 'Pending', value: ReservationStatus.PENDING },
-  { label: 'Confirmed', value: ReservationStatus.CONFIRMED },
-  { label: 'Rejected', value: ReservationStatus.REJECTED },
+  { label: 'Tous les statuts', value: 'all' },
+  { label: 'En attente', value: ReservationStatus.PENDING },
+  { label: 'Confirmée', value: ReservationStatus.CONFIRMED },
+  { label: 'Rejetée', value: ReservationStatus.REJECTED },
 ];
 
 const reservationStatusBadgeClass: Record<string, string> = {
@@ -91,7 +92,7 @@ export const ReservationManagement = () => {
 
   const agenciesQuery = useQuery({
     queryKey: ['agencies', 'reservation-create'],
-    queryFn: () => getAgencies(),
+    queryFn: () => getAgencies({ page: 1, limit: 100 }),
   });
 
   const createMutation = useMutation({
@@ -144,7 +145,7 @@ export const ReservationManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to confirm reservation.';
+          : 'Échec de la confirmation.';
 
       setActionError(message);
     },
@@ -160,7 +161,7 @@ export const ReservationManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to reject reservation.';
+          : 'Échec du rejet.';
 
       setActionError(message);
     },
@@ -176,7 +177,7 @@ export const ReservationManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to move reservation to pending.';
+          : 'Échec de la mise en attente.';
 
       setActionError(message);
     },
@@ -199,7 +200,7 @@ export const ReservationManagement = () => {
       !formData.pickupTime ||
       !formData.returnTime
     ) {
-      setCreateError('Please fill in all required fields.');
+      setCreateError('Veuillez remplir tous les champs obligatoires.');
       return;
     }
 
@@ -250,22 +251,22 @@ export const ReservationManagement = () => {
   return (
     <div className="space-y-6">
       <PageHeader 
-        title="Reservation Operations" 
-        description="Create and manage all reservations from one place."
+        title="Opérations de Réservation" 
+        description="Créez et gérez toutes les réservations depuis un seul endroit."
       >
-        <Button onClick={openCreateModal}>Create Reservation</Button>
+        <Button onClick={openCreateModal}>Créer une Réservation</Button>
       </PageHeader>
 
       <Modal
         isOpen={isCreateModalOpen}
         onClose={closeCreateModal}
-        title="Create Reservation"
+        title="Créer une Réservation"
         contentClassName="max-w-4xl"
       >
         {createError && <p className="text-sm text-rose-600 mb-3">{createError}</p>}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-1">
           <input
-            placeholder="Customer name"
+            placeholder="Client (nom)"
             value={formData.customerName}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, customerName: event.target.value }))
@@ -274,7 +275,7 @@ export const ReservationManagement = () => {
           />
           <input
             type="email"
-            placeholder="Customer email"
+            placeholder="Email client"
             value={formData.customerEmail}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, customerEmail: event.target.value }))
@@ -282,7 +283,7 @@ export const ReservationManagement = () => {
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
-            placeholder="Customer phone"
+            placeholder="Téléphone client"
             value={formData.customerPhone}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, customerPhone: event.target.value }))
@@ -296,7 +297,7 @@ export const ReservationManagement = () => {
             }
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           >
-            <option value="">Select agency</option>
+            <option value="">Sélectionner une agence</option>
             {(agenciesQuery.data?.agencies ?? []).map((agency) => (
               <option key={agency.id || agency._id} value={agency.id || agency._id}>
                 {agency.name}
@@ -310,7 +311,7 @@ export const ReservationManagement = () => {
             }
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           >
-            <option value="">Select vehicle</option>
+            <option value="">Sélectionner un véhicule</option>
             {(carsQuery.data?.cars ?? []).map((car) => {
               const carId = resolveCarId(car);
 
@@ -322,7 +323,7 @@ export const ReservationManagement = () => {
             })}
           </select>
           <input
-            placeholder="Pickup location"
+            placeholder="Lieu de départ"
             value={formData.pickupLocation}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, pickupLocation: event.target.value }))
@@ -330,7 +331,7 @@ export const ReservationManagement = () => {
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
-            placeholder="Return location"
+            placeholder="Lieu de retour"
             value={formData.returnLocation}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, returnLocation: event.target.value }))
@@ -370,7 +371,7 @@ export const ReservationManagement = () => {
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
           />
           <input
-            placeholder="Extras (comma separated)"
+            placeholder="Options (séparées par des virgules)"
             value={formData.selectedExtras}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, selectedExtras: event.target.value }))
@@ -379,7 +380,7 @@ export const ReservationManagement = () => {
           />
           <input
             type="number"
-            placeholder="Estimated total"
+            placeholder="Total estimé (MAD)"
             value={formData.estimatedTotal}
             onChange={(event) =>
               setFormData((previous) => ({ ...previous, estimatedTotal: event.target.value }))
@@ -389,7 +390,7 @@ export const ReservationManagement = () => {
         </div>
         <div className="flex justify-end mt-4">
           <Button className="shadow-sm" onClick={handleCreateReservation} disabled={createMutation.isPending}>
-            Create Reservation
+            Créer la Réservation
           </Button>
         </div>
       </Modal>
@@ -399,13 +400,13 @@ export const ReservationManagement = () => {
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Filter by vehicle</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Filtrer par véhicule</label>
             <select
               value={selectedCarId}
               onChange={(event) => setSelectedCarId(event.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
             >
-              <option value="all">All vehicles</option>
+              <option value="all">Tous les véhicules</option>
               {vehicleFilterOptions.map((car) => (
                 <option key={car.id} value={car.id}>
                   {car.label}
@@ -415,7 +416,7 @@ export const ReservationManagement = () => {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Filter by status</label>
+            <label className="block mb-1 text-sm font-medium text-slate-700">Filtrer par statut</label>
             <select
               value={selectedStatus}
               onChange={(event) => setSelectedStatus(event.target.value)}
@@ -431,25 +432,25 @@ export const ReservationManagement = () => {
 
           <div className="flex items-end">
             <Button className="shadow-sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['reservations'] })}>
-              Refresh
+              Actualiser
             </Button>
           </div>
         </div>
       </div>
 
-      {reservationsQuery.isLoading && <p className="text-sm text-slate-600">Loading reservations...</p>}
-      {reservationsQuery.isError && <p className="text-sm text-rose-600">Error loading reservations.</p>}
+      {reservationsQuery.isLoading && <p className="text-sm text-slate-600">Chargement des réservations...</p>}
+      {reservationsQuery.isError && <p className="text-sm text-rose-600">Erreur lors du chargement des réservations.</p>}
 
       {reservationsQuery.data && (
         <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-slate-600">
               <tr>
-                <th className="px-4 py-3 font-medium">Reference</th>
-                <th className="px-4 py-3 font-medium">Vehicle</th>
-                <th className="px-4 py-3 font-medium">Customer</th>
+                <th className="px-4 py-3 font-medium">Référence</th>
+                <th className="px-4 py-3 font-medium">Véhicule</th>
+                <th className="px-4 py-3 font-medium">Client</th>
                 <th className="px-4 py-3 font-medium">Dates</th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Statut</th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -467,7 +468,7 @@ export const ReservationManagement = () => {
                     </td>
                     <td className="px-4 py-3 text-slate-700">
                       <div>{new Date(reservation.pickupDate).toLocaleDateString()} → {new Date(reservation.returnDate).toLocaleDateString()}</div>
-                      <div className="text-xs text-slate-500">{reservation.rentalDays} day(s)</div>
+                      <div className="text-xs text-slate-500">{reservation.rentalDays} jour(s)</div>
                     </td>
                     <td className="px-4 py-3">
                       <span
@@ -487,7 +488,7 @@ export const ReservationManagement = () => {
                             onClick={() => confirmMutation.mutate(reservationId)}
                             disabled={isActionPending}
                           >
-                            Accept
+                            Accepter
                           </Button>
                           <Button
                             size="sm"
@@ -496,7 +497,7 @@ export const ReservationManagement = () => {
                             onClick={() => rejectMutation.mutate(reservationId)}
                             disabled={isActionPending}
                           >
-                            Reject
+                            Rejeter
                           </Button>
                         </>
                       )}
@@ -510,17 +511,17 @@ export const ReservationManagement = () => {
                           onClick={() => pendingMutation.mutate(reservationId)}
                           disabled={isActionPending}
                         >
-                          Set Pending
+                          Mettre en attente
                         </Button>
                       )}
 
-                      {!canManageReservationStatus && <span className="text-xs text-slate-500">View only</span>}
+                      {!canManageReservationStatus && <span className="text-xs text-slate-500">Consultation uniquement</span>}
 
                       {canManageReservationStatus &&
                         reservation.status !== ReservationStatus.PENDING &&
                         reservation.status !== ReservationStatus.CONFIRMED &&
                         reservation.status !== ReservationStatus.REJECTED && (
-                          <span className="text-xs text-slate-500">No action</span>
+                          <span className="text-xs text-slate-500">Aucune action</span>
                         )}
                     </td>
                   </tr>

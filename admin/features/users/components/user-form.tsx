@@ -29,7 +29,7 @@ const optionalPhoneSchema = z
   .optional()
   .transform((value) => (value && value.trim().length > 0 ? value : undefined))
   .refine((value) => !value || value.length >= 6, {
-    message: 'Phone must be at least 6 characters',
+    message: 'Le téléphone doit contenir au moins 6 caractères',
   });
 
 const optionalPasswordSchema = z
@@ -37,20 +37,20 @@ const optionalPasswordSchema = z
   .optional()
   .transform((value) => (value && value.trim().length > 0 ? value : undefined))
   .refine((value) => !value || value.length >= 6, {
-    message: 'Password must be at least 6 characters',
+    message: 'Le mot de passe doit contenir au moins 6 caractères',
   });
 
 const baseFormSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  email: z.string().email('Invalid email address'),
+  name: z.string().min(3, 'Le nom doit contenir au moins 3 caractères'),
+  email: z.string().email('Adresse e-mail invalide'),
   phone: optionalPhoneSchema,
   password: optionalPasswordSchema,
   role: z.nativeEnum(Role),
 });
 
 const createFormSchema = baseFormSchema.extend({
-  phone: z.string().min(6, 'Phone must be at least 6 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  phone: z.string().min(6, 'Le téléphone doit contenir au moins 6 caractères'),
+  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
 });
 
 interface UserFormProps {
@@ -91,7 +91,7 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Nom complet</FormLabel>
               <FormControl>
                 <Input {...field} disabled={isLoading} />
               </FormControl>
@@ -104,7 +104,7 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>E-mail</FormLabel>
               <FormControl>
                 <Input {...field} disabled={isLoading} />
               </FormControl>
@@ -117,7 +117,7 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Téléphone</FormLabel>
               <FormControl>
                 <Input {...field} disabled={isLoading} />
               </FormControl>
@@ -131,7 +131,7 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>Mot de passe</FormLabel>
                 <FormControl>
                   <Input type="password" {...field} disabled={isLoading} />
                 </FormControl>
@@ -145,11 +145,11 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
           name="role"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Role</FormLabel>
+              <FormLabel>Rôle</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder="Sélectionnez un rôle" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -165,7 +165,7 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
           )}
         />
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save'}
+          {isLoading ? 'Enregistrement...' : 'Enregistrer'}
         </Button>
       </form>
     </Form>

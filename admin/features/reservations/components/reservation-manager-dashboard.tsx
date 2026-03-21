@@ -86,17 +86,17 @@ const statusClassMap: Record<ReservationStatus, string> = {
 };
 
 const statusLabelMap: Record<ReservationStatus, string> = {
-  [ReservationStatus.PENDING]: 'Pending',
-  [ReservationStatus.CONFIRMED]: 'Confirmed',
-  [ReservationStatus.REJECTED]: 'Rejected',
-  [ReservationStatus.READY_FOR_DELIVERY]: 'Ready for Delivery',
-  [ReservationStatus.IN_DELIVERY]: 'In Delivery',
-  [ReservationStatus.DELIVERED]: 'Delivered',
-  [ReservationStatus.ACTIVE_RENTAL]: 'Active Rental',
-  [ReservationStatus.RETURN_SCHEDULED]: 'Return Scheduled',
-  [ReservationStatus.RETURNED]: 'Returned',
-  [ReservationStatus.CANCELLED]: 'Cancelled',
-  [ReservationStatus.COMPLETED]: 'Completed',
+  [ReservationStatus.PENDING]: 'En attente',
+  [ReservationStatus.CONFIRMED]: 'Confirmée',
+  [ReservationStatus.REJECTED]: 'Rejetée',
+  [ReservationStatus.READY_FOR_DELIVERY]: 'Prête pour livraison',
+  [ReservationStatus.IN_DELIVERY]: 'En livraison',
+  [ReservationStatus.DELIVERED]: 'Livrée',
+  [ReservationStatus.ACTIVE_RENTAL]: 'Location active',
+  [ReservationStatus.RETURN_SCHEDULED]: 'Retour programmé',
+  [ReservationStatus.RETURNED]: 'Retournée',
+  [ReservationStatus.CANCELLED]: 'Annulée',
+  [ReservationStatus.COMPLETED]: 'Terminée',
 };
 
 export const ReservationManagerDashboard = () => {

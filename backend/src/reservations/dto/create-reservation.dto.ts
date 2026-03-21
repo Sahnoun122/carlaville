@@ -5,6 +5,7 @@ import {
   IsDateString,
   IsArray,
   IsObject,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateReservationDto {
@@ -20,9 +21,9 @@ export class CreateReservationDto {
   @IsNotEmpty()
   customerPhone: string;
 
+  @IsOptional()
   @IsMongoId()
-  @IsNotEmpty()
-  agencyId: string;
+  agencyId?: string;
 
   @IsMongoId()
   @IsNotEmpty()

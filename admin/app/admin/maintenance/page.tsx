@@ -6,7 +6,7 @@ import { CarMaintenanceManagement } from '@/features/cars/components/car-mainten
 const MaintenancePage = () => {
   return (
     <div>
-      <PageHeader title="Vehicle Maintenance" />
+      <PageHeader title="Maintenance des Véhicules" />
       <div className="p-6">
         <CarMaintenanceManagement />
       </div>

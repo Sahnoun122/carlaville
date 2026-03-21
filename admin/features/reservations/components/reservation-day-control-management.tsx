@@ -11,13 +11,13 @@ import {
 import type { ReservationExtraOption } from '@/types';
 
 const weekdayOptions = [
-  { value: 0, label: 'Sunday' },
-  { value: 1, label: 'Monday' },
-  { value: 2, label: 'Tuesday' },
-  { value: 3, label: 'Wednesday' },
-  { value: 4, label: 'Thursday' },
-  { value: 5, label: 'Friday' },
-  { value: 6, label: 'Saturday' },
+  { value: 0, label: 'Dimanche' },
+  { value: 1, label: 'Lundi' },
+  { value: 2, label: 'Mardi' },
+  { value: 3, label: 'Mercredi' },
+  { value: 4, label: 'Jeudi' },
+  { value: 5, label: 'Vendredi' },
+  { value: 6, label: 'Samedi' },
 ];
 
 export const ReservationDayControlManagement = () => {
@@ -53,7 +53,7 @@ export const ReservationDayControlManagement = () => {
     mutationFn: updateReservationDayControlSettings,
     onSuccess: () => {
       setSubmitError(null);
-      setSubmitSuccess('Reservation day policy updated successfully.');
+      setSubmitSuccess('Politique globale mise à jour avec succès.');
       queryClient.invalidateQueries({
         queryKey: ['reservation-day-control-settings'],
       });
@@ -65,7 +65,7 @@ export const ReservationDayControlManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to update reservation day policy.';
+          : 'Échec de la mise à jour de la politique globale.';
 
       setSubmitSuccess(null);
       setSubmitError(message);
@@ -111,7 +111,7 @@ export const ReservationDayControlManagement = () => {
       .filter((extra) => extra.id.length > 0 && extra.label.length > 0);
 
     if (minRentalDays > maxRentalDays) {
-      setSubmitError('Minimum rental days cannot be greater than maximum rental days.');
+      setSubmitError('Le minimum ne peut être supérieur au maximum.');
       return;
     }
 
@@ -121,7 +121,7 @@ export const ReservationDayControlManagement = () => {
     );
 
     if (duplicateExtraId) {
-      setSubmitError(`Duplicate extra id: ${duplicateExtraId.id}`);
+      setSubmitError(`Identifiant d\'extra en double : ${duplicateExtraId.id}`);
       return;
     }
 
@@ -130,7 +130,7 @@ export const ReservationDayControlManagement = () => {
     );
 
     if (missingScopedCars) {
-      setSubmitError(`Please select at least one car for "${missingScopedCars.label}".`);
+      setSubmitError(`Veuillez sélectionner au moins une voiture pour "${missingScopedCars.label}".`);
       return;
     }
 
@@ -211,23 +211,23 @@ export const ReservationDayControlManagement = () => {
   return (
     <div className="max-w-4xl space-y-5">
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">General Reservation Day Control</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Règles globales de dates de réservation</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Define global booking policy used as fallback when a vehicle policy is not set.
+          Définissez la politique globale de dates, utilisée par défaut lorsqu'aucune n\'est spécifiée.
         </p>
       </div>
 
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
       <p className="text-sm text-slate-600">
-        Define global rules for vehicle reservation duration and allowed booking days.
+        Définissez les règles générales sur la durée et les jours de réservation.
       </p>
 
       {submitError && <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
       {submitSuccess && <p className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{submitSuccess}</p>}
 
-      {settingsQuery.isLoading && <p className="mt-4 text-sm text-slate-600">Loading reservation settings...</p>}
+      {settingsQuery.isLoading && <p className="mt-4 text-sm text-slate-600">Chargement des paramètres...</p>}
       {settingsQuery.isError && !submitError && (
-        <p className="mt-4 text-sm text-rose-600">Failed to load reservation settings.</p>
+        <p className="mt-4 text-sm text-rose-600">Échec du chargement des paramètres.</p>
       )}
 
       {!settingsQuery.isLoading && settingsQuery.data && (
@@ -238,7 +238,7 @@ export const ReservationDayControlManagement = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Minimum Rental Days</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Minimum de jours de location</label>
               <input
                 name="minRentalDays"
                 type="number"
@@ -249,7 +249,7 @@ export const ReservationDayControlManagement = () => {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Maximum Rental Days</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">Maximum de jours de location</label>
               <input
                 name="maxRentalDays"
                 type="number"
@@ -260,7 +260,7 @@ export const ReservationDayControlManagement = () => {
             </div>
 
             <div>
-              <label className="block mb-1 text-sm font-medium text-slate-700">Max Advance Booking (days)</label>
+              <label className="block mb-1 text-sm font-medium text-slate-700">A l\'avance max (jours)</label>
               <input
                 name="maxAdvanceBookingDays"
                 type="number"
@@ -279,12 +279,12 @@ export const ReservationDayControlManagement = () => {
               defaultChecked={settingsQuery.data.allowSameDayBooking}
             />
             <label htmlFor="allowSameDayBooking" className="text-sm font-medium text-slate-700">
-              Allow same-day booking
+              Autoriser réservation le jour même
             </label>
           </div>
 
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <p className="mb-2 text-sm font-medium text-slate-700">Blocked weekdays</p>
+            <p className="mb-2 text-sm font-medium text-slate-700">Jours de la semaine bloqués</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {weekdayOptions.map((day) => (
                 <label key={day.value} className="flex items-center gap-2 rounded-md bg-white px-2 py-1.5 text-sm text-slate-700">
@@ -305,17 +305,17 @@ export const ReservationDayControlManagement = () => {
               <div>
                 <p className="text-sm font-semibold text-slate-800">Options & Extras</p>
                 <p className="text-xs text-slate-500">
-                  Configure selectable extras and target all vehicles or specific ones.
+                  Configurez des extras disponibles pour tous ou certains véhicules.
                 </p>
               </div>
               <Button type="button" variant="outline" onClick={addExtra}>
-                Add Extra
+                Ajouter un extra
               </Button>
             </div>
 
             {extrasDraft.length === 0 ? (
               <div className="rounded-md border border-dashed border-slate-300 bg-white px-4 py-6 text-center text-sm text-slate-500">
-                No extras configured yet.
+                Aucun extra configuré.
               </div>
             ) : (
               <div className="space-y-4">
@@ -365,7 +365,7 @@ export const ReservationDayControlManagement = () => {
                           </select>
                         </div>
                         <Button type="button" variant="destructive" size="sm" onClick={() => removeExtra(index)}>
-                          Remove
+                          Supprimer
                         </Button>
                       </div>
                     </div>
@@ -401,9 +401,9 @@ export const ReservationDayControlManagement = () => {
                       <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
                         <p className="mb-2 text-xs font-medium text-slate-700">Voitures concernées</p>
                         {carsQuery.isLoading ? (
-                          <p className="text-xs text-slate-500">Loading vehicles...</p>
+                          <p className="text-xs text-slate-500">Chargement des véhicules...</p>
                         ) : carOptions.length === 0 ? (
-                          <p className="text-xs text-slate-500">No vehicles available.</p>
+                          <p className="text-xs text-slate-500">Aucun véhicule.</p>
                         ) : (
                           <div className="max-h-36 space-y-1 overflow-y-auto pr-1">
                             {carOptions.map((car) => (
@@ -428,7 +428,7 @@ export const ReservationDayControlManagement = () => {
 
           <div className="flex justify-end">
             <Button className="shadow-sm" type="submit" disabled={updateMutation.isPending}>
-              Save Reservation Policy
+              Sauvegarder les règles de dates
             </Button>
           </div>
         </form>

@@ -56,7 +56,7 @@ export const OperationsDeliveriesManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to update delivery status.';
+          : 'Échec de la mise à jour du statut de livraison.';
 
       setActionError(message);
     },
@@ -91,25 +91,25 @@ export const OperationsDeliveriesManagement = () => {
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4 shadow-sm">
-      <h2 className="text-lg font-semibold text-slate-800">My Deliveries</h2>
+      <h2 className="text-lg font-semibold text-slate-800">Mes Livraisons</h2>
       {actionError && <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{actionError}</p>}
 
       <div>
-        <label className="block mb-1 text-sm font-medium text-slate-700">Status Filter</label>
+        <label className="block mb-1 text-sm font-medium text-slate-700">Filtre de Statut</label>
         <select
           value={statusFilter}
           onChange={(event) => setStatusFilter(event.target.value as 'all' | DeliveryStatus)}
           className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 md:w-64"
         >
-          <option value="all">all</option>
+          <option value="all">tous</option>
           {Object.values(DeliveryStatus).map((status) => (
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
       </div>
 
-      {deliveriesQuery.isLoading && <p className="text-sm text-slate-600">Loading your deliveries...</p>}
-      {deliveriesQuery.isError && <p className="text-sm text-rose-600">Error loading deliveries.</p>}
+      {deliveriesQuery.isLoading && <p className="text-sm text-slate-600">Chargement de vos livraisons...</p>}
+      {deliveriesQuery.isError && <p className="text-sm text-rose-600">Erreur lors du chargement des livraisons.</p>}
 
       {deliveriesQuery.data && (
         <div className="space-y-3">
@@ -152,7 +152,7 @@ export const OperationsDeliveriesManagement = () => {
                   </select>
                   <input
                     name="gpsLocation"
-                    placeholder="GPS location"
+                    placeholder="Localisation GPS"
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
                   />
                   <input
@@ -161,7 +161,7 @@ export const OperationsDeliveriesManagement = () => {
                     className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
                   />
                   <Button type="submit" size="sm" disabled={updateMutation.isPending}>
-                    Update
+                    Mettre à jour
                   </Button>
                 </form>
               </div>

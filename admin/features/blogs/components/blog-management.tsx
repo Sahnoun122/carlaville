@@ -65,7 +65,7 @@ export const BlogManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to create blog.';
+          : 'Échec de la création du blog.';
 
       setSubmitError(message);
     },
@@ -87,7 +87,7 @@ export const BlogManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Failed to update blog.';
+          : 'Échec de la mise à jour du blog.';
 
       setSubmitError(message);
     },
@@ -167,7 +167,7 @@ export const BlogManagement = () => {
         'message' in error &&
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
-          : 'Image upload failed.';
+          : "Échec du téléchargement de l'image.";
 
       setUploadError(message);
     } finally {
@@ -178,7 +178,7 @@ export const BlogManagement = () => {
 
   const handleSubmit = () => {
     if (!formValues.title || !formValues.excerpt || !formValues.content) {
-      setSubmitError('Please fill in title, excerpt and content.');
+      setSubmitError('Veuillez remplir le titre, le résumé et le contenu.');
       return;
     }
 
@@ -201,23 +201,23 @@ export const BlogManagement = () => {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Blog Management" description="Create, edit, and publish content for the blog.">
-        <Button onClick={openCreateModal}>Add Blog</Button>
+      <PageHeader title="Gestion du Blog" description="Créez, éditez et publiez du contenu pour le blog.">
+        <Button onClick={openCreateModal}>Ajouter un Blog</Button>
       </PageHeader>
 
       <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Search</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Recherche</label>
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Title or excerpt"
+                placeholder="Titre ou résumé"
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Status</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Statut</label>
               <select
                 value={statusFilter}
                 onChange={(event) =>
@@ -225,16 +225,16 @@ export const BlogManagement = () => {
                 }
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
               >
-                <option value="all">All</option>
-                <option value="true">Published</option>
-                <option value="false">Draft</option>
+                <option value="all">Tous</option>
+                <option value="true">Publié</option>
+                <option value="false">Brouillon</option>
               </select>
             </div>
           </div>
       </div>
 
-      {blogsQuery.isLoading && <p className="text-sm text-slate-600">Loading blogs...</p>}
-      {blogsQuery.isError && <p className="text-sm text-rose-600">Error loading blogs.</p>}
+      {blogsQuery.isLoading && <p className="text-sm text-slate-600">Chargement des blogs...</p>}
+      {blogsQuery.isError && <p className="text-sm text-rose-600">Erreur de chargement des blogs.</p>}
 
       {blogsQuery.data && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -258,7 +258,7 @@ export const BlogManagement = () => {
                   />
                 ) : (
                   <div className="mb-4 flex h-44 w-full items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-500">
-                    No image
+                    Aucune image
                   </div>
                 )}
 
@@ -270,7 +270,7 @@ export const BlogManagement = () => {
                         : 'border border-amber-200 bg-amber-100 text-amber-800'
                     }`}
                   >
-                    {blog.published ? 'Published' : 'Draft'}
+                    {blog.published ? 'Publié' : 'Brouillon'}
                   </span>
                   <span className="text-xs text-slate-500">
                     {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : '-'}
@@ -284,10 +284,10 @@ export const BlogManagement = () => {
 
                 <div className="flex flex-wrap gap-2">
                   <Link href={`/admin/blogs/${blogId}`}>
-                    <Button size="sm" variant="outline">View Details</Button>
+                    <Button size="sm" variant="outline">Voir les Détails</Button>
                   </Link>
                   <Button size="sm" variant="outline" onClick={() => openEditModal(blog)}>
-                    Edit
+                    Modifier
                   </Button>
                   <Button
                     size="sm"
@@ -295,7 +295,7 @@ export const BlogManagement = () => {
                     onClick={() => deleteMutation.mutate(blogId)}
                     disabled={deleteMutation.isPending}
                   >
-                    Delete
+                    Supprimer
                   </Button>
                 </div>
               </article>
@@ -307,14 +307,14 @@ export const BlogManagement = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={closeModal}
-        title={selectedBlog ? 'Edit Blog' : 'Add Blog'}
+        title={selectedBlog ? 'Modifier le Blog' : 'Ajouter un Blog'}
         contentClassName="max-w-3xl"
       >
         {submitError && <p className="mb-3 text-sm text-rose-600">{submitError}</p>}
         {uploadError && <p className="mb-3 text-sm text-rose-600">{uploadError}</p>}
         <div className="grid max-h-[70vh] grid-cols-1 gap-3 overflow-y-auto pr-1">
           <input
-            placeholder="Title"
+            placeholder="Titre"
             value={formValues.title}
             onChange={(event) =>
               setFormValues((previous) => ({ ...previous, title: event.target.value }))
@@ -322,7 +322,7 @@ export const BlogManagement = () => {
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
           />
           <input
-            placeholder="Slug (optional)"
+            placeholder="Slug (optionnel)"
             value={formValues.slug}
             onChange={(event) =>
               setFormValues((previous) => ({ ...previous, slug: event.target.value }))
@@ -330,7 +330,7 @@ export const BlogManagement = () => {
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
           />
           <input
-            placeholder="Cover image URL (optional)"
+            placeholder="URL de l'image de couverture (optionnel)"
             value={formValues.coverImage}
             onChange={(event) =>
               setFormValues((previous) => ({ ...previous, coverImage: event.target.value }))
@@ -343,14 +343,13 @@ export const BlogManagement = () => {
             multiple
             onChange={handleImagesUpload}
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-            disabled={isUploadingImages}
           />
           <p className="text-xs text-slate-500">
-            Upload one or multiple photos. The first uploaded image is used as cover if cover is empty.
+            Téléchargez une ou plusieurs photos. La première image téléchargée est utilisée comme couverture si la couverture est vide.
           </p>
           {(formValues.images?.length ?? 0) > 0 ? (
             <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-              <p className="mb-2 text-xs font-medium text-slate-700">Uploaded images</p>
+              <p className="mb-2 text-xs font-medium text-slate-700">Images téléchargées</p>
               <div className="space-y-1">
                 {(formValues.images || []).map((imageUrl) => (
                   <div key={imageUrl} className="text-xs text-slate-600 break-all">
@@ -361,7 +360,7 @@ export const BlogManagement = () => {
             </div>
           ) : null}
           <textarea
-            placeholder="Short excerpt"
+            placeholder="Court résumé"
             value={formValues.excerpt}
             onChange={(event) =>
               setFormValues((previous) => ({ ...previous, excerpt: event.target.value }))
@@ -370,7 +369,7 @@ export const BlogManagement = () => {
             className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
           />
           <textarea
-            placeholder="Blog content"
+            placeholder="Contenu du blog"
             value={formValues.content}
             onChange={(event) =>
               setFormValues((previous) => ({ ...previous, content: event.target.value }))
@@ -387,16 +386,16 @@ export const BlogManagement = () => {
                 setFormValues((previous) => ({ ...previous, published: event.target.checked }))
               }
             />
-            Publish immediately
+            Publier immédiatement
           </label>
         </div>
 
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>
-            Cancel
+            Annuler
           </Button>
           <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {selectedBlog ? 'Save Changes' : 'Create Blog'}
+            {selectedBlog ? 'Enregistrer les Modifications' : 'Créer le Blog'}
           </Button>
         </div>
       </Modal>
