@@ -2,6 +2,23 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  RefreshCw, 
+  Check, 
+  X, 
+  Clock, 
+  Mail, 
+  Phone, 
+  Calendar as CalendarIcon, 
+  MapPin, 
+  User, 
+  Car as CarIcon,
+  ChevronRight,
+  MoreHorizontal
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { getCars } from '@/features/cars/services/car-service';
@@ -26,7 +43,6 @@ const resolveVehicleLabel = (reservation: Reservation) => {
   if (reservation.carId && typeof reservation.carId === 'object') {
     return `${reservation.carId.brand} ${reservation.carId.model}`;
   }
-
   return 'Véhicule inconnu';
 };
 
@@ -38,9 +54,9 @@ const statusOptions = [
 ];
 
 const reservationStatusBadgeClass: Record<string, string> = {
-  [ReservationStatus.PENDING]: 'bg-amber-100 text-amber-800 border border-amber-200',
-  [ReservationStatus.CONFIRMED]: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  [ReservationStatus.REJECTED]: 'bg-rose-100 text-rose-800 border border-rose-200',
+  [ReservationStatus.PENDING]: 'bg-amber-50 text-amber-600 border border-amber-100',
+  [ReservationStatus.CONFIRMED]: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+  [ReservationStatus.REJECTED]: 'bg-red-50 text-red-600 border border-red-100',
 };
 
 export const ReservationManagement = () => {
@@ -76,7 +92,7 @@ export const ReservationManagement = () => {
     queryFn: () =>
       getReservations({
         page,
-        limit: 20,
+        limit: 50,
         carId: selectedCarId !== 'all' ? selectedCarId : undefined,
         status:
           selectedStatus !== 'all'
@@ -125,7 +141,6 @@ export const ReservationManagement = () => {
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
           : 'Failed to create reservation.';
-
       setCreateError(message);
     },
   });
@@ -146,7 +161,6 @@ export const ReservationManagement = () => {
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
           : 'Échec de la confirmation.';
-
       setActionError(message);
     },
   });
@@ -162,7 +176,6 @@ export const ReservationManagement = () => {
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
           : 'Échec du rejet.';
-
       setActionError(message);
     },
   });
@@ -178,7 +191,6 @@ export const ReservationManagement = () => {
         typeof (error as { message?: unknown }).message === 'string'
           ? (error as { message: string }).message
           : 'Échec de la mise en attente.';
-
       setActionError(message);
     },
   });
@@ -249,288 +261,341 @@ export const ReservationManagement = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <PageHeader 
-        title="Opérations de Réservation" 
-        description="Créez et gérez toutes les réservations depuis un seul endroit."
+        title="Gestion des Réservations" 
+        description="Centralisez toutes les demandes de location et gérez les flux opérationnels."
       >
-        <Button onClick={openCreateModal}>Créer une Réservation</Button>
+        <Button 
+          onClick={openCreateModal}
+          className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 text-white font-bold h-11 px-6 rounded-xl transition-all hover:-translate-y-0.5"
+        >
+          <Plus className="w-5 h-5 mr-2" />
+          Nouvelle Réservation
+        </Button>
       </PageHeader>
 
       <Modal
         isOpen={isCreateModalOpen}
         onClose={closeCreateModal}
-        title="Créer une Réservation"
-        contentClassName="max-w-4xl"
+        title="Nouvelle Réservation"
+        contentClassName="max-w-4xl rounded-[2.5rem]"
       >
-        {createError && <p className="text-sm text-rose-600 mb-3">{createError}</p>}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto pr-1">
-          <input
-            placeholder="Client (nom)"
-            value={formData.customerName}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, customerName: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            type="email"
-            placeholder="Email client"
-            value={formData.customerEmail}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, customerEmail: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            placeholder="Téléphone client"
-            value={formData.customerPhone}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, customerPhone: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <select
-            value={formData.agencyId}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, agencyId: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          >
-            <option value="">Sélectionner une agence</option>
-            {(agenciesQuery.data?.agencies ?? []).map((agency) => (
-              <option key={agency.id || agency._id} value={agency.id || agency._id}>
-                {agency.name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={formData.carId}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, carId: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          >
-            <option value="">Sélectionner un véhicule</option>
-            {(carsQuery.data?.cars ?? []).map((car) => {
-              const carId = resolveCarId(car);
+        <div className="p-2">
+          {createError && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm font-bold text-red-600">
+              {createError}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[65vh] overflow-y-auto pr-4 scrollbar-thin">
+             {/* Section: Client */}
+             <div className="space-y-4">
+               <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Informations Client</h3>
+               <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    placeholder="Nom complet du client"
+                    value={formData.customerName}
+                    onChange={(e) => setFormData(p => ({ ...p, customerName: e.target.value }))}
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 transition-all font-bold text-gray-900"
+                  />
+               </div>
+               <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    placeholder="Adresse email"
+                    value={formData.customerEmail}
+                    onChange={(e) => setFormData(p => ({ ...p, customerEmail: e.target.value }))}
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 transition-all font-bold text-gray-900"
+                  />
+               </div>
+               <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    placeholder="Numéro de téléphone"
+                    value={formData.customerPhone}
+                    onChange={(e) => setFormData(p => ({ ...p, customerPhone: e.target.value }))}
+                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 transition-all font-bold text-gray-900"
+                  />
+               </div>
+             </div>
 
-              return (
-                <option key={carId} value={carId}>
-                  {car.brand} {car.model}
-                </option>
-              );
-            })}
-          </select>
-          <input
-            placeholder="Lieu de départ"
-            value={formData.pickupLocation}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, pickupLocation: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            placeholder="Lieu de retour"
-            value={formData.returnLocation}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, returnLocation: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            type="date"
-            value={formData.pickupDate}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, pickupDate: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            type="date"
-            value={formData.returnDate}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, returnDate: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            type="time"
-            value={formData.pickupTime}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, pickupTime: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            type="time"
-            value={formData.returnTime}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, returnTime: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            placeholder="Options (séparées par des virgules)"
-            value={formData.selectedExtras}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, selectedExtras: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-          <input
-            type="number"
-            placeholder="Total estimé (MAD)"
-            value={formData.estimatedTotal}
-            onChange={(event) =>
-              setFormData((previous) => ({ ...previous, estimatedTotal: event.target.value }))
-            }
-            className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-          />
-        </div>
-        <div className="flex justify-end mt-4">
-          <Button className="shadow-sm" onClick={handleCreateReservation} disabled={createMutation.isPending}>
-            Créer la Réservation
-          </Button>
-        </div>
-      </Modal>
+             {/* Section: Véhicule & Agence */}
+             <div className="space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Véhicule & Agence</h3>
+                <div className="relative">
+                  <select
+                    value={formData.agencyId}
+                    onChange={(e) => setFormData(p => ({ ...p, agencyId: e.target.value }))}
+                    className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-900 cursor-pointer"
+                  >
+                    <option value="">Sélectionner une agence</option>
+                    {(agenciesQuery.data?.agencies ?? []).map((agency) => (
+                      <option key={agency.id || agency._id} value={agency.id || agency._id}>
+                        {agency.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="relative">
+                  <select
+                    value={formData.carId}
+                    onChange={(e) => setFormData(p => ({ ...p, carId: e.target.value }))}
+                    className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-900 cursor-pointer"
+                  >
+                    <option value="">Sélectionner un véhicule</option>
+                    {(carsQuery.data?.cars ?? []).map((car) => {
+                      const carId = resolveCarId(car);
+                      return <option key={carId} value={carId}>{car.brand} {car.model}</option>;
+                    })}
+                  </select>
+                </div>
+             </div>
 
-      {actionError && <p className="text-sm text-rose-600">{actionError}</p>}
+             {/* Section: Dates & Lieux */}
+             <div className="space-y-4 md:col-span-2">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Logistique</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase ml-4">Prise en charge</p>
+                    <div className="grid grid-cols-2 gap-2">
+                       <input type="date" value={formData.pickupDate} onChange={e => setFormData(p => ({...p, pickupDate: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
+                       <input type="time" value={formData.pickupTime} onChange={e => setFormData(p => ({...p, pickupTime: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
+                    </div>
+                    <input placeholder="Lieu de prise en charge" value={formData.pickupLocation} onChange={e => setFormData(p => ({...p, pickupLocation: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-gray-400 uppercase ml-4">Retour</p>
+                    <div className="grid grid-cols-2 gap-2">
+                       <input type="date" value={formData.returnDate} onChange={e => setFormData(p => ({...p, returnDate: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
+                       <input type="time" value={formData.returnTime} onChange={e => setFormData(p => ({...p, returnTime: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
+                    </div>
+                    <input placeholder="Lieu de retour" value={formData.returnLocation} onChange={e => setFormData(p => ({...p, returnLocation: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
+                  </div>
+                </div>
+             </div>
 
-      <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Filtrer par véhicule</label>
-            <select
-              value={selectedCarId}
-              onChange={(event) => setSelectedCarId(event.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
-            >
-              <option value="all">Tous les véhicules</option>
-              {vehicleFilterOptions.map((car) => (
-                <option key={car.id} value={car.id}>
-                  {car.label}
-                </option>
-              ))}
-            </select>
+             {/* Section: Options & Total */}
+             <div className="space-y-4 md:col-span-2">
+                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Extras & Tarification</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    placeholder="Options (ex: Siège bébé, GPS...)"
+                    value={formData.selectedExtras}
+                    onChange={(e) => setFormData(p => ({ ...p, selectedExtras: e.target.value }))}
+                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900"
+                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      placeholder="Total estimé (MAD)"
+                      value={formData.estimatedTotal}
+                      onChange={(e) => setFormData(p => ({ ...p, estimatedTotal: e.target.value }))}
+                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400 uppercase">MAD</span>
+                  </div>
+                </div>
+             </div>
           </div>
 
-          <div>
-            <label className="block mb-1 text-sm font-medium text-slate-700">Filtrer par statut</label>
-            <select
-              value={selectedStatus}
-              onChange={(event) => setSelectedStatus(event.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-400"
+          <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+            <Button variant="outline" className="font-bold text-gray-500 border-none hover:bg-gray-50 h-12 px-8 rounded-2xl" onClick={closeCreateModal}>Annuler</Button>
+            <Button 
+               className="bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 text-white font-bold h-12 px-10 rounded-2xl transition-all" 
+               onClick={handleCreateReservation} 
+               disabled={createMutation.isPending}
             >
-              {statusOptions.map((status) => (
-                <option key={status.value} value={status.value}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <Button className="shadow-sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['reservations'] })}>
-              Actualiser
+              Finaliser la Réservation
             </Button>
           </div>
         </div>
-      </div>
+      </Modal>
 
-      {reservationsQuery.isLoading && <p className="text-sm text-slate-600">Chargement des réservations...</p>}
-      {reservationsQuery.isError && <p className="text-sm text-rose-600">Erreur lors du chargement des réservations.</p>}
-
-      {reservationsQuery.data && (
-        <div className="overflow-x-auto rounded-2xl border border-gray-100 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-left text-slate-600">
-              <tr>
-                <th className="px-4 py-3 font-medium">Référence</th>
-                <th className="px-4 py-3 font-medium">Véhicule</th>
-                <th className="px-4 py-3 font-medium">Client</th>
-                <th className="px-4 py-3 font-medium">Dates</th>
-                <th className="px-4 py-3 font-medium">Statut</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reservationsQuery.data.reservations.map((reservation) => {
-                const reservationId = resolveReservationId(reservation);
-
-                return (
-                  <tr key={reservationId} className="border-t border-slate-200 hover:bg-slate-50/70 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-slate-800">{reservation.bookingReference}</td>
-                    <td className="px-4 py-3 text-slate-700">{resolveVehicleLabel(reservation)}</td>
-                    <td className="px-4 py-3 text-slate-700">
-                      <div>{reservation.customerName}</div>
-                      <div className="text-xs text-slate-500">{reservation.customerPhone}</div>
-                    </td>
-                    <td className="px-4 py-3 text-slate-700">
-                      <div>{new Date(reservation.pickupDate).toLocaleDateString()} → {new Date(reservation.returnDate).toLocaleDateString()}</div>
-                      <div className="text-xs text-slate-500">{reservation.rentalDays} jour(s)</div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                          reservationStatusBadgeClass[reservation.status] ?? 'bg-slate-100 text-slate-700 border border-slate-200'
-                        }`}
-                      >
-                        {reservation.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
-                        <>
-                          <Button
-                            size="sm"
-                            className="shadow-sm"
-                            onClick={() => confirmMutation.mutate(reservationId)}
-                            disabled={isActionPending}
-                          >
-                            Accepter
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            className="ml-2 shadow-sm"
-                            onClick={() => rejectMutation.mutate(reservationId)}
-                            disabled={isActionPending}
-                          >
-                            Rejeter
-                          </Button>
-                        </>
-                      )}
-
-                      {canManageReservationStatus && (reservation.status === ReservationStatus.CONFIRMED ||
-                        reservation.status === ReservationStatus.REJECTED) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-slate-300 text-slate-700 hover:bg-slate-100"
-                          onClick={() => pendingMutation.mutate(reservationId)}
-                          disabled={isActionPending}
-                        >
-                          Mettre en attente
-                        </Button>
-                      )}
-
-                      {!canManageReservationStatus && <span className="text-xs text-slate-500">Consultation uniquement</span>}
-
-                      {canManageReservationStatus &&
-                        reservation.status !== ReservationStatus.PENDING &&
-                        reservation.status !== ReservationStatus.CONFIRMED &&
-                        reservation.status !== ReservationStatus.REJECTED && (
-                          <span className="text-xs text-slate-500">Aucune action</span>
-                        )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {actionError && (
+        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-sm font-bold text-red-600 animate-in slide-in-from-top duration-300">
+          {actionError}
         </div>
       )}
+
+      {/* Filters Section */}
+      <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+           <Filter className="w-5 h-5 text-gray-400" />
+           <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Filtres de recherche</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-2 relative">
+            <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <select
+              value={selectedCarId}
+              onChange={(e) => setSelectedCarId(e.target.value)}
+              className="w-full pl-11 pr-10 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-800 cursor-pointer"
+            >
+              <option value="all">Tous les véhicules</option>
+              {vehicleFilterOptions.map((car) => (
+                <option key={car.id} value={car.id}>{car.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full pl-11 pr-10 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-800 cursor-pointer"
+            >
+              {statusOptions.map((status) => (
+                <option key={status.value} value={status.value}>{status.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <Button 
+            variant="outline"
+            className="h-full rounded-2xl border-gray-100 bg-gray-50 hover:bg-gray-100 font-bold transition-all flex items-center gap-2"
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['reservations'] })}
+          >
+            <RefreshCw className={`w-4 h-4 ${reservationsQuery.isFetching ? 'animate-spin' : ''}`} />
+            Actualiser
+          </Button>
+        </div>
+      </div>
+
+      {/* Main Table */}
+      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+        {reservationsQuery.isLoading ? (
+          <div className="p-20 text-center">
+            <div className="w-12 h-12 border-4 border-red-100 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-400 font-bold">Chargement des données...</p>
+          </div>
+        ) : reservationsQuery.isError ? (
+          <div className="p-20 text-center text-red-600 font-bold">Erreur lors du chargement des réservations.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gray-50/50">
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] rounded-tl-[2.5rem]">Référence / Véhicule</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Client</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Dates & Durée</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Statut</th>
+                  <th className="px-6 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] rounded-tr-[2.5rem]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {reservationsQuery.data?.reservations.map((reservation) => {
+                  const reservationId = resolveReservationId(reservation);
+                  return (
+                    <tr key={reservationId} className="group hover:bg-gray-50 transition-all duration-300">
+                      <td className="px-6 py-6 align-middle">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono text-xs font-black text-gray-900 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 self-start">
+                            {reservation.bookingReference}
+                          </span>
+                          <span className="text-xs font-bold text-gray-600 ml-1">{resolveVehicleLabel(reservation)}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 align-middle">
+                        <div className="flex items-start gap-3">
+                           <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-600 border border-red-100 shadow-sm shrink-0">
+                              <User className="w-5 h-5" />
+                           </div>
+                           <div>
+                              <p className="text-sm font-black text-gray-900">{reservation.customerName}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                 <Phone className="w-2.5 h-2.5 text-gray-300" />
+                                 <span className="text-[10px] font-bold text-gray-400">{reservation.customerPhone}</span>
+                              </div>
+                           </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 align-middle">
+                        <div className="flex flex-col gap-1.5 pl-1">
+                          <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                             <span className="text-gray-900">{new Date(reservation.pickupDate).toLocaleDateString()}</span>
+                             <ChevronRight className="w-3 h-3 text-gray-300" />
+                             <span className="text-gray-500 font-medium">{new Date(reservation.returnDate).toLocaleDateString()}</span>
+                          </div>
+                          <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-full border border-red-100 self-start">
+                             {reservation.rentalDays} JOURS
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 align-middle">
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-widest ${
+                            reservationStatusBadgeClass[reservation.status] ?? 'bg-gray-50 text-gray-500 border border-gray-200'
+                          }`}
+                        >
+                          {reservation.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-6 text-right align-middle">
+                        <div className="flex justify-end gap-2">
+                           {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
+                             <>
+                               <Button
+                                 size="sm"
+                                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 px-4 transition-all hover:-translate-y-0.5"
+                                 onClick={() => confirmMutation.mutate(reservationId)}
+                                 disabled={isActionPending}
+                               >
+                                 <Check className="w-4 h-4 mr-1.5" />
+                                 Accepter
+                               </Button>
+                               <Button
+                                 size="sm"
+                                 variant="destructive"
+                                 className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 px-4 transition-all hover:-translate-y-0.5"
+                                 onClick={() => rejectMutation.mutate(reservationId)}
+                                 disabled={isActionPending}
+                               >
+                                 <X className="w-4 h-4 mr-1.5" />
+                                 Rejeter
+                               </Button>
+                             </>
+                           )}
+
+                           {canManageReservationStatus && (reservation.status === ReservationStatus.CONFIRMED ||
+                             reservation.status === ReservationStatus.REJECTED) && (
+                             <Button
+                               size="sm"
+                               variant="outline"
+                               className="border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:text-red-100 transition-all"
+                               onClick={() => pendingMutation.mutate(reservationId)}
+                               disabled={isActionPending}
+                             >
+                                <Clock className="w-4 h-4 mr-1.5" />
+                                Suspendre
+                             </Button>
+                           )}
+
+                           <button className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-all text-gray-400">
+                              <MoreHorizontal className="w-4 h-4" />
+                           </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination Placeholder */}
+      <div className="flex justify-between items-center px-4">
+         <p className="text-xs font-bold text-gray-400">Affichage de {reservationsQuery.data?.reservations?.length || 0} réservations sur {reservationsQuery.data?.count || 0}</p>
+         <div className="flex gap-2">
+            <Button variant="outline" disabled className="h-9 px-4 rounded-xl border-gray-100 font-bold text-gray-400">Précédent</Button>
+            <Button variant="outline" disabled className="h-9 px-4 rounded-xl border-gray-100 font-bold text-gray-400">Suivant</Button>
+         </div>
+      </div>
     </div>
   );
 };

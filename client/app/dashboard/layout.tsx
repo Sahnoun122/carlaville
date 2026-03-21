@@ -1,8 +1,19 @@
 "use client";
-import { useEffect, useState } from 'react';
+
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, LogOut, Car, History, LayoutDashboard } from 'lucide-react';
+import { 
+  Calendar, 
+  LogOut, 
+  Car, 
+  History, 
+  LayoutDashboard, 
+  Settings, 
+  User as UserIcon,
+  ChevronRight,
+  Bell
+} from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -28,67 +39,98 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push('/auth/login');
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
-
   const NavLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
     const isActive = pathname === href;
     return (
       <Link 
         href={href} 
-        className={`flex items-center gap-3 w-full p-3.5 rounded-xl font-bold transition-all shadow-sm border ${
+        className={`group flex items-center justify-between w-full p-4 rounded-2xl font-black transition-all duration-300 ${
           isActive 
-            ? 'bg-red-50 text-red-700 border-red-100 hover:bg-red-100 shadow-sm' 
-            : 'text-gray-400 border-transparent hover:bg-gray-50 hover:text-gray-900'
+            ? 'bg-neutral-900 text-white shadow-xl shadow-neutral-900/20 translate-x-1' 
+            : 'text-gray-400 hover:text-neutral-900 border-transparent hover:bg-gray-50'
         }`}
       >
-        <Icon className={`w-5 h-5 ${isActive ? 'text-red-600' : ''}`} /> 
-        <span>{label}</span>
+        <div className="flex items-center gap-4">
+          <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-red-600' : ''}`} /> 
+          <span className="text-[11px] uppercase tracking-[0.2em]">{label}</span>
+        </div>
+        {isActive && <ChevronRight className="w-4 h-4 text-red-600 animate-in fade-in slide-in-from-left-2" />}
       </Link>
     );
   };
 
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+      <div className="w-16 h-16 border-8 border-red-50 border-t-red-600 rounded-full animate-spin mb-6"></div>
+      <p className="text-gray-400 font-black uppercase tracking-[0.4em] text-[10px]">Chargement sécurisé...</p>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row font-sans text-gray-900">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row font-sans text-neutral-900 selection:bg-red-100 italic selection:text-red-900">
+      
       {/* Sidebar */}
-      <aside className="w-full md:w-72 bg-white border-r border-gray-100 shrink-0 flex flex-col shadow-[1px_0_10px_rgba(0,0,0,0.02)]">
-        {/* Brand/User Area */}
-        <div className="p-8 border-b border-gray-50 bg-[#fff] flex flex-col items-center md:items-start text-center md:text-left">
-          <Link href="/" className="mb-8 block">
-            <span className="text-2xl font-black tracking-tighter text-red-600">Carlaville<span className="text-gray-900">.</span></span>
+      <aside className="w-full md:w-80 bg-white border-r border-gray-100 shrink-0 flex flex-col shadow-[20px_0_60px_rgba(0,0,0,0.02)] z-50">
+        
+        {/* Brand Area */}
+        <div className="p-10 border-b border-gray-50 flex flex-col items-center md:items-start">
+          <Link href="/" className="mb-12 block group">
+            <span className="text-3xl font-black tracking-tighter text-neutral-900 group-hover:text-red-600 transition-colors">Carlaville<span className="text-red-600 group-hover:text-neutral-900 transition-colors">.</span></span>
           </Link>
           
-          <div className="relative group cursor-pointer">
-            <div className="w-20 h-20 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-red-100 group-hover:bg-red-100 transition-colors">
-              <span className="text-3xl font-black">{user?.name ? user.name.charAt(0).toUpperCase() : 'C'}</span>
+          <div className="flex items-center gap-5">
+            <div className="relative group">
+              <div className="w-16 h-16 bg-red-600 text-white rounded-3xl flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:scale-105 transition-all duration-500 overflow-hidden">
+                <div className="absolute inset-0 bg-neutral-900/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span className="text-2xl font-black relative z-10">{user?.name ? user.name.charAt(0).toUpperCase() : 'C'}</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-4 border-white rounded-full shadow-sm"></div>
+            </div>
+            <div>
+               <h2 className="text-sm font-black text-neutral-900 tracking-tight leading-tight">{user?.name}</h2>
+               <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Client Vérifié</span>
+               </div>
             </div>
           </div>
-          
-          <h2 className="text-xl font-black text-gray-900 leading-tight">{user?.name}</h2>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Espace Client</p>
+        </div>
+
+        {/* Global Search / Info Placeholder */}
+        <div className="px-8 py-6">
+           <div className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between text-gray-400">
+              <span className="text-[9px] font-black uppercase tracking-widest">Notification</span>
+              <Bell className="w-4 h-4" />
+           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-6 space-y-2">
+        <nav className="flex-1 p-6 space-y-3">
+          <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mb-4 ml-4">Pilotage</p>
           <NavLink href="/dashboard" icon={LayoutDashboard} label="Tableau de bord" />
           <NavLink href="/dashboard/reservations" icon={Calendar} label="Mes Réservations" />
           <NavLink href="/dashboard/history" icon={History} label="Historique" />
+          
+          <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mt-10 mb-4 ml-4">Services</p>
           <NavLink href="/cars" icon={Car} label="Catalogue Flotte" />
+          <NavLink href="/dashboard/settings" icon={Settings} label="Paramètres" />
         </nav>
 
         {/* Footer actions */}
-        <div className="p-6 border-t border-gray-50 bg-gray-50/30">
+        <div className="p-8 border-t border-gray-50 bg-[#fafafa]/50">
           <button 
             onClick={handleLogout} 
-            className="flex items-center gap-3 w-full p-3.5 rounded-xl text-gray-500 hover:bg-red-50 hover:text-red-700 font-bold transition-all"
+            className="group flex items-center gap-4 w-full p-4 rounded-2xl text-gray-400 hover:bg-red-50 hover:text-red-700 font-black transition-all duration-300"
           >
-            <LogOut className="w-5 h-5" /> 
-            <span>Déconnexion</span>
+            <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:border-red-200 transition-all">
+               <LogOut className="w-4 h-4" /> 
+            </div>
+            <span className="text-[10px] uppercase tracking-widest">Fermer Session</span>
           </button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto bg-[#fafafa]">
         <div className="p-6 md:p-12 lg:p-16">
           {children}
         </div>
