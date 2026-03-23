@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, MapPin, Search } from 'lucide-react';
+import { Calendar, MapPin, Search, Clock } from 'lucide-react';
 
 interface DayControlSettings {
   minRentalDays: number;
@@ -35,9 +35,7 @@ export default function HomeSearchWidget() {
           cache: 'no-store',
         });
 
-        if (!res.ok) {
-          return;
-        }
+        if (!res.ok) return;
 
         const data = await res.json();
         setSettings({
@@ -46,8 +44,7 @@ export default function HomeSearchWidget() {
           maxAdvanceBookingDays: data.maxAdvanceBookingDays,
           allowSameDayBooking: data.allowSameDayBooking,
         });
-      } catch {
-      }
+      } catch {}
     };
 
     loadDayControlSettings();
@@ -67,146 +64,136 @@ export default function HomeSearchWidget() {
     if (!pickupDate) {
       const start = pickupMinDate;
       setPickupDate(start);
-      setReturnDate(addDaysToDateString(start, minRentalDays - 1));
+      setReturnDate(addDaysToDateString(start, minRentalDays));
       return;
     }
 
     if (pickupDate < pickupMinDate) {
       setPickupDate(pickupMinDate);
-      setReturnDate(addDaysToDateString(pickupMinDate, minRentalDays - 1));
+      setReturnDate(addDaysToDateString(pickupMinDate, minRentalDays));
       return;
     }
-
-    if (!returnDate) {
-      setReturnDate(addDaysToDateString(pickupDate, minRentalDays - 1));
-    }
-  }, [pickupDate, returnDate, pickupMinDate, minRentalDays]);
+  }, [pickupDate, pickupMinDate, minRentalDays]);
 
   const returnMinDate = pickupDate
-    ? addDaysToDateString(pickupDate, minRentalDays - 1)
+    ? addDaysToDateString(pickupDate, minRentalDays)
     : pickupMinDate;
   const returnMaxDate = pickupDate
-    ? addDaysToDateString(pickupDate, maxRentalDays - 1)
+    ? addDaysToDateString(pickupDate, maxRentalDays)
     : undefined;
 
   const handlePickupDateChange = (value: string) => {
     setPickupDate(value);
-
-    if (!value) {
-      return;
-    }
-
-    const minAllowedReturn = addDaysToDateString(value, minRentalDays - 1);
-    const maxAllowedReturn = addDaysToDateString(value, maxRentalDays - 1);
-
+    const minAllowedReturn = addDaysToDateString(value, minRentalDays);
     if (!returnDate || returnDate < minAllowedReturn) {
       setReturnDate(minAllowedReturn);
-      return;
-    }
-
-    if (returnDate > maxAllowedReturn) {
-      setReturnDate(maxAllowedReturn);
     }
   };
 
-  const startDate = new Date(pickupDate);
-  const endDate = new Date(returnDate);
-  let days = 1;
-
-  if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
-    const diffTime = endDate.getTime() - startDate.getTime();
-    days = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-  }
-
-  let calendarRuleError = '';
-  if (!Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
-    if (days < minRentalDays) {
-      calendarRuleError = `Durée minimale autorisée: ${minRentalDays} jour(s).`;
-    } else if (days > maxRentalDays) {
-      calendarRuleError = `Durée maximale autorisée: ${maxRentalDays} jour(s).`;
-    }
-  }
-
   const handleSearch = () => {
-    if (calendarRuleError) {
-      return;
-    }
-
     const params = new URLSearchParams();
-    if (location.trim().length > 0) {
-      params.set('location', location.trim());
-    }
+    if (location.trim().length > 0) params.set('location', location.trim());
     params.set('pickupDate', pickupDate);
     params.set('returnDate', returnDate);
     params.set('pickupTime', pickupTime);
     params.set('returnTime', returnTime);
-
     router.push(`/cars?${params.toString()}`);
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 -mb-45 max-w-5xl mx-auto text-left transform translate-y-16 border border-gray-100 relative z-20">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> Départ / Retour</label>
+    <div className="max-w-6xl mx-auto transform translate-y-12 relative z-30 group px-4">
+      <div className="bg-white rounded-2xl lg:rounded-full p-2 lg:p-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)] flex flex-col lg:flex-row items-stretch lg:items-center gap-2 lg:gap-0">
+        
+        {/* Destination Zone */}
+        <div className="flex-[1.2] px-8 py-3 lg:py-0 flex flex-col justify-center min-w-[200px] hover:bg-gray-50/80 transition-colors rounded-t-xl lg:rounded-l-full lg:rounded-tr-none">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+            <MapPin className="w-3 h-3 text-primary" /> Destination
+          </label>
           <input
             type="text"
             value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            placeholder="Aéroport, Ville..."
-            className="p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium"
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Où allez-vous ?"
+            className="bg-transparent border-none p-0 focus:ring-0 outline-none text-sm font-bold text-gray-900 placeholder:text-gray-300 w-full"
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> Date de départ</label>
-          <div className="flex gap-2">
+
+        {/* Pickup Zone */}
+        <div className="flex-1 px-8 py-3 lg:py-0 flex flex-col justify-center hover:bg-gray-50/80 transition-colors">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+            <Calendar className="w-3 h-3 text-primary" /> Départ
+          </label>
+          <div className="flex items-center gap-3">
             <input
               type="date"
               min={pickupMinDate}
               max={pickupMaxDate}
               value={pickupDate}
-              onChange={(event) => handlePickupDateChange(event.target.value)}
-              className="p-4 w-2/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium"
+              onChange={(e) => handlePickupDateChange(e.target.value)}
+              className="bg-transparent border-none p-0 focus:ring-0 outline-none text-xs font-bold text-gray-900 w-full cursor-pointer"
             />
+            <div className="w-px h-3 bg-gray-100 shrink-0"></div>
             <input
               type="time"
               value={pickupTime}
-              onChange={(event) => setPickupTime(event.target.value)}
-              className="p-4 w-1/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium px-2"
+              onChange={(e) => setPickupTime(e.target.value)}
+              className="bg-transparent border-none p-0 focus:ring-0 outline-none text-xs font-bold text-gray-900 w-16 cursor-pointer"
             />
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-bold text-gray-700 flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" /> Date de retour</label>
-          <div className="flex gap-2">
+
+        {/* Return Zone */}
+        <div className="flex-1 px-8 py-3 lg:py-0 flex flex-col justify-center hover:bg-gray-50/80 transition-colors">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+            <Clock className="w-3 h-3 text-primary" /> Retour
+          </label>
+          <div className="flex items-center gap-3">
             <input
               type="date"
               min={returnMinDate}
               max={returnMaxDate}
               value={returnDate}
-              onChange={(event) => setReturnDate(event.target.value)}
-              className="p-4 w-2/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium"
+              onChange={(e) => setReturnDate(e.target.value)}
+              className="bg-transparent border-none p-0 focus:ring-0 outline-none text-xs font-bold text-gray-900 w-full cursor-pointer"
             />
+            <div className="w-px h-3 bg-gray-100 shrink-0"></div>
             <input
               type="time"
               value={returnTime}
-              onChange={(event) => setReturnTime(event.target.value)}
-              className="p-4 w-1/3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary focus:outline-none text-black transition-all font-medium px-2"
+              onChange={(e) => setReturnTime(e.target.value)}
+              className="bg-transparent border-none p-0 focus:ring-0 outline-none text-xs font-bold text-gray-900 w-16 cursor-pointer"
             />
           </div>
         </div>
-        <div className="flex flex-col">
+
+        {/* Search Button Zone */}
+        <div className="lg:pl-6 py-2 lg:py-0 pr-2 lg:pr-3 flex items-center">
           <button
             onClick={handleSearch}
-            disabled={Boolean(calendarRuleError)}
-            className="w-full bg-primary text-white p-4 rounded-xl font-extrabold text-lg hover:bg-primary-hover transition-all flex justify-center items-center gap-2 shadow-lg hover:shadow-xl hover:-translate-y-1 disabled:opacity-70 disabled:hover:translate-y-0"
+            className="w-full lg:w-auto px-12 py-4 bg-primary text-white rounded-xl lg:rounded-full font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-neutral-900 transition-all shadow-xl shadow-red-600/20 active:scale-95 group/btn"
           >
-            <Search className="w-6 h-6" />
+            <Search className="w-4 h-4" />
             Rechercher
           </button>
         </div>
-      </div>
 
+      </div>
+      
+      {/* Quick Info Tags */}
+      <div className="flex flex-wrap items-center gap-4 mt-6 ml-1 opacity-40">
+         <div className="flex items-center gap-1.5">
+            <div className="w-1 h-1 bg-primary rounded-full"></div>
+            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Kilométrage illimité</span>
+         </div>
+         <div className="flex items-center gap-1.5 border-l border-gray-100 pl-4">
+            <div className="w-1 h-1 bg-primary rounded-full"></div>
+            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Assistance 24/7</span>
+         </div>
+         <div className="flex items-center gap-1.5 border-l border-gray-100 pl-4">
+            <div className="w-1 h-1 bg-primary rounded-full"></div>
+            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Assurance comprise</span>
+         </div>
+      </div>
     </div>
   );
 }

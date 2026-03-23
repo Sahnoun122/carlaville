@@ -1,12 +1,11 @@
 import Link from 'next/link';
+import { ChevronRight, Calendar, Bookmark } from 'lucide-react';
 
 interface Blog {
-  id?: string;
   _id?: string;
   title: string;
   slug: string;
   excerpt: string;
-  content: string;
   coverImage?: string;
   images?: string[];
   createdAt?: string;
@@ -14,14 +13,8 @@ interface Blog {
 
 async function getBlogs() {
   try {
-    const res = await fetch('http://localhost:3009/api/blogs?limit=30', {
-      next: { revalidate: 60 },
-    });
-
-    if (!res.ok) {
-      return { blogs: [] as Blog[] };
-    }
-
+    const res = await fetch('http://localhost:3009/api/blogs?limit=30', { next: { revalidate: 60 } });
+    if (!res.ok) return { blogs: [] as Blog[] };
     return (await res.json()) as { blogs: Blog[] };
   } catch {
     return { blogs: [] as Blog[] };
@@ -33,49 +26,37 @@ export default async function BlogsPage() {
   const blogs = data?.blogs || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <div className="min-h-screen bg-gray-50 pt-32 pb-24">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-          <h1 className="mb-4 text-4xl font-black text-gray-900 md:text-5xl">Nos Blogs</h1>
-          <div className="mx-auto h-1.5 w-28 rounded-full bg-primary"></div>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-gray-500">
-            Tous nos conseils voyage, location et mobilité.
-          </p>
+           <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog & Conseils</h1>
+           <p className="text-gray-500 max-w-2xl mx-auto">Retrouvez toutes les actualités de Carlaville et nos conseils pour vos locations de voitures au Maroc.</p>
         </div>
 
         {blogs.length > 0 ? (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {blogs.map((blog) => {
-              const previewImage =
-                typeof blog.coverImage === 'string' && /^(https?:\/\/|\/)/i.test(blog.coverImage)
-                  ? blog.coverImage
-                  : blog.images?.[0];
-
-              return (
-              <Link
-                key={blog.id || blog._id || blog.slug}
-                href={`/blogs/${blog.slug}`}
-                className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-              >
-                {previewImage ? (
-                  <img
-                    src={previewImage}
-                    alt={blog.title}
-                    className="mb-5 h-48 w-full rounded-xl object-cover"
-                  />
-                ) : null}
-                <h2 className="mb-3 text-2xl font-extrabold leading-tight text-gray-900">
-                  {blog.title}
-                </h2>
-                <p className="mb-4 line-clamp-3 text-gray-500">{blog.excerpt}</p>
-                <div className="text-sm font-medium text-primary">Lire l'article</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogs.map((blog) => (
+              <Link key={blog._id} href={`/blogs/${blog.slug}`} className="bg-white rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="h-48 overflow-hidden bg-gray-100">
+                  <img src={blog.coverImage || blog.images?.[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase mb-3">
+                     <Calendar className="w-3 h-3" />
+                     {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : 'Mars 2026'}
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors line-clamp-2">{blog.title}</h2>
+                  <p className="text-gray-500 text-sm line-clamp-3 mb-6">{blog.excerpt}</p>
+                  <div className="text-primary font-bold text-xs flex items-center gap-1 uppercase tracking-wider">
+                     Tout lire <ChevronRight className="w-4 h-4" />
+                  </div>
+                </div>
               </Link>
-              );
-            })}
+            ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center">
-            <p className="text-lg text-gray-500">Aucun blog publié pour le moment.</p>
+          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 italic text-gray-400">
+             Aucun article disponible pour le moment.
           </div>
         )}
       </div>

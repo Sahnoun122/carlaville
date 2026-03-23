@@ -2,7 +2,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Car } from 'lucide-react';
+import { Car, ArrowRight, Loader2 } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -44,41 +44,84 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 bg-gray-50">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl shadow-red-900/5 border-t-4 border-primary">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-red-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <Car className="w-8 h-8" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#f9fafb]">
+      {/* Background Decorations */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50/50 rounded-full blur-[120px] -mr-48 -mt-48 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-50/30 rounded-full blur-[100px] -ml-24 -mb-24"></div>
+      
+      <div className="max-w-md w-full relative z-10 animate-in fade-in zoom-in-95 duration-700">
+        <div className="bg-white p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
+          <div className="text-center mb-12">
+            <Link href="/" className="inline-flex w-16 h-16 bg-red-600 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-red-600/20 hover:scale-110 transition-transform">
+              <Car className="w-8 h-8" />
+            </Link>
+            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">Bon retour !</h2>
+            <p className="text-gray-400 font-medium text-sm">Accédez à votre espace privilégié Carlaville.</p>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900">Connexion</h2>
-          <p className="mt-2 text-sm text-gray-600">Connectez-vous à votre espace client</p>
+          
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center border border-red-100 animate-in shake-x duration-500">
+                {error}
+              </div>
+            )}
+            
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Email</label>
+                <input 
+                  name="email" 
+                  type="email" 
+                  required 
+                  className="input-premium" 
+                  placeholder="name@example.com" 
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Mot de passe</label>
+                  <Link href="/auth/forgot" className="text-[10px] font-black text-red-600 uppercase tracking-[0.1em] hover:underline">Oublié ?</Link>
+                </div>
+                <input 
+                  name="password" 
+                  type="password" 
+                  required 
+                  className="input-premium" 
+                  placeholder="••••••••" 
+                />
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="btn-premium w-full group relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span className="relative z-10 flex items-center justify-center gap-3">
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                  <>Se connecter <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>
+                )}
+              </span>
+            </button>
+            
+            <div className="text-center pt-8 border-t border-gray-50">
+              <p className="text-sm font-medium text-gray-400">
+                Nouveau ici ?{' '}
+                <Link 
+                  href={`/auth/register?redirect=${encodeURIComponent(redirectParams)}`} 
+                  className="font-black text-red-600 hover:text-neutral-900 transition-colors"
+                >
+                  Ouvrir un compte
+                </Link>
+              </p>
+            </div>
+          </form>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && <div className="bg-red-50 text-primary p-3 rounded-lg text-sm text-center font-semibold">{error}</div>}
-          
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label className="sr-only">Email</label>
-              <input name="email" type="email" required className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Adresse email" />
-            </div>
-            <div>
-              <label className="sr-only">Mot de passe</label>
-              <input name="password" type="password" required className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Mot de passe" />
-            </div>
-          </div>
-
-          <div>
-            <button type="submit" disabled={loading} className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70 transition-colors shadow-md">
-              {loading ? 'Connexion...' : 'Se connecter'}
-            </button>
-          </div>
-          
-          <div className="text-center text-sm">
-            <span className="text-gray-600">Pas encore de compte ?</span>{' '}
-            <Link href={`/auth/register?redirect=${encodeURIComponent(redirectParams)}`} className="font-semibold text-primary hover:text-red-700">Créer un compte</Link>
-          </div>
-        </form>
+        <p className="mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
+          Carlaville — Performance & Élégance
+        </p>
       </div>
     </div>
   );
@@ -86,7 +129,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-black text-gray-300 uppercase tracking-widest text-xs">Chargement...</div>}>
       <LoginForm />
     </Suspense>
   );

@@ -2,7 +2,7 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { UserPlus } from 'lucide-react';
+import { UserPlus, ArrowRight, Loader2 } from 'lucide-react';
 
 function RegisterForm() {
   const router = useRouter();
@@ -48,58 +48,72 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 bg-gray-50">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-xl shadow-red-900/5 border-t-4 border-primary">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-red-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserPlus className="w-8 h-8" />
+    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#f9fafb]">
+      {/* Background Decorations */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50/50 rounded-full blur-[120px] -mr-48 -mt-48 animate-pulse"></div>
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-50/30 rounded-full blur-[100px] -ml-24 -mb-24"></div>
+      
+      <div className="max-w-xl w-full relative z-10 animate-in fade-in zoom-in-95 duration-700">
+        <div className="bg-white p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
+          <div className="text-center mb-12">
+            <div className="inline-flex w-16 h-16 bg-neutral-900 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-neutral-900/20 hover:scale-110 transition-transform">
+              <UserPlus className="w-8 h-8" />
+            </div>
+            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">Nous rejoindre</h2>
+            <p className="text-gray-400 font-medium text-sm">Créez votre profil en quelques instants.</p>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900">Nouveau compte</h2>
-          <p className="mt-2 text-sm text-gray-600">Rejoignez Carlaville en quelques clics</p>
+          
+          <form className="space-y-8" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center border border-red-100 animate-in shake-x duration-500">
+                {error}
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Prénom</label>
+                <input name="firstName" type="text" required className="input-premium" placeholder="Jean" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Nom</label>
+                <input name="lastName" type="text" required className="input-premium" placeholder="Dupont" />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Email</label>
+                <input name="email" type="email" required className="input-premium" placeholder="name@example.com" />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Téléphone</label>
+                <input name="phone" type="tel" required className="input-premium" placeholder="+212 ..." />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Mot de passe</label>
+                <input name="password" type="password" required className="input-premium" placeholder="••••••••" />
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} className="btn-premium w-full group relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span className="relative z-10 flex items-center justify-center gap-3">
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                  <>Créer mon compte <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>
+                )}
+              </span>
+            </button>
+            
+            <div className="text-center pt-8 border-t border-gray-50">
+              <p className="text-sm font-medium text-gray-400">
+                Déjà membre ?{' '}
+                <Link href="/auth/login" className="font-black text-red-600 hover:text-neutral-900 transition-colors">Connectez-vous</Link>
+              </p>
+            </div>
+          </form>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && <div className="bg-red-50 text-primary p-3 rounded-lg text-sm text-center font-semibold">{error}</div>}
-          
-          <div className="rounded-md shadow-sm space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                <input name="firstName" type="text" required className="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                <input name="lastName" type="text" required className="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm" />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input name="email" type="email" required className="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm" />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
-              <input name="phone" type="tel" required className="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm" placeholder="+212 ..." />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
-              <input name="password" type="password" required className="appearance-none block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary sm:text-sm" />
-            </div>
-          </div>
-
-          <div>
-            <button type="submit" disabled={loading} className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-primary hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-70 transition-colors shadow-md">
-              {loading ? 'Création...' : 'S\'inscrire'}
-            </button>
-          </div>
-          
-          <div className="text-center text-sm">
-            <span className="text-gray-600">Vous avez déjà un compte ?</span>{' '}
-            <Link href="/auth/login" className="font-semibold text-primary hover:text-red-700">Connectez-vous</Link>
-          </div>
-        </form>
+        <p className="mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
+          Rejoignez Carlaville — Mobilité Supérieure
+        </p>
       </div>
     </div>
   );
@@ -107,7 +121,7 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Chargement...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-black text-gray-300 uppercase tracking-widest text-xs">Chargement...</div>}>
       <RegisterForm />
     </Suspense>
   );
