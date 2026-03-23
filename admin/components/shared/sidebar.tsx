@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { CalendarDays, CarFront, LayoutDashboard, LogOut, Settings, Truck, UserRound, Users, Wrench } from 'lucide-react';
+import { CalendarDays, CarFront, LayoutDashboard, LogOut, Settings, Truck, UserRound, Users, Wrench, DollarSign, TrendingUp } from 'lucide-react';
 import type { ComponentType } from 'react';
 import { useAuth } from '@/providers/auth-provider';
 import { Role } from '@/types';
@@ -12,6 +12,7 @@ const navLinks = {
     { name: 'Blogs', href: '/admin/blogs' },
     { name: 'Utilisateurs', href: '/admin/users' },
     { name: 'Agences', href: '/admin/agencies' },
+    { name: 'Revenus', href: '/admin/revenue' },
     { name: 'Véhicules', href: '/admin/cars' },
     { name: 'Maintenance', href: '/admin/maintenance' },
     { name: 'Réservations', href: '/admin/reservations' },
@@ -58,6 +59,7 @@ export const Sidebar = () => {
     'Paramètres de réservation': Settings,
     Livraisons: Truck,
     Tarification: Settings,
+    'Revenus': TrendingUp,
   };
 
   return (

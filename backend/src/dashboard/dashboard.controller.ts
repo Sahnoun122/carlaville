@@ -16,4 +16,10 @@ export class DashboardController {
 	getReservationManagerDashboard() {
 		return this.dashboardService.getReservationManagerStats();
 	}
+
+	@Roles(Role.ADMIN)
+	@Get('analytics/revenue')
+	getRevenueAnalytics() {
+		return this.dashboardService.getRevenueAnalytics();
+	}
 }

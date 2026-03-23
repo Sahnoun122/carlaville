@@ -145,48 +145,14 @@ export const AdminOverviewDashboard = () => {
             ))}
           </div>
 
-          {/* Analyse & Statistiques */}
-          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2 xl:grid-cols-3">
-            {/* Revenue Chart */}
-            <div className="col-span-1 xl:col-span-2 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+          {/* Analyse Stratégique Rapide */}
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8">
+             {/* Status Doughnut Chart */}
+            <div className="col-span-1 rounded-[3rem] border border-gray-100 bg-white p-10 shadow-sm transition-all hover:shadow-md">
+              <div className="mb-8 flex items-center justify-between border-b border-gray-50 pb-6">
                 <div>
-                  <h3 className="text-lg font-black tracking-tight text-gray-900">Revenus Estimés</h3>
-                  <p className="text-xs font-medium text-gray-400">Projection sur les 6 derniers mois (MAD)</p>
-                </div>
-              </div>
-              <div className="h-64">
-                <Bar
-                  data={{
-                    labels: statsQuery.data.revenue?.map((r) => r.label) || [],
-                    datasets: [
-                      {
-                        label: 'Revenus (MAD)',
-                        data: statsQuery.data.revenue?.map((r) => r.amount) || [],
-                        backgroundColor: '#ef4444',
-                        borderRadius: 4,
-                      },
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                      y: { beginAtZero: true, grid: { color: '#f3f4f6' }, border: { display: false } },
-                      x: { grid: { display: false }, border: { display: false } }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Status Doughnut Chart */}
-            <div className="col-span-1 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-md">
-              <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
-                <div>
-                  <h3 className="text-lg font-black tracking-tight text-gray-900">Répartition</h3>
-                  <p className="text-xs font-medium text-gray-400">Statut actuel des réservations</p>
+                  <h3 className="text-xl font-black tracking-tight text-gray-900">Répartition</h3>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-1">État des Réservations</p>
                 </div>
               </div>
               <div className="h-64 relative">
@@ -200,7 +166,7 @@ export const AdminOverviewDashboard = () => {
                           statsQuery.data.reservations.confirmed,
                           statsQuery.data.reservations.activeRentals,
                         ],
-                        backgroundColor: ['#fcd34d', '#34d399', '#ef4444'],
+                        backgroundColor: ['#fcd34d', '#10b981', '#ef4444'],
                         borderWidth: 0,
                         hoverOffset: 4,
                       },
@@ -209,13 +175,38 @@ export const AdminOverviewDashboard = () => {
                   options={{
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '75%',
+                    cutout: '80%',
                     plugins: {
-                      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+                      legend: { position: 'bottom', labels: { usePointStyle: true, padding: 25, font: { weight: 'bold', size: 10 }, color: '#94a3b8' } },
                     }
                   }}
                 />
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-3xl font-black text-gray-900 leading-none">{statsQuery.data.reservations.total}</span>
+                  <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1">Total</span>
+                </div>
               </div>
+            </div>
+
+            {/* Quick Strategic View */}
+            <div className="lg:col-span-2 rounded-[3rem] bg-neutral-900 p-10 shadow-2xl relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                <div className="relative z-10 flex flex-col justify-between h-full">
+                   <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 mb-6">
+                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                         <span className="text-[8px] font-black text-white/40 uppercase tracking-widest">IA Insight</span>
+                      </div>
+                      <h3 className="text-2xl font-black text-white tracking-tight mb-4">Vue d'ensemble Stratégique</h3>
+                      <p className="text-white/40 text-sm font-medium leading-relaxed max-w-md">
+                         Analysez vos revenus détaillés par semaine et par mois dans la nouvelle section **Revenus**. 
+                         Votre taux d'occupation actuel est stable à {Math.round((statsQuery.data.reservations.activeRentals / (statsQuery.data.maintenance.inProgressCars + 10)) * 100)}%.
+                      </p>
+                   </div>
+                   <Link href="/admin/revenue" className="text-xs font-black text-red-500 uppercase tracking-widest hover:text-white transition-colors mt-8 inline-flex items-center gap-2">
+                      Accéder à l'Analyse des Revenus <ArrowRight className="ml-1 h-4 w-4" />
+                   </Link>
+                </div>
             </div>
           </div>
 

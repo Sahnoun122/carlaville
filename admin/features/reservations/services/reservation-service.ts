@@ -48,6 +48,17 @@ export interface ReservationManagerDashboardStats {
   }>;
 }
 
+export interface RevenueAnalytics {
+  monthly: Array<{ label: string; amount: number }>;
+  weekly: Array<{ label: string; amount: number }>;
+  summary: {
+    totalRevenue: number;
+    avgBookingValue: number;
+    totalBookings: number;
+    growth: number;
+  };
+}
+
 interface GetReservationsParams {
   page: number;
   limit: number;
@@ -97,4 +108,8 @@ export const markReservationPending = async (id: string) => {
 
 export const verifyReservationPayment = async (id: string) => {
   return post<any>(`/payments/${id}/verify`, {});
+};
+
+export const getRevenueAnalytics = async () => {
+  return get<RevenueAnalytics>('/admin/dashboard/analytics/revenue');
 };
