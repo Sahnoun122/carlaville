@@ -76,4 +76,42 @@ export class PaymentsService {
 
     return { received: true };
   }
+
+  async verifyPayment(reservationId: string) {
+    this.logger.log(`Verifying payment for reservation: ${reservationId}`);
+    const reservation = await this.reservationModel.findById(reservationId);
+    if (!reservation) {
+      this.logger.error(`Reservation not found: ${reservationId}`);
+      throw new NotFoundException(`Reservation with id ${reservationId} not found`);
+    }
+
+    if (reservation.paymentStatus === 'paid') {
+      this.logger.log(`Reservation ${reservationId} already paid`);
+      return { success: true, status: 'paid' };
+    }
+
+    if (!reservation.stripePaymentIntentId) {
+      this.logger.error(`No payment intent for reservation: ${reservationId}`);
+      throw new BadRequestException('No payment intent found for this reservation');
+    }
+
+    try {
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(reservation.stripePaymentIntentId);
+      this.logger.log(`Stripe PaymentIntent status for ${reservationId}: ${paymentIntent.status}`);
+
+      if (paymentIntent.status === 'succeeded') {
+        await this.reservationModel.findByIdAndUpdate(reservationId, {
+          paymentStatus: 'paid',
+          status: 'confirmed' as any,
+        });
+        this.logger.log(`Payment confirmed and marked as PAID for ${reservationId}`);
+        return { success: true, status: 'paid' };
+      }
+
+      return { success: false, status: paymentIntent.status };
+    } catch (err) {
+      this.logger.error(`Failed to retrieve payment intent from Stripe: ${err.message}`);
+      throw new BadRequestException(`Stripe Error: ${err.message}`);
+    }
+  }
 }

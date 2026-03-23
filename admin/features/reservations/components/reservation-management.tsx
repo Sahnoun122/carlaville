@@ -29,6 +29,7 @@ import {
   getReservations,
   markReservationPending,
   rejectReservation,
+  verifyReservationPayment,
 } from '@/features/reservations/services/reservation-service';
 import { useAuth } from '@/providers/auth-provider';
 import { PageHeader } from '@/components/shared/page-header';
@@ -57,6 +58,12 @@ const reservationStatusBadgeClass: Record<string, string> = {
   [ReservationStatus.PENDING]: 'bg-amber-50 text-amber-600 border border-amber-100',
   [ReservationStatus.CONFIRMED]: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
   [ReservationStatus.REJECTED]: 'bg-red-50 text-red-600 border border-red-100',
+};
+
+const paymentStatusBadgeClass: Record<string, string> = {
+  paid: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+  unpaid: 'bg-amber-50 text-amber-600 border border-amber-100',
+  failed: 'bg-red-50 text-red-600 border border-red-100',
 };
 
 export const ReservationManagement = () => {
@@ -195,8 +202,16 @@ export const ReservationManagement = () => {
     },
   });
 
+  const verifyMutation = useMutation({
+    mutationFn: verifyReservationPayment,
+    onSuccess: onMutationSuccess,
+    onError: (error: any) => {
+      setActionError(error.message || 'La vérification a échoué.');
+    },
+  });
+
   const isActionPending =
-    confirmMutation.isPending || rejectMutation.isPending || pendingMutation.isPending;
+    confirmMutation.isPending || rejectMutation.isPending || pendingMutation.isPending || verifyMutation.isPending;
 
   const handleCreateReservation = () => {
     if (
@@ -482,6 +497,7 @@ export const ReservationManagement = () => {
                   <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] rounded-tl-[2.5rem]">Référence / Véhicule</th>
                   <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Client</th>
                   <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Dates & Durée</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Paiement</th>
                   <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Statut</th>
                   <th className="px-6 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] rounded-tr-[2.5rem]">Actions</th>
                 </tr>
@@ -523,6 +539,32 @@ export const ReservationManagement = () => {
                           <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-full border border-red-100 self-start">
                              {reservation.rentalDays} JOURS
                           </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 align-middle text-left">
+                        <div className="flex flex-col gap-1.5">
+                          <span
+                            className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest border w-fit ${
+                              paymentStatusBadgeClass[reservation.paymentStatus || 'unpaid']
+                            }`}
+                          >
+                            {reservation.paymentStatus || 'unpaid'}
+                          </span>
+                          {reservation.paymentStatus !== 'paid' && (
+                            <button
+                              className="text-[9px] font-bold text-blue-600 hover:text-blue-800 underline flex items-center gap-1 mt-1 transition-colors"
+                              onClick={() => verifyMutation.mutate(reservationId)}
+                              disabled={verifyMutation.isPending}
+                            >
+                              <RefreshCw className={`w-2.5 h-2.5 ${verifyMutation.isPending ? 'animate-spin' : ''}`} />
+                              Vérifier Stripe
+                            </button>
+                          )}
+                          {reservation.pricingBreakdown?.total && (
+                            <span className="text-xs font-black text-gray-900 ml-1">
+                              {reservation.pricingBreakdown.total.toLocaleString()} MAD
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-6 align-middle">

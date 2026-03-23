@@ -52,6 +52,16 @@ export default function DashboardPage() {
 
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment_success') === 'true') {
+      const rid = params.get('reservation_id');
+      if (rid) {
+        const token = localStorage.getItem('carlaville_token');
+        fetch(`http://localhost:3009/api/payments/${rid}/verify`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }).then(() => fetchReservations());
+      }
       setShowSuccess(true);
       // Clean up URL
       window.history.replaceState({}, '', window.location.pathname);

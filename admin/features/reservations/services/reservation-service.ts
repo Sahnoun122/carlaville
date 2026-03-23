@@ -94,3 +94,7 @@ export const rejectReservation = async (id: string) => {
 export const markReservationPending = async (id: string) => {
   return patch<Reservation>(`/admin/reservations/${id}/pending`);
 };
+
+export const verifyReservationPayment = async (id: string) => {
+  return post<any>(`/payments/${id}/verify`, {});
+};

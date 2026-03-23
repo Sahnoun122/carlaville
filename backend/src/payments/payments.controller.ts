@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, Req } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Req, Param } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { Request } from 'express';
@@ -18,5 +18,10 @@ export class PaymentsController {
     @Headers('stripe-signature') signature: string,
   ) {
     return this.paymentsService.handleWebhook(req.rawBody, signature);
+  }
+
+  @Post(':id/verify')
+  async verifyPayment(@Param('id') id: string) {
+    return this.paymentsService.verifyPayment(id);
   }
 }

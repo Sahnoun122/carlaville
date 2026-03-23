@@ -34,6 +34,8 @@ export interface Reservation {
   selectedExtras?: string[];
   pricingBreakdown?: Record<string, number>;
   status: ReservationStatus;
+  paymentStatus?: 'unpaid' | 'paid' | 'failed';
+  stripePaymentIntentId?: string;
   internalNotes?: string;
   createdAt?: string;
   updatedAt?: string;
