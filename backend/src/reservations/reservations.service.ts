@@ -48,6 +48,12 @@ export class ReservationsService {
       throw new NotFoundException(`Car with id ${dto.carId} not found`);
     }
 
+    if (!car.agencyId) {
+      throw new BadRequestException(
+        `Car with id ${dto.carId} is not associated with any agency. Please contact support.`,
+      );
+    }
+
     const effectiveMinRentalDays =
       typeof car.minRentalDays === 'number' && car.minRentalDays > 0
         ? car.minRentalDays

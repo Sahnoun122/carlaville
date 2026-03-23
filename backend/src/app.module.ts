@@ -13,6 +13,7 @@ import { DeliveriesModule } from './deliveries/deliveries.module';
 import { RolesModule } from './roles/roles.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { PaymentsModule } from './payments/payments.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 
@@ -42,6 +43,7 @@ import configuration from './config/configuration';
     RolesModule,
     BlogsModule,
     UploadsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

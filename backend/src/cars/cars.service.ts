@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Car, CarDocument } from './schemas/car.schema';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
@@ -61,6 +61,9 @@ export class CarsService {
   }
 
   async findById(id: string): Promise<Car> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Car with id ${id} not found (invalid format)`);
+    }
     const car = await this.carModel.findById(id).populate('agencyId').exec();
     if (!car) {
       throw new NotFoundException(`Car with id ${id} not found`);

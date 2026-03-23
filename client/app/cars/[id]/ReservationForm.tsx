@@ -268,10 +268,13 @@ export default function ReservationForm({ car }: { car: any }) {
         throw new Error(backendMessage || 'Erreur lors de la réservation');
       }
 
+      const data = await res.json();
+      const reservationId = data._id || data.id;
+
       setSuccess(true);
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
+        router.push(`/checkout/${reservationId}`);
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       setLoading(false);

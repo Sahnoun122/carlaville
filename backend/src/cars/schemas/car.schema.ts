@@ -22,8 +22,8 @@ export class MaintenanceRecord {
 
 @Schema({ timestamps: true })
 export class Car {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Agency' })
-  agencyId?: MongooseSchema.Types.ObjectId;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Agency', required: true })
+  agencyId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
   brand: string;

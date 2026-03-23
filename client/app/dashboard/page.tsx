@@ -44,10 +44,19 @@ export default function DashboardPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('carlaville_user');
     if (userData) setUser(JSON.parse(userData));
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment_success') === 'true') {
+      setShowSuccess(true);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => setShowSuccess(false), 5000);
+    }
 
     async function fetchReservations() {
       const token = localStorage.getItem('carlaville_token');
@@ -127,6 +136,18 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-12 pb-24 px-4 sm:px-6 lg:px-8 animate-in fade-in duration-1000">
+      
+      {showSuccess && (
+        <div className="fixed top-24 right-8 z-50 bg-neutral-900 border border-white/10 text-white px-8 py-5 rounded-[2rem] shadow-2xl flex items-center gap-4 animate-in slide-in-from-right duration-500">
+          <div className="w-12 h-12 bg-red-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-red-600/30">
+            <CheckCircle2 className="w-6 h-6" />
+          </div>
+          <div>
+            <p className="text-xs font-black uppercase tracking-widest text-red-500 mb-1">Paiement Réussi</p>
+            <p className="text-sm font-bold text-white/90">Votre réservation a été confirmée avec succès.</p>
+          </div>
+        </div>
+      )}
       
       {/* Premium Header Container */}
       <div className="relative overflow-hidden group">

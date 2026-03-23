@@ -61,6 +61,16 @@ export class Reservation {
   @Prop()
   internalNotes: string;
 
+  @Prop({
+    type: String,
+    enum: ['unpaid', 'paid', 'failed'],
+    default: 'unpaid',
+  })
+  paymentStatus: string;
+
+  @Prop()
+  stripePaymentIntentId: string;
+
   @Prop({ required: true, unique: true })
   bookingReference: string;
 }
