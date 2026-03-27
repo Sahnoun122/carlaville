@@ -38,7 +38,7 @@ export default async function Home() {
     <div className="w-full bg-white overflow-x-hidden">
 
       {/* 🚀 Premium Hero Section */}
-      <section className="relative pt-24 lg:pt-32 pb-12 bg-white overflow-hidden min-h-[70vh] lg:min-h-[85vh] flex flex-col justify-center">
+      <section className="relative pt-20 lg:pt-32 pb-12 bg-white overflow-hidden min-h-[60vh] lg:min-h-[85vh] flex flex-col justify-center">
         
         <div className="container mx-auto px-6 relative z-10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-0 pb-16 lg:pb-32">
@@ -75,7 +75,7 @@ export default async function Home() {
 
             {/* Right: Car Image Portfolio Style */}
             <div className="w-full lg:w-[45%] relative z-10 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[500px] lg:max-w-none transform scale-[1.0] lg:scale-[1.25] lg:-translate-x-8 xl:-translate-x-12 translate-y-4 lg:translate-y-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div className="relative w-full max-w-[500px] md:max-w-[700px] lg:max-w-none transform scale-[1.0] md:scale-[1.1] lg:scale-[1.25] lg:-translate-x-8 xl:-translate-x-12 translate-y-4 lg:translate-y-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
                 {/* Visual Background Lines */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] opacity-15 pointer-events-none select-none">
                   <svg viewBox="0 0 200 200" className="w-full h-full text-gray-300">
@@ -112,7 +112,7 @@ export default async function Home() {
             <p className="text-gray-500 text-sm font-medium">Une large gamme adaptée à tous vos besoins de mobilité au Maroc.</p>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
             <CategoryCard title="Citadines" icon={<Zap className="w-5 h-5" />} count="12+ véhicules" href="/cars?category=citadine" />
             <CategoryCard title="Berlines" icon={<Compass className="w-5 h-5" />} count="8+ véhicules" href="/cars?category=berline" />
             <CategoryCard title="SUV & 4x4" icon={<Compass className="w-5 h-5" />} count="15+ véhicules" href="/cars?category=suv" />

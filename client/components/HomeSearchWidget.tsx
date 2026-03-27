@@ -153,7 +153,7 @@ export default function HomeSearchWidget() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto transform translate-y-6 lg:translate-y-12 relative z-30 group px-4 lg:px-0">
+    <div className="max-w-6xl mx-auto transform translate-y-4 lg:translate-y-12 relative z-30 group px-4 lg:px-0">
       {/* Main Search Bar Container */}
       <div className="bg-white lg:bg-gray-50 rounded-3xl lg:rounded-full p-2 lg:p-4 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)] flex flex-col lg:flex-row items-stretch lg:items-center gap-1 lg:gap-0">
         
