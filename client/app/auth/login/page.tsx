@@ -50,7 +50,7 @@ function LoginForm() {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-50/30 rounded-full blur-[100px] -ml-24 -mb-24"></div>
       
       <div className="max-w-md w-full relative z-10 animate-in fade-in zoom-in-95 duration-700">
-        <div className="bg-white p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
+        <div className="bg-gray-50 p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
           <div className="text-center mb-12">
             <Link href="/" className="inline-flex w-16 h-16 bg-red-600 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-red-600/20 hover:scale-110 transition-transform">
               <Car className="w-8 h-8" />
@@ -97,7 +97,7 @@ function LoginForm() {
               disabled={loading} 
               className="btn-premium w-full group relative overflow-hidden"
             >
-              <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="absolute inset-0 bg-gray-50/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="relative z-10 flex items-center justify-center gap-3">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                   <>Se connecter <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>

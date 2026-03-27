@@ -33,7 +33,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
   return (
     <div className="min-h-screen bg-white pt-32 pb-24">
       <div className="container mx-auto px-4 max-w-4xl">
-        <Link href="/blogs" className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-primary mb-8 px-4 py-2 bg-gray-50 rounded-xl">
+        <Link href="/blogs" className="inline-flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-primary mb-8 px-4 py-2 bg-white rounded-xl">
            <ChevronLeft className="w-4 h-4" /> Retour aux articles
         </Link>
 
@@ -65,7 +65,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
              </div>
            )}
            
-           <div className="mt-16 p-8 bg-gray-50 rounded-2xl border border-gray-100 text-center space-y-4">
+           <div className="mt-16 p-8 bg-white rounded-2xl border border-gray-100 text-center space-y-4">
               <Bookmark className="w-10 h-10 text-gray-200 mx-auto" />
               <p className="text-sm font-bold text-gray-500 italic">Merci de lire Carlaville Blog. <br/>Suivez-nous pour plus de conseils mobilité au Maroc.</p>
            </div>

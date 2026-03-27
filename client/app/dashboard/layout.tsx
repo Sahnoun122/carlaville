@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   if (loading) return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <div className="w-16 h-16 border-8 border-red-50 border-t-red-600 rounded-full animate-spin mb-6"></div>
       <p className="text-gray-400 font-black uppercase tracking-[0.4em] text-[10px]">Chargement sécurisé...</p>
     </div>
@@ -70,7 +70,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row font-sans text-neutral-900 selection:bg-red-100 italic selection:text-red-900">
       
       {/* Sidebar */}
-      <aside className="w-full md:w-80 bg-white border-r border-gray-100 shrink-0 flex flex-col shadow-[20px_0_60px_rgba(0,0,0,0.02)] z-50">
+      <aside className="w-full md:w-80 bg-gray-50 border-r border-gray-100 shrink-0 flex flex-col shadow-[20px_0_60px_rgba(0,0,0,0.02)] z-50">
         
         {/* Brand Area */}
         <div className="p-10 border-b border-gray-50 flex flex-col items-center md:items-start">
@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             onClick={handleLogout} 
             className="group flex items-center gap-4 w-full p-4 rounded-2xl text-gray-400 hover:bg-red-50 hover:text-red-700 font-black transition-all duration-300"
           >
-            <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:border-red-200 transition-all">
+            <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:border-red-200 transition-all">
                <LogOut className="w-4 h-4" /> 
             </div>
             <span className="text-[10px] uppercase tracking-widest">Fermer Session</span>
@@ -138,3 +138,4 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     </div>
   );
 }
+

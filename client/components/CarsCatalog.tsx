@@ -160,9 +160,10 @@ const SortBtn = ({ active, onClick, label }: any) => (
     className={`flex-1 py-2 rounded-lg border text-xs font-bold transition-all ${
       active 
       ? 'bg-primary text-white border-primary shadow-sm' 
-      : 'bg-white text-gray-500 border-gray-200 hover:border-primary hover:text-primary'
+      : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-primary hover:text-primary'
     }`}
   >
     {label}
   </button>
 );
+

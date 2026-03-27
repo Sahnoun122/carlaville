@@ -77,7 +77,7 @@ export default function ReservationsPage() {
       </div>
 
       {/* Control Bar */}
-      <div className="bg-white p-4 rounded-xl border border-gray-100 soft-shadow flex flex-col md:flex-row gap-4 mb-10">
+      <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 soft-shadow flex flex-col md:flex-row gap-4 mb-10">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input 
@@ -104,7 +104,7 @@ export default function ReservationsPage() {
 
       {/* Results */}
       {filteredReservations.length === 0 ? (
-        <div className="py-20 text-center bg-white rounded-2xl border border-gray-100 soft-shadow">
+        <div className="py-20 text-center bg-gray-50 rounded-2xl border border-gray-100 soft-shadow">
           <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
              <Calendar className="w-8 h-8" />
           </div>
@@ -114,7 +114,7 @@ export default function ReservationsPage() {
       ) : (
         <div className="space-y-6">
           {filteredReservations.map((res: any) => (
-            <div key={res._id} className="bg-white rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-primary/20 transition-all">
+            <div key={res._id} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-primary/20 transition-all">
               <div className="p-6 flex flex-col lg:flex-row gap-6 lg:items-center">
                  
                  {/* Car Image Small */}
@@ -130,7 +130,7 @@ export default function ReservationsPage() {
                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${
                          ['pending', 'rejected', 'cancelled'].includes(res.status) ? 'bg-amber-50 text-amber-600 border-amber-100' :
                          ['confirmed', 'active-rental', 'completed', 'delivered', 'returned', 'ready-for-delivery', 'in-delivery'].includes(res.status) ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                         'bg-gray-100 text-gray-500 border-gray-200'
+                         'bg-gray-50 text-gray-500 border-gray-200'
                        }`}>
                          {res.status}
                        </span>
@@ -176,3 +176,4 @@ const InfoItem = ({ icon, text }: any) => (
      {text}
   </div>
 );
+

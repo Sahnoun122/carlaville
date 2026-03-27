@@ -32,7 +32,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="relative z-10 p-12 lg:p-14">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/5 backdrop-blur-md rounded-full border border-white/10 mb-6 text-white/40">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-gray-50/5 backdrop-blur-md rounded-full border border-white/10 mb-6 text-white/40">
              <Shield className="w-3 h-3" />
              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-400">Compte Sécurisé</span>
           </div>
@@ -47,7 +47,7 @@ export default function SettingsPage() {
         
         {/* Profile Section */}
         <div className="lg:col-span-2 space-y-10">
-          <section className="bg-white p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.06)] relative overflow-hidden group">
+          <section className="bg-gray-50 p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.06)] relative overflow-hidden group">
             <h2 className="text-3xl font-black text-neutral-900 tracking-tighter mb-10 flex items-center gap-4">
               <UserIcon className="w-8 h-8 text-red-600" />
               Profil Utilisateur
@@ -73,7 +73,7 @@ export default function SettingsPage() {
                        type="email" 
                        defaultValue={user?.email || 'mon-email@carlaville.ma'} 
                        disabled
-                       className="w-full pl-16 pr-6 py-5 bg-gray-100 border-none rounded-[1.5rem] font-bold text-gray-400 cursor-not-allowed"
+                       className="w-full pl-16 pr-6 py-5 bg-gray-50 border-none rounded-[1.5rem] font-bold text-gray-400 cursor-not-allowed"
                      />
                   </div>
                </div>
@@ -88,7 +88,7 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section className="bg-white p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.06)]">
+          <section className="bg-gray-50 p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_30px_70px_-20px_rgba(0,0,0,0.06)]">
             <h2 className="text-3xl font-black text-neutral-900 tracking-tighter mb-10 flex items-center gap-4">
               <Lock className="w-8 h-8 text-neutral-400" />
               Sécurité & Mot de passe
@@ -129,7 +129,7 @@ export default function SettingsPage() {
                         <p className="text-sm font-black text-white mb-0.5">{pref.label}</p>
                         <p className="text-[10px] text-white/30 font-medium leading-tight">{pref.desc}</p>
                      </div>
-                     <input type="checkbox" defaultChecked className="mt-1 w-6 h-6 rounded-lg bg-white/5 border-white/10 text-red-600 focus:ring-red-500/20" />
+                     <input type="checkbox" defaultChecked className="mt-1 w-6 h-6 rounded-lg bg-gray-50/5 border-white/10 text-red-600 focus:ring-red-500/20" />
                   </label>
                 ))}
              </div>
@@ -153,3 +153,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+

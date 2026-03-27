@@ -201,7 +201,7 @@ export default function ReservationForm({ car }: { car: any }) {
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Options supplémentaires</p>
               <div className="space-y-2">
                 {applicableExtras.map((extra) => (
-                  <label key={extra.id} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-gray-50/50 cursor-pointer hover:border-primary/30 transition-colors">
+                  <label key={extra.id} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white cursor-pointer hover:border-primary/30 transition-colors">
                     <div className="flex items-center gap-3">
                       <input 
                         type="checkbox" 

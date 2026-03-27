@@ -2,7 +2,7 @@
 
 export default function RootLoading() {
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-gray-50">
       <div className="relative animate-fade-in flex flex-col items-center">
         {/* CSS Reconstruction of the Carlaville Logo */}
         <div className="flex items-center text-4xl md:text-5xl font-extrabold tracking-tighter text-gray-900 select-none mb-8">
@@ -15,7 +15,7 @@ export default function RootLoading() {
         </div>
         
         {/* Loading Progress Bar */}
-        <div className="w-48 h-1 bg-gray-100 rounded-full overflow-hidden relative">
+        <div className="w-48 h-1 bg-gray-50 rounded-full overflow-hidden relative">
           <div className="absolute inset-0 bg-primary w-2/3 rounded-full animate-[loading_1.5s_ease-in-out_infinite]"></div>
         </div>
         

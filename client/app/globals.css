@@ -7,7 +7,7 @@
 
 /* Base Professional Styles */
 body {
-  @apply bg-white text-gray-900;
+  @apply bg-gray-50 text-gray-900;
   font-family: 'Inter', sans-serif;
 }
 
@@ -18,7 +18,7 @@ body {
   }
   
   .glass {
-    @apply bg-white/90 backdrop-blur-md border border-gray-100;
+    @apply bg-gray-50/90 backdrop-blur-md border border-gray-100;
   }
 
   .btn-premium {
@@ -30,7 +30,8 @@ body {
   }
 
   .card-simple {
-    @apply bg-white border border-gray-100 rounded-2xl p-6 soft-shadow;
+    @apply bg-gray-50 border border-gray-100 rounded-2xl p-6;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   }
 }
 
@@ -43,3 +44,4 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+

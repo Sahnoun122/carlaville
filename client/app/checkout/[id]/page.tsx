@@ -35,7 +35,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   }, [id]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-20">
+    <div className="min-h-screen bg-white pt-28 pb-20">
       <div className="container mx-auto px-4 max-w-4xl">
         <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-primary mb-10">
            <ArrowLeft className="w-4 h-4" /> Retour au compte
@@ -49,7 +49,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Finaliser ma réservation</h1>
                  </div>
                  
-                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                 <div className="bg-white rounded-xl p-6 border border-gray-100">
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Référence</p>
                     <p className="text-lg font-black text-gray-900">#{id.slice(-8).toUpperCase()}</p>
                  </div>

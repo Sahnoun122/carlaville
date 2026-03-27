@@ -41,7 +41,7 @@ export default function Navbar() {
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled || isAuthPage 
-        ? 'bg-white/80 backdrop-blur-xl border-b border-gray-100 py-3 shadow-sm' 
+        ? 'bg-gray-50/80 backdrop-blur-xl border-b border-gray-100 py-3 shadow-sm' 
         : 'bg-transparent py-5'
       }`}
     >
@@ -100,30 +100,51 @@ export default function Navbar() {
         <div className="flex lg:hidden items-center gap-4">
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-neutral-900 hover:bg-gray-100 rounded-xl transition-colors"
+            className="p-2.5 text-gray-900 bg-gray-100 rounded-xl transition-all active:scale-95"
+            aria-label="Toggle Menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      <div className={`lg:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 p-6 flex flex-col gap-6 shadow-2xl transition-all duration-500 origin-top ${mobileMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
-          <nav className="flex flex-col gap-4">
-            <MobileNavLink href="/" active={pathname === '/'}>Accueil</MobileNavLink>
-            <MobileNavLink href="/cars" active={pathname.startsWith('/cars')}>Véhicules</MobileNavLink>
-            <MobileNavLink href="/blogs" active={pathname.startsWith('/blogs')}>Blogs</MobileNavLink>
-            <MobileNavLink href="/about" active={pathname === '/about'}>À Propos</MobileNavLink>
-          </nav>
-          <div className="pt-6 border-t border-gray-50 flex flex-col gap-4">
-             {isAuthenticated ? (
-               <Link href="/dashboard" className="w-full py-4 bg-neutral-900 text-white text-center font-black rounded-2xl">Dashboard</Link>
-             ) : (
-               <>
-                 <Link href="/auth/login" className="w-full py-4 text-center font-black text-neutral-900 bg-gray-50 rounded-2xl">Connexion</Link>
-                 <Link href="/auth/register" className="w-full py-4 bg-red-600 text-white text-center font-black rounded-2xl">S'inscrire</Link>
-               </>
-             )}
+      {/* Mobile Menu - Enhanced with Glassmorphism */}
+      <div className={`lg:hidden fixed inset-x-0 top-[72px] bg-white/95 backdrop-blur-2xl border-b border-gray-100 shadow-2xl transition-all duration-500 ease-in-out origin-top z-40 ${
+        mobileMenuOpen ? 'opacity-100 scale-y-100 translate-y-0' : 'opacity-0 scale-y-0 -translate-y-4 pointer-events-none'
+      }`}>
+          <div className="p-8 flex flex-col gap-8">
+            <nav className="flex flex-col gap-6">
+              <MobileNavLink href="/" active={pathname === '/'}>Accueil</MobileNavLink>
+              <MobileNavLink href="/cars" active={pathname.startsWith('/cars')}>Véhicules</MobileNavLink>
+              <MobileNavLink href="/blogs" active={pathname.startsWith('/blogs')}>Articles & Conseils</MobileNavLink>
+              <MobileNavLink href="/about" active={pathname === '/about'}>L'agence Carlaville</MobileNavLink>
+            </nav>
+            
+            <div className="pt-8 border-t border-gray-100 flex flex-col gap-4">
+               {isAuthenticated ? (
+                 <Link 
+                   href="/dashboard" 
+                   className="w-full py-4 bg-gray-900 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-gray-200"
+                 >
+                   Accéder au Dashboard
+                 </Link>
+               ) : (
+                 <>
+                   <Link 
+                     href="/auth/login" 
+                     className="w-full py-4 text-center font-black text-gray-900 bg-gray-50 rounded-2xl text-xs uppercase tracking-widest border border-gray-100"
+                   >
+                     Se Connecter
+                   </Link>
+                   <Link 
+                     href="/auth/register" 
+                     className="w-full py-4 bg-red-600 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-red-500/20"
+                   >
+                     Créer un compte
+                   </Link>
+                 </>
+               )}
+            </div>
           </div>
       </div>
     </header>
@@ -154,3 +175,4 @@ const MobileNavLink = ({ href, children, active }: any) => (
     {children}
   </Link>
 );
+

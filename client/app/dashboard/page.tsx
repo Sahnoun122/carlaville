@@ -123,7 +123,7 @@ export default function DashboardPage() {
          </div>
 
          {lastReservation ? (
-           <div className="bg-white p-6 rounded-2xl border border-gray-100 soft-shadow flex flex-col md:flex-row gap-8 items-center">
+           <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 soft-shadow flex flex-col md:flex-row gap-8 items-center">
               <div className="w-full md:w-48 h-32 bg-gray-50 rounded-xl flex items-center justify-center p-4 shrink-0">
                  {(lastReservation.carId?.images?.[0] || lastReservation.carId?.imageUrl) ? (
                    <img src={lastReservation.carId?.images?.[0] || lastReservation.carId?.imageUrl} className="max-w-full max-h-full object-contain" alt="" />
@@ -166,7 +166,7 @@ export default function DashboardPage() {
 }
 
 const StatsCard = ({ icon, label, value }: any) => (
-  <div className="bg-white p-6 rounded-2xl border border-gray-100 soft-shadow flex items-center gap-6">
+  <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 soft-shadow flex items-center gap-6">
      <div className="w-12 h-12 bg-gray-50 text-primary rounded-xl flex items-center justify-center shrink-0">
         {icon}
      </div>
@@ -176,3 +176,4 @@ const StatsCard = ({ icon, label, value }: any) => (
      </div>
   </div>
 );
+

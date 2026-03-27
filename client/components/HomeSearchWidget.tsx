@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, MapPin, Search, Clock } from 'lucide-react';
+import { Calendar, MapPin, Search, Clock, Plane, Zap, Shield } from 'lucide-react';
 
 interface DayControlSettings {
   minRentalDays: number;
@@ -12,6 +12,22 @@ interface DayControlSettings {
 }
 
 const formatDate = (value: Date) => value.toISOString().split('T')[0];
+
+const AIRPORTS = [
+  { city: 'Casablanca', name: 'Aéroport Mohammed V', code: 'CMN' },
+  { city: 'Marrakech', name: 'Aéroport Menara', code: 'RAK' },
+  { city: 'Agadir', name: 'Aéroport Al Massira', code: 'AGA' },
+  { city: 'Tanger', name: 'Aéroport Ibn Battouta', code: 'TNG' },
+  { city: 'Rabat', name: 'Aéroport Rabat-Salé', code: 'RBA' },
+  { city: 'Fès', name: 'Aéroport Saïss', code: 'FEZ' },
+  { city: 'Nador', name: 'Aéroport Al Aroui', code: 'NDR' },
+  { city: 'Oujda', name: 'Aéroport Angads', code: 'OJD' },
+  { city: 'Tétouan', name: 'Aéroport Saniat R\'mel', code: 'TTU' },
+  { city: 'Dakhla', name: 'Aéroport de Dakhla', code: 'VIL' },
+  { city: 'Laâyoune', name: 'Aéroport Hassan I', code: 'EUN' },
+  { city: 'Essaouira', name: 'Aéroport Mogador', code: 'ESU' },
+  { city: 'Ouarzazate', name: 'Aéroport de Ouarzazate', code: 'OZZ' },
+];
 
 const addDaysToDateString = (dateString: string, days: number) => {
   const date = new Date(dateString);
@@ -27,6 +43,42 @@ export default function HomeSearchWidget() {
   const [returnDate, setReturnDate] = useState('');
   const [pickupTime, setPickupTime] = useState('10:00');
   const [returnTime, setReturnTime] = useState('10:00');
+
+  // Autocomplete State
+  const [suggestions, setSuggestions] = useState(AIRPORTS);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showDropdown && (event.target as HTMLElement).closest('.airport-dropdown-container') === null) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showDropdown]);
+
+  const handleLocationChange = (val: string) => {
+    setLocation(val);
+    if (val.length > 0) {
+      const searchVal = val.toLowerCase();
+      const filtered = AIRPORTS.filter(a => 
+        a.city.toLowerCase().includes(searchVal) || 
+        a.code.toLowerCase().includes(searchVal) ||
+        (a.name.toLowerCase().replace('aéroport', '').trim().includes(searchVal))
+      );
+      setSuggestions(filtered);
+      setShowDropdown(true);
+    } else {
+      setSuggestions(AIRPORTS);
+      setShowDropdown(false);
+    }
+  };
+
+  const selectAirport = (airport: any) => {
+    setLocation(`${airport.city} (${airport.code})`);
+    setShowDropdown(false);
+  };
 
   useEffect(() => {
     const loadDayControlSettings = async () => {
@@ -101,26 +153,49 @@ export default function HomeSearchWidget() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto transform translate-y-12 relative z-30 group px-4">
-      <div className="bg-white rounded-2xl lg:rounded-full p-2 lg:p-3 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)] flex flex-col lg:flex-row items-stretch lg:items-center gap-2 lg:gap-0">
+    <div className="max-w-6xl mx-auto transform translate-y-6 lg:translate-y-12 relative z-30 group px-4 lg:px-0">
+      {/* Main Search Bar Container */}
+      <div className="bg-white lg:bg-gray-50 rounded-3xl lg:rounded-full p-2 lg:p-4 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.15)] flex flex-col lg:flex-row items-stretch lg:items-center gap-1 lg:gap-0">
         
         {/* Destination Zone */}
-        <div className="flex-[1.2] px-8 py-3 lg:py-0 flex flex-col justify-center min-w-[200px] hover:bg-gray-50/80 transition-colors rounded-t-xl lg:rounded-l-full lg:rounded-tr-none">
-          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+        <div className="flex-[1.2] px-6 lg:px-12 py-4 lg:py-0 flex flex-col justify-center min-w-[200px] hover:bg-gray-50 transition-all duration-300 rounded-2xl lg:rounded-l-full lg:rounded-tr-none relative airport-dropdown-container border-b lg:border-b-0 lg:border-r border-gray-100/50">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2 pl-1">
             <MapPin className="w-3 h-3 text-primary" /> Destination
           </label>
           <input
             type="text"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => handleLocationChange(e.target.value)}
+            onFocus={() => location.length > 0 && setShowDropdown(true)}
             placeholder="Où allez-vous ?"
-            className="bg-transparent border-none p-0 focus:ring-0 outline-none text-sm font-bold text-gray-900 placeholder:text-gray-300 w-full"
+            className="bg-transparent border-none p-0 focus:ring-0 outline-none text-sm font-bold text-gray-900 placeholder:text-gray-300 w-full pl-1"
           />
+
+          {/* Airport Suggestions Dropdown - Compact Version */}
+          {showDropdown && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 w-full lg:w-[280px] bg-gray-50 mt-2 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="max-h-[220px] overflow-y-auto airport-scroll">
+                {suggestions.map((airport, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => selectAirport(airport)}
+                    className="px-5 py-2.5 hover:bg-primary hover:text-white cursor-pointer flex items-center justify-between group/item transition-all border-b border-gray-50 last:border-0"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold leading-tight">{airport.city}</span>
+                      <span className="text-[9px] opacity-60 truncate max-w-[150px] leading-tight mt-0.5">{airport.name.replace('Aéroport ', '')}</span>
+                    </div>
+                    <span className="text-[10px] font-black opacity-40 group-hover/item:opacity-100 transition-opacity">{airport.code}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Pickup Zone */}
-        <div className="flex-1 px-8 py-3 lg:py-0 flex flex-col justify-center hover:bg-gray-50/80 transition-colors">
-          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+        <div className="flex-1 px-6 lg:px-12 py-4 lg:py-0 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-gray-100/50 hover:bg-gray-50 transition-all duration-300 rounded-xl lg:rounded-none">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
             <Calendar className="w-3 h-3 text-primary" /> Départ
           </label>
           <div className="flex items-center gap-3">
@@ -132,7 +207,7 @@ export default function HomeSearchWidget() {
               onChange={(e) => handlePickupDateChange(e.target.value)}
               className="bg-transparent border-none p-0 focus:ring-0 outline-none text-xs font-bold text-gray-900 w-full cursor-pointer"
             />
-            <div className="w-px h-3 bg-gray-100 shrink-0"></div>
+            <div className="w-px h-3 bg-gray-50 shrink-0"></div>
             <input
               type="time"
               value={pickupTime}
@@ -143,8 +218,8 @@ export default function HomeSearchWidget() {
         </div>
 
         {/* Return Zone */}
-        <div className="flex-1 px-8 py-3 lg:py-0 flex flex-col justify-center hover:bg-gray-50/80 transition-colors">
-          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+        <div className="flex-1 px-6 lg:px-12 py-4 lg:py-0 flex flex-col justify-center hover:bg-gray-50 transition-all duration-300 rounded-xl lg:rounded-none">
+          <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
             <Clock className="w-3 h-3 text-primary" /> Retour
           </label>
           <div className="flex items-center gap-3">
@@ -156,7 +231,7 @@ export default function HomeSearchWidget() {
               onChange={(e) => setReturnDate(e.target.value)}
               className="bg-transparent border-none p-0 focus:ring-0 outline-none text-xs font-bold text-gray-900 w-full cursor-pointer"
             />
-            <div className="w-px h-3 bg-gray-100 shrink-0"></div>
+            <div className="w-px h-3 bg-gray-50 shrink-0"></div>
             <input
               type="time"
               value={returnTime}
@@ -167,33 +242,32 @@ export default function HomeSearchWidget() {
         </div>
 
         {/* Search Button Zone */}
-        <div className="lg:pl-6 py-2 lg:py-0 pr-2 lg:pr-3 flex items-center">
+        <div className="lg:pl-10 p-2 lg:py-0 pr-2 lg:pr-5 flex items-center">
           <button
             onClick={handleSearch}
-            className="w-full lg:w-auto px-12 py-4 bg-primary text-white rounded-xl lg:rounded-full font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-neutral-900 transition-all shadow-xl shadow-red-600/20 active:scale-95 group/btn"
+            className="w-full lg:w-auto px-10 lg:px-14 py-4 bg-primary text-white rounded-2xl lg:rounded-full font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-neutral-900 transition-all duration-300 shadow-xl shadow-red-600/20 active:scale-95 group/btn h-[56px] lg:h-[64px] hover:scale-[1.02]"
           >
-            <Search className="w-4 h-4" />
+            <Search className="w-4 h-4 lg:w-5 lg:h-5" />
             Rechercher
           </button>
         </div>
 
       </div>
       
-      {/* Quick Info Tags */}
-      <div className="flex flex-wrap items-center gap-4 mt-6 ml-1 opacity-40">
-         <div className="flex items-center gap-1.5">
-            <div className="w-1 h-1 bg-primary rounded-full"></div>
-            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Kilométrage illimité</span>
-         </div>
-         <div className="flex items-center gap-1.5 border-l border-gray-100 pl-4">
-            <div className="w-1 h-1 bg-primary rounded-full"></div>
-            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Assistance 24/7</span>
-         </div>
-         <div className="flex items-center gap-1.5 border-l border-gray-100 pl-4">
-            <div className="w-1 h-1 bg-primary rounded-full"></div>
-            <span className="text-[8px] font-bold text-gray-500 uppercase tracking-widest">Assurance comprise</span>
-         </div>
+      {/* Quick Info Tags - Optimized Premium Look */}
+      <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8 ml-1">
+         <InfoTag icon={<Zap className="w-3 h-3 text-primary" />} text="Kilométrage illimité" />
+         <InfoTag icon={<Shield className="w-3 h-3 text-primary" />} text="Assurance comprise" />
+         <InfoTag icon={<Clock className="w-3 h-3 text-primary" />} text="Assistance 24/7" />
       </div>
     </div>
   );
 }
+
+const InfoTag = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
+  <div className="flex items-center gap-2 px-4 py-2 bg-gray-50/50 backdrop-blur-sm border border-gray-100 rounded-full shadow-sm">
+    {icon}
+    <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{text}</span>
+  </div>
+);
+

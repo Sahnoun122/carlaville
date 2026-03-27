@@ -29,7 +29,7 @@ export default async function CarsPage({
   return (
     <div className="min-h-screen bg-[#f9fafb] pb-24">
       {/* Premium Header Section */}
-      <div className="bg-white border-b border-gray-100 pt-32 pb-16 relative overflow-hidden">
+      <div className="bg-gray-50 border-b border-gray-100 pt-32 pb-16 relative overflow-hidden">
         {/* Soft Background Elements */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-50/50 rounded-full blur-[100px] -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-red-50/20 rounded-full blur-[80px] -ml-16 -mb-16"></div>
@@ -46,7 +46,7 @@ export default async function CarsPage({
               <div className="hidden lg:flex flex-col items-end text-right">
                  <div className="flex -space-x-4 mb-4">
                     {[1,2,3,4].map(i => (
-                      <div key={i} className="w-12 h-12 rounded-full border-4 border-white bg-gray-100"></div>
+                      <div key={i} className="w-12 h-12 rounded-full border-4 border-white bg-gray-50"></div>
                     ))}
                     <div className="w-12 h-12 rounded-full border-4 border-white bg-neutral-900 flex items-center justify-center text-[10px] font-black text-white">+50</div>
                  </div>
@@ -60,7 +60,7 @@ export default async function CarsPage({
         {cars && cars.length > 0 ? (
           <CarsCatalog initialCars={cars} initialSearch={initialSearch} />
         ) : (
-          <div className="text-center py-32 bg-white rounded-[4rem] border-4 border-dashed border-gray-50 max-w-3xl mx-auto flex flex-col items-center">
+          <div className="text-center py-32 bg-gray-50 rounded-[4rem] border-4 border-dashed border-gray-50 max-w-3xl mx-auto flex flex-col items-center">
             <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200 mb-6">
                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             </div>
@@ -72,3 +72,4 @@ export default async function CarsPage({
     </div>
   );
 }
+

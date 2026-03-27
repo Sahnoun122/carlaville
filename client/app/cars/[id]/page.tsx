@@ -27,7 +27,7 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-20">
+    <div className="min-h-screen bg-white pt-28 pb-20">
       <div className="container mx-auto px-4">
         
         {/* Simple Navigation */}
@@ -54,14 +54,14 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
                         <MapPin className="w-4 h-4" /> {car.city}
                      </div>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 text-right min-w-[140px]">
+                  <div className="bg-white p-4 rounded-xl border border-gray-100 text-right min-w-[140px]">
                      <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Tarif de base</p>
                      <p className="text-2xl font-black text-gray-900 tracking-tight">{car.dailyPrice} MAD <span className="text-xs font-normal text-gray-400">/ jour</span></p>
                   </div>
                </div>
 
                {/* Image Display */}
-               <div className="h-[300px] md:h-[400px] w-full bg-gray-50 rounded-2xl flex items-center justify-center p-8 mb-8 border border-gray-100">
+               <div className="h-[300px] md:h-[400px] w-full bg-white rounded-2xl flex items-center justify-center p-8 mb-8 border border-gray-100">
                   {previewImage ? (
                     <img src={previewImage} alt={`${car.brand} ${car.model}`} className="max-w-full max-h-full object-contain" />
                   ) : (
@@ -108,7 +108,7 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
 }
 
 const SpecCard = ({ icon, label, value }: any) => (
-  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col items-center text-center">
+  <div className="bg-white p-4 rounded-xl border border-gray-100 flex flex-col items-center text-center">
      <div className="text-primary mb-2 opacity-80">{icon}</div>
      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
      <p className="text-sm font-bold text-gray-900 mt-1">{value}</p>

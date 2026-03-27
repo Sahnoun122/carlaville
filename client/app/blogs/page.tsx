@@ -36,8 +36,8 @@ export default async function BlogsPage() {
         {blogs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogs.map((blog) => (
-              <Link key={blog._id} href={`/blogs/${blog.slug}`} className="bg-white rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="h-48 overflow-hidden bg-gray-100">
+              <Link key={blog._id} href={`/blogs/${blog.slug}`} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:shadow-md transition-shadow">
+                <div className="h-48 overflow-hidden bg-gray-50">
                   <img src={blog.coverImage || blog.images?.[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                 </div>
                 <div className="p-6">
@@ -55,7 +55,7 @@ export default async function BlogsPage() {
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-100 italic text-gray-400">
+          <div className="text-center py-20 bg-gray-50 rounded-2xl border border-gray-100 italic text-gray-400">
              Aucun article disponible pour le moment.
           </div>
         )}
@@ -63,3 +63,4 @@ export default async function BlogsPage() {
     </div>
   );
 }
+
