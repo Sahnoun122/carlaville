@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "invalid_credentials": "Invalid credentials.",
+    "email_taken": "This email is already taken.",
+    "not_authorized": "You are not authorized to access this resource."
+  },
+  "common": {
+    "success": "Operation successful.",
+    "error": "An error occurred."
+  }
+}

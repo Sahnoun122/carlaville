@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "invalid_credentials": "Identifiants invalides.",
+    "email_taken": "Cet email est déjà utilisé.",
+    "not_authorized": "Vous n'êtes pas autorisé à accéder à cette ressource."
+  },
+  "common": {
+    "success": "Opération réussie.",
+    "error": "Une erreur est survenue."
+  }
+}

@@ -16,9 +16,26 @@ import { UploadsModule } from './uploads/uploads.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
+import * as path from 'path';
+import {
+  AcceptLanguageResolver,
+  I18nModule,
+  HeaderResolver,
+} from 'nestjs-i18n';
 
 @Module({
   imports: [
+    I18nModule.forRoot({
+      fallbackLanguage: 'fr',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [
+        new HeaderResolver(['x-custom-lang']),
+        AcceptLanguageResolver,
+      ],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',

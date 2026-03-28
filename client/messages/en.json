@@ -1,0 +1,18 @@
+{
+  "home": {
+    "title": "Welcome to CarLaville",
+    "subtitle": "Rent the car of your dreams with ease",
+    "search": "Search for a car",
+    "exclusive_offers": "Exclusive offers"
+  },
+  "nav": {
+    "home": "Home",
+    "cars": "Cars",
+    "about": "About",
+    "contact": "Contact",
+    "login": "Login"
+  },
+  "footer": {
+    "rights": "All rights reserved"
+  }
+}

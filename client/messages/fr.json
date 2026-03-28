@@ -1,0 +1,18 @@
+{
+  "home": {
+    "title": "Bienvenue chez CarLaville",
+    "subtitle": "Louez la voiture de vos rêves en toute simplicité",
+    "search": "Rechercher une voiture",
+    "exclusive_offers": "Offres exclusives"
+  },
+  "nav": {
+    "home": "Accueil",
+    "cars": "Voitures",
+    "about": "À propos",
+    "contact": "Contact",
+    "login": "Connexion"
+  },
+  "footer": {
+    "rights": "Tous droits réservés"
+  }
+}

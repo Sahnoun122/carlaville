@@ -77,7 +77,6 @@ export class Reservation {
 
 export const ReservationSchema = SchemaFactory.createForClass(Reservation);
 
-ReservationSchema.index({ bookingReference: 1 });
 ReservationSchema.index({ agencyId: 1 });
 ReservationSchema.index({ carId: 1 });
 ReservationSchema.index({ assignedDeliveryAgentId: 1 });

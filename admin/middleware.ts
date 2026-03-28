@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get('token');
   const { pathname } = req.nextUrl;
 
-  if (!token && pathname !== '/login') {
+  const token = req.cookies.get('token');
+  
+  const isAuthPage = pathname === '/login';
+  
+  if (!token && !isAuthPage && !pathname.includes('_next') && !pathname.includes('favicon.ico')) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  if (token && pathname === '/login') {
+  if (token && isAuthPage) {
     return NextResponse.redirect(new URL('/', req.url));
   }
-
-  // Add role-based route protection here if needed
-  // For example:
-  // if (token && pathname.startsWith('/admin')) {
-  //   // decode token and check role
-  // }
 
   return NextResponse.next();
 }
