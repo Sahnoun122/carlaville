@@ -56,6 +56,8 @@ export const BlogManagement = () => {
       setSubmitError(null);
       setIsModalOpen(false);
       setFormValues(initialFormValues);
+      setSearchTerm('');
+      setStatusFilter('all');
       queryClient.invalidateQueries({ queryKey: ['blogs'] });
     },
     onError: (error: unknown) => {
@@ -106,6 +108,9 @@ export const BlogManagement = () => {
     setUploadError(null);
     setFormValues(initialFormValues);
     setIsModalOpen(true);
+    // Clear search values to prevent them from interfering
+    setSearchTerm('');
+    setStatusFilter('all');
   };
 
   const openEditModal = (blog: Blog) => {
@@ -199,6 +204,8 @@ export const BlogManagement = () => {
 
   const blogs = useMemo(() => blogsQuery.data?.blogs ?? [], [blogsQuery.data?.blogs]);
 
+  const randomIdSuffix = useMemo(() => Math.random().toString(36).substring(7), []);
+
   return (
     <div className="space-y-6">
       <PageHeader title="Gestion du Blog" description="Créez, éditez et publiez du contenu pour le blog.">
@@ -210,6 +217,10 @@ export const BlogManagement = () => {
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Recherche</label>
               <input
+                type="search"
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Titre ou résumé"
@@ -219,6 +230,9 @@ export const BlogManagement = () => {
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Statut</label>
               <select
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as 'all' | 'true' | 'false')
@@ -312,89 +326,111 @@ export const BlogManagement = () => {
       >
         {submitError && <p className="mb-3 text-sm text-rose-600">{submitError}</p>}
         {uploadError && <p className="mb-3 text-sm text-rose-600">{uploadError}</p>}
-        <div className="grid max-h-[70vh] grid-cols-1 gap-3 overflow-y-auto pr-1">
-          <input
-            placeholder="Titre"
-            value={formValues.title}
-            onChange={(event) =>
-              setFormValues((previous) => ({ ...previous, title: event.target.value }))
-            }
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-          <input
-            placeholder="Slug (optionnel)"
-            value={formValues.slug}
-            onChange={(event) =>
-              setFormValues((previous) => ({ ...previous, slug: event.target.value }))
-            }
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-          <input
-            placeholder="URL de l'image de couverture (optionnel)"
-            value={formValues.coverImage}
-            onChange={(event) =>
-              setFormValues((previous) => ({ ...previous, coverImage: event.target.value }))
-            }
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImagesUpload}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-          <p className="text-xs text-slate-500">
-            Téléchargez une ou plusieurs photos. La première image téléchargée est utilisée comme couverture si la couverture est vide.
-          </p>
-          {(formValues.images?.length ?? 0) > 0 ? (
-            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-              <p className="mb-2 text-xs font-medium text-slate-700">Images téléchargées</p>
-              <div className="space-y-1">
-                {(formValues.images || []).map((imageUrl) => (
-                  <div key={imageUrl} className="text-xs text-slate-600 break-all">
-                    {imageUrl}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          <textarea
-            placeholder="Court résumé"
-            value={formValues.excerpt}
-            onChange={(event) =>
-              setFormValues((previous) => ({ ...previous, excerpt: event.target.value }))
-            }
-            rows={3}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-          <textarea
-            placeholder="Contenu du blog"
-            value={formValues.content}
-            onChange={(event) =>
-              setFormValues((previous) => ({ ...previous, content: event.target.value }))
-            }
-            rows={10}
-            className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
-
-          <label className="inline-flex items-center gap-2 text-sm text-slate-700">
+        <div className="grid max-h-[70vh] grid-cols-1 gap-5 overflow-y-auto p-1">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Titre <span className="text-red-500">*</span></label>
             <input
-              type="checkbox"
-              checked={formValues.published}
+              type="text"
+              autoComplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              placeholder="Ex. 5 conseils pour louer au Maroc"
+              value={formValues.title}
               onChange={(event) =>
-                setFormValues((previous) => ({ ...previous, published: event.target.checked }))
+                setFormValues((previous) => ({ ...previous, title: event.target.value }))
               }
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
             />
-            Publier immédiatement
-          </label>
-        </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Slug (optionnel)</label>
+              <input
+                type="text"
+                autoComplete="off"
+                data-lpignore="true"
+                data-1p-ignore="true"
+                placeholder="ex-5-conseils"
+                value={formValues.slug}
+                onChange={(event) =>
+                  setFormValues((previous) => ({ ...previous, slug: event.target.value }))
+                }
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Statut <span className="text-red-500">*</span></label>
+              <select
+                value={formValues.published ? 'true' : 'false'}
+                onChange={(event) =>
+                  setFormValues((previous) => ({ ...previous, published: event.target.value === 'true' }))
+                }
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+              >
+                <option value="true">Publié (Visible)</option>
+                <option value="false">Brouillon (Caché)</option>
+              </select>
+            </div>
+          </div>
 
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Images</label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImagesUpload}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Téléchargez une ou plusieurs photos. La première image est utilisée comme couverture.
+            </p>
+            {(formValues.images?.length ?? 0) > 0 ? (
+              <div className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-3">
+                <p className="mb-2 text-xs font-medium text-slate-700">Images téléchargées</p>
+                <div className="space-y-1">
+                  {(formValues.images || []).map((imageUrl) => (
+                    <div key={imageUrl} className="text-xs text-slate-600 break-all">
+                      {imageUrl}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Résumé court <span className="text-red-500">*</span></label>
+            <textarea
+              placeholder="Texte introductif ou aperçu..."
+              value={formValues.excerpt}
+              onChange={(event) =>
+                setFormValues((previous) => ({ ...previous, excerpt: event.target.value }))
+              }
+              rows={3}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Contenu <span className="text-red-500">*</span></label>
+            <textarea
+              placeholder="Contenu complet du blog..."
+              value={formValues.content}
+              onChange={(event) =>
+                setFormValues((previous) => ({ ...previous, content: event.target.value }))
+              }
+              rows={10}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
+            />
+          </div>
+        </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="outline" onClick={closeModal} disabled={isSubmitting}>
+          <Button type="button" variant="outline" onClick={closeModal} disabled={isSubmitting}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button type="button" onClick={handleSubmit} disabled={isSubmitting}>
             {selectedBlog ? 'Enregistrer les Modifications' : 'Créer le Blog'}
           </Button>
         </div>
