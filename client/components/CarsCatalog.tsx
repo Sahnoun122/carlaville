@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import { Search, Filter, SortAsc, SortDesc, ChevronRight } from 'lucide-react';
 import VehicleCard from './VehicleCard';
+import { useTranslations } from 'next-intl';
 
 export default function CarsCatalog({
   initialCars,
@@ -10,6 +11,9 @@ export default function CarsCatalog({
   initialCars: any[];
   initialSearch?: string;
 }) {
+  const t = useTranslations('cars.filters');
+  const tc = useTranslations('cars');
+
   const [search, setSearch] = useState(initialSearch);
   const [category, setCategory] = useState('ALL');
   const [transmission, setTransmission] = useState('ALL');
@@ -52,7 +56,7 @@ export default function CarsCatalog({
         <div className="flex items-center justify-between border-b pb-4">
            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <Filter className="w-4 h-4 text-primary" />
-              Filtres
+              {t('title')}
            </h2>
            <button 
              onClick={() => {
@@ -60,19 +64,19 @@ export default function CarsCatalog({
              }}
              className="text-xs font-semibold text-gray-400 hover:text-primary transition-colors"
            >
-             Réinitialiser
+             {t('reset')}
            </button>
         </div>
 
         <div className="space-y-6">
           {/* Search */}
           <div className="space-y-2">
-            <label className="text-xs font-bold text-gray-700">Recherche</label>
+            <label className="text-xs font-bold text-gray-700">{t('search_label')}</label>
             <div className="relative">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input 
                 type="text" 
-                placeholder="Marque, modèle..." 
+                placeholder={t('search_placeholder')} 
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="input-premium pl-10 py-2.5 text-sm"
@@ -81,34 +85,34 @@ export default function CarsCatalog({
           </div>
 
           <SimpleFilter 
-            label="Catégorie" 
+            label={t('category')} 
             value={category} 
             onChange={setCategory} 
             options={categories} 
-            placeholder="Toutes les catégories" 
+            placeholder={t('all_categories')} 
           />
 
           <SimpleFilter 
-            label="Transmission" 
+            label={t('transmission')} 
             value={transmission} 
             onChange={setTransmission} 
             options={transmissions} 
-            placeholder="Toutes transmissions" 
+            placeholder={t('all_transmissions')} 
           />
 
           <SimpleFilter 
-            label="Carburant" 
+            label={t('fuel')} 
             value={fuel} 
             onChange={setFuel} 
             options={fuels} 
-            placeholder="Tous carburants" 
+            placeholder={t('all_fuels')} 
           />
 
           <div className="space-y-2">
-             <label className="text-xs font-bold text-gray-700">Trier par prix</label>
+             <label className="text-xs font-bold text-gray-700">{t('sort_label')}</label>
              <div className="flex gap-2">
-                <SortBtn active={sortOrder === 'asc'} onClick={() => setSortOrder('asc')} label="Prix Bas" />
-                <SortBtn active={sortOrder === 'desc'} onClick={() => setSortOrder('desc')} label="Prix Haut" />
+                <SortBtn active={sortOrder === 'asc'} onClick={() => setSortOrder('asc')} label={t('sort_low')} />
+                <SortBtn active={sortOrder === 'desc'} onClick={() => setSortOrder('desc')} label={t('sort_high')} />
              </div>
           </div>
         </div>
@@ -118,7 +122,7 @@ export default function CarsCatalog({
       <main className="flex-1 space-y-6">
         <div className="flex items-center justify-between border-b pb-4">
            <p className="text-sm font-medium text-gray-500">
-             <span className="text-gray-900 font-bold">{filteredCars.length}</span> véhicules disponibles
+             <span className="text-gray-900 font-bold">{filteredCars.length}</span> {tc('results_count')}
            </p>
         </div>
 
@@ -130,7 +134,7 @@ export default function CarsCatalog({
           </div>
         ) : (
           <div className="py-24 text-center bg-gray-50 rounded-2xl border border-gray-100 italic text-gray-400 font-medium">
-             Aucun résultat ne correspond à vos critères.
+             {tc('no_results')}
           </div>
         )}
       </main>

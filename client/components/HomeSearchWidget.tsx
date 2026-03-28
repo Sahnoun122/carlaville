@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, MapPin, Search, Clock, Plane, Zap, Shield } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
 
 interface DayControlSettings {
   minRentalDays: number;
@@ -36,6 +38,7 @@ const addDaysToDateString = (dateString: string, days: number) => {
 };
 
 export default function HomeSearchWidget() {
+  const t = useTranslations('nav.search');
   const router = useRouter();
   const [settings, setSettings] = useState<DayControlSettings | null>(null);
   const [location, setLocation] = useState('');
@@ -160,14 +163,14 @@ export default function HomeSearchWidget() {
         {/* Destination Zone */}
         <div className="flex-[1.2] px-6 lg:px-12 py-4 lg:py-0 flex flex-col justify-center min-w-[200px] hover:bg-gray-50 transition-all duration-300 rounded-2xl lg:rounded-l-full lg:rounded-tr-none relative airport-dropdown-container border-b lg:border-b-0 lg:border-r border-gray-100/50">
           <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2 pl-1">
-            <MapPin className="w-3 h-3 text-primary" /> Destination
+            <MapPin className="w-3 h-3 text-primary" /> {t('destination')}
           </label>
           <input
             type="text"
             value={location}
             onChange={(e) => handleLocationChange(e.target.value)}
             onFocus={() => location.length > 0 && setShowDropdown(true)}
-            placeholder="Où allez-vous ?"
+            placeholder={t('placeholder')}
             className="bg-transparent border-none p-0 focus:ring-0 outline-none text-sm font-bold text-gray-900 placeholder:text-gray-300 w-full pl-1"
           />
 
@@ -196,7 +199,7 @@ export default function HomeSearchWidget() {
         {/* Pickup Zone */}
         <div className="flex-1 px-6 lg:px-12 py-4 lg:py-0 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-gray-100/50 hover:bg-gray-50 transition-all duration-300 rounded-xl lg:rounded-none">
           <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-            <Calendar className="w-3 h-3 text-primary" /> Départ
+            <Calendar className="w-3 h-3 text-primary" /> {t('pickup')}
           </label>
           <div className="flex items-center gap-3">
             <input
@@ -220,7 +223,7 @@ export default function HomeSearchWidget() {
         {/* Return Zone */}
         <div className="flex-1 px-6 lg:px-12 py-4 lg:py-0 flex flex-col justify-center hover:bg-gray-50 transition-all duration-300 rounded-xl lg:rounded-none">
           <label className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
-            <Clock className="w-3 h-3 text-primary" /> Retour
+            <Clock className="w-3 h-3 text-primary" /> {t('return')}
           </label>
           <div className="flex items-center gap-3">
             <input
@@ -248,7 +251,7 @@ export default function HomeSearchWidget() {
             className="w-full lg:w-auto px-10 lg:px-14 py-4 bg-primary text-white rounded-2xl lg:rounded-full font-bold text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-neutral-900 transition-all duration-300 shadow-xl shadow-red-600/20 active:scale-95 group/btn h-[56px] lg:h-[64px] hover:scale-[1.02]"
           >
             <Search className="w-4 h-4 lg:w-5 lg:h-5" />
-            Rechercher
+            {t('button')}
           </button>
         </div>
 
@@ -256,9 +259,9 @@ export default function HomeSearchWidget() {
       
       {/* Quick Info Tags - Optimized Premium Look */}
       <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-8 ml-1">
-         <InfoTag icon={<Zap className="w-3 h-3 text-primary" />} text="Kilométrage illimité" />
-         <InfoTag icon={<Shield className="w-3 h-3 text-primary" />} text="Assurance comprise" />
-         <InfoTag icon={<Clock className="w-3 h-3 text-primary" />} text="Assistance 24/7" />
+         <InfoTag icon={<Zap className="w-3 h-3 text-primary" />} text={t('mileage')} />
+         <InfoTag icon={<Shield className="w-3 h-3 text-primary" />} text={t('insurance')} />
+         <InfoTag icon={<Clock className="w-3 h-3 text-primary" />} text={t('assistance')} />
       </div>
     </div>
   );

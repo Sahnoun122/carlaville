@@ -1,11 +1,15 @@
 "use client";
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { Car, ArrowRight, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 function LoginForm() {
+  const t = useTranslations('auth.login');
+  const tf = useTranslations('auth');
   const router = useRouter();
+
   const searchParams = useSearchParams();
   const redirectParams = searchParams.get('redirect') || '/dashboard';
   
@@ -29,7 +33,7 @@ function LoginForm() {
       });
 
       if (!res.ok) {
-        throw new Error('Email ou mot de passe incorrect');
+        throw new Error(t('error_invalid'));
       }
 
       const data = await res.json();
@@ -55,8 +59,8 @@ function LoginForm() {
             <Link href="/" className="inline-flex w-16 h-16 bg-red-600 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-red-600/20 hover:scale-110 transition-transform">
               <Car className="w-8 h-8" />
             </Link>
-            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">Bon retour !</h2>
-            <p className="text-gray-400 font-medium text-sm">Accédez à votre espace privilégié Carlaville.</p>
+            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">{t('title')}</h2>
+            <p className="text-gray-400 font-medium text-sm">{t('subtitle')}</p>
           </div>
           
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -68,7 +72,7 @@ function LoginForm() {
             
             <div className="space-y-5">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Email</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{t('email_label')}</label>
                 <input 
                   name="email" 
                   type="email" 
@@ -79,8 +83,8 @@ function LoginForm() {
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-2">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Mot de passe</label>
-                  <Link href="/auth/forgot" className="text-[10px] font-black text-red-600 uppercase tracking-[0.1em] hover:underline">Oublié ?</Link>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t('password_label')}</label>
+                  <Link href="/auth/forgot" className="text-[10px] font-black text-red-600 uppercase tracking-[0.1em] hover:underline">{t('forgot_password')}</Link>
                 </div>
                 <input 
                   name="password" 
@@ -100,19 +104,19 @@ function LoginForm() {
               <div className="absolute inset-0 bg-gray-50/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="relative z-10 flex items-center justify-center gap-3">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                  <>Se connecter <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>
+                  <>{t('submit')} <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>
                 )}
               </span>
             </button>
             
             <div className="text-center pt-8 border-t border-gray-50">
               <p className="text-sm font-medium text-gray-400">
-                Nouveau ici ?{' '}
+                {t('new_here')}{' '}
                 <Link 
                   href={`/auth/register?redirect=${encodeURIComponent(redirectParams)}`} 
                   className="font-black text-red-600 hover:text-neutral-900 transition-colors"
                 >
-                  Ouvrir un compte
+                  {t('register_link')}
                 </Link>
               </p>
             </div>
@@ -120,7 +124,7 @@ function LoginForm() {
         </div>
         
         <p className="mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
-          Carlaville — Performance & Élégance
+          {tf('footer')}
         </p>
       </div>
     </div>
@@ -128,8 +132,9 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const t = useTranslations('common');
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-black text-gray-300 uppercase tracking-widest text-xs">Chargement...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-black text-gray-300 uppercase tracking-widest text-xs">{t('loading')}</div>}>
       <LoginForm />
     </Suspense>
   );

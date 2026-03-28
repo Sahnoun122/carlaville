@@ -9,6 +9,8 @@ import {
   CheckCircle2, 
   AlertCircle 
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+
 
 type ReservationExtraOption = {
   id: string;
@@ -43,6 +45,7 @@ const addDaysToDateString = (dateString: string, days: number) => {
 };
 
 export default function ReservationForm({ car }: { car: any }) {
+  const t = useTranslations('reservation');
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -142,7 +145,7 @@ export default function ReservationForm({ car }: { car: any }) {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error('Erreur réseau');
+      if (!res.ok) throw new Error(t('error.network'));
       const data = await res.json();
       setSuccess(true);
       setTimeout(() => router.push(`/checkout/${data._id || data.id}`), 800);
@@ -154,13 +157,13 @@ export default function ReservationForm({ car }: { car: any }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 soft-shadow p-6 lg:p-8 animate-fade-in">
-      <h3 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b">Réserver maintenant</h3>
+      <h3 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b">{t('title')}</h3>
       
       {success ? (
          <div className="py-10 text-center flex flex-col items-center">
             <CheckCircle2 className="w-12 h-12 text-emerald-500 mb-4" />
-            <p className="font-bold text-gray-900">Réservation créée !</p>
-            <p className="text-xs text-gray-400 mt-2">Chargement du paiement...</p>
+            <p className="font-bold text-gray-900">{t('success.title')}</p>
+            <p className="text-xs text-gray-400 mt-2">{t('success.subtitle')}</p>
          </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -169,28 +172,28 @@ export default function ReservationForm({ car }: { car: any }) {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Prise en charge</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.pickup_date')}</label>
                 <input required name="pickupDate" type="date" min={pickupMinDate} value={pickupDate} onChange={e => handlePickupChange(e.target.value)} className="input-premium py-2 text-sm" />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Heure</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.time')}</label>
                 <input required name="pickupTime" type="time" defaultValue="10:00" className="input-premium py-2 text-sm" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Restitution</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.return_date')}</label>
                 <input required name="returnDate" type="date" min={returnMinDate} value={returnDate} onChange={e => setReturnDate(e.target.value)} className="input-premium py-2 text-sm" />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Heure</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.time')}</label>
                 <input required name="returnTime" type="time" defaultValue="10:00" className="input-premium py-2 text-sm" />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Lieu de départ</label>
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.pickup_location')}</label>
               <input required name="pickupLocation" type="text" defaultValue={car.city} className="input-premium py-2 text-sm" />
               <input type="hidden" name="returnLocation" value={car.city} />
             </div>
@@ -198,7 +201,7 @@ export default function ReservationForm({ car }: { car: any }) {
 
           {applicableExtras.length > 0 && (
             <div className="space-y-3 pt-4 border-t border-gray-100">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Options supplémentaires</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t('fields.extras')}</p>
               <div className="space-y-2">
                 {applicableExtras.map((extra) => (
                   <label key={extra.id} className="flex items-center justify-between p-3 rounded-xl border border-gray-100 bg-white cursor-pointer hover:border-primary/30 transition-colors">
@@ -220,15 +223,15 @@ export default function ReservationForm({ car }: { car: any }) {
 
           <div className="pt-6 border-t border-gray-100 space-y-3">
              <div className="flex justify-between items-center text-sm font-bold text-gray-900">
-                <span className="text-gray-400 font-medium">Prix total ({days}j) :</span>
+                <span className="text-gray-400 font-medium">{t('total_price', { days })}</span>
                 <span className="text-2xl font-black text-primary">{totalPrice} MAD</span>
              </div>
              <button type="submit" disabled={loading} className="btn-premium w-full flex items-center justify-center gap-2">
-                {loading ? '...' : `Valider pour ${totalPrice} MAD`}
+                {loading ? '...' : t('submit', { price: totalPrice })}
              </button>
           </div>
           
-          <p className="text-[10px] text-gray-400 text-center font-medium">Paiement sécurisé par SSL</p>
+          <p className="text-[10px] text-gray-400 text-center font-medium">{t('secure_payment')}</p>
         </form>
       )}
     </div>

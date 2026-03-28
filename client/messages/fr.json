@@ -1,18 +1,274 @@
 {
   "home": {
-    "title": "Bienvenue chez CarLaville",
-    "subtitle": "Louez la voiture de vos rêves en toute simplicité",
-    "search": "Rechercher une voiture",
-    "exclusive_offers": "Offres exclusives"
+    "hero": {
+      "badge": "Expérience Premium 2026",
+      "title_p1": "Votre Voyage",
+      "title_p2": "Commence",
+      "title_italic": "Ici.",
+      "subtitle": "Découvrez la liberté absolue avec notre sélection exclusive de véhicules de prestige. Simple, rapide et sans compromis sur la qualité.",
+      "joined": "Rejoint par plus de 5,000 conducteurs"
+    },
+    "categories": {
+      "title": "Quel véhicule recherchez-vous ?",
+      "subtitle": "Une large gamme adaptée à tous vos besoins de mobilité au Maroc.",
+      "citadines": "Citadines",
+      "berlines": "Berlines",
+      "suv": "SUV & 4x4",
+      "luxe": "Luxe",
+      "utilitaires": "Utilitaires",
+      "count": "{count} véhicules"
+    },
+    "vehicles": {
+      "title": "Nos véhicules disponibles",
+      "view_all": "Tout voir",
+      "empty": "Aucun véhicule disponible pour le moment."
+    },
+    "services": {
+      "badge": "Services Carlaville",
+      "title": "Plus qu'une simple location de voiture.",
+      "discover": "Découvrir nos offres",
+      "digital_exp": "Expérience 100% Digitalisée",
+      "item1": {
+        "title": "Livraison à domicile & Aéroport",
+        "desc": "Nous vous livrons votre véhicule directement à votre arrivée ou chez vous, partout au Maroc."
+      },
+      "item2": {
+        "title": "Assistance Premium 24h/7j",
+        "desc": "Une équipe dédiée pour vous accompagner à chaque étape de votre voyage, jour et nuit."
+      },
+      "item3": {
+        "title": "Abonnement sans engagement",
+        "desc": "Besoin d'un véhicule sur le long terme ? Profitez de nos offres flexibles et sans contraintes."
+      }
+    },
+    "stats": {
+      "agencies": "Agences au Maroc",
+      "vehicles": "Véhicules disponibles",
+      "clients": "Clients satisfaits",
+      "support": "Support Client"
+    },
+    "agencies": {
+      "title": "Un réseau d'agences à votre écoute",
+      "subtitle": "Retrouvez Carlaville dans les plus grandes villes et aéroports du Royaume.",
+      "details": "Détails de l'agence"
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "item1": {
+        "q": "Documents nécessaires ?",
+        "a": "Permis de conduire, carte d'identité et carte bancaire."
+      },
+      "item2": {
+        "q": "Kilométrage ?",
+        "a": "Le kilométrage illimité est inclus dans la plupart de nos offres."
+      },
+      "item3": {
+        "q": "Modification ?",
+        "a": "Gratuited jusqu'à 48h avant la prise en charge."
+      }
+    },
+    "blogs": {
+      "title": "Nos derniers articles"
+    }
   },
   "nav": {
     "home": "Accueil",
     "cars": "Voitures",
     "about": "À propos",
     "contact": "Contact",
-    "login": "Connexion"
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "dashboard": "Tableau de Bord",
+    "articles": "Articles & Conseils",
+    "agency": "L'agence Carlaville",
+    "search": {
+      "destination": "Destination",
+      "placeholder": "Où allez-vous ?",
+      "pickup": "Départ",
+      "return": "Retour",
+      "button": "Rechercher",
+      "mileage": "Kilométrage illimité",
+      "insurance": "Assurance comprise",
+      "assistance": "Assistance 24/7"
+    }
   },
   "footer": {
+    "description": "Location de voitures de prestige au Maroc. Profitez de tarifs imbattables et d'un service client d'exception.",
+    "links": "Liens Rapides",
+    "contact": "Contact",
+    "newsletter": "Newsletter",
+    "newsletter_desc": "Inscrivez-vous pour nos offres exclusives.",
+    "my_account": "Mon Compte",
     "rights": "Tous droits réservés"
+  },
+  "cars": {
+    "badge": "Catalogue 2026",
+    "title_p1": "Trouvez Votre",
+    "title_p2": "Prochaine Destination.",
+    "subtitle": "Exploration sans limites avec notre sélection de véhicules premium, parfaitement entretenus pour votre confort.",
+    "stats": {
+      "reservations": "Déjà plus de 2,400 réservations ce mois-ci"
+    },
+    "empty": {
+      "title": "Aucun véhicule disponible",
+      "subtitle": "Veuillez réessayer plus tard ou changer vos critères."
+    },
+    "filters": {
+      "title": "Filtres",
+      "reset": "Réinitialiser",
+      "search_label": "Recherche",
+      "search_placeholder": "Marque, modèle...",
+      "category": "Catégorie",
+      "all_categories": "Toutes les catégories",
+      "transmission": "Transmission",
+      "all_transmissions": "Toutes transmissions",
+      "fuel": "Carburant",
+      "all_fuels": "Tous carburants",
+      "sort_label": "Trier par prix",
+      "sort_low": "Prix Bas",
+      "sort_high": "Prix Haut"
+    },
+    "results_count": "véhicules disponibles",
+    "no_results": "Aucun résultat ne correspond à vos critères.",
+    "currency": "MAD",
+    "per_day": "par jour",
+    "book_now": "Réserver ce véhicule"
+  },
+  "details": {
+    "not_found": "Véhicule introuvable",
+    "back": "← Retour au catalogue",
+    "base_rate": "Tarif de base",
+    "per_day": "/ jour",
+    "specs": {
+      "seats": "Places",
+      "seats_count": "{count} Places",
+      "transmission": "Boîte",
+      "fuel": "Énergie",
+      "region": "Région"
+    },
+    "equipments": {
+      "title": "Équipements & Garanties",
+      "ac": "Climatisation automatique",
+      "mileage": "Kilométrage illimité",
+      "assistance": "Assistance routière 24/7",
+      "insurance": "Assurance tous risques",
+      "fuel_full": "Plein de carburant",
+      "cleaning": "Nettoyage professionnel",
+      "shield": "Véhicule désinfecté et certifié conforme pour chaque location."
+    }
+  },
+  "reservation": {
+    "title": "Réserver maintenant",
+    "success": {
+      "title": "Réservation créée !",
+      "subtitle": "Chargement du paiement..."
+    },
+    "error": {
+      "network": "Erreur réseau"
+    },
+    "fields": {
+      "pickup_date": "Prise en charge",
+      "return_date": "Restitution",
+      "time": "Heure",
+      "pickup_location": "Lieu de départ",
+      "extras": "Options supplémentaires"
+    },
+    "total_price": "Prix total ({days}j) :",
+    "submit": "Valider pour {price} MAD",
+    "secure_payment": "Paiement sécurisé par SSL"
+  },
+  "auth": {
+    "login": {
+      "title": "Bon retour !",
+      "subtitle": "Accédez à votre espace privilégié Carlaville.",
+      "error_invalid": "Email ou mot de passe incorrect",
+      "email_label": "Email",
+      "password_label": "Mot de passe",
+      "forgot_password": "Oublié ?",
+      "submit": "Se connecter",
+      "new_here": "Nouveau ici ?",
+      "register_link": "Ouvrir un compte"
+    },
+    "register": {
+      "title": "Nous rejoindre",
+      "subtitle": "Créez votre profil en quelques instants.",
+      "error_generic": "Erreur lors de l'inscription",
+      "first_name": "Prénom",
+      "last_name": "Nom",
+      "phone": "Téléphone",
+      "submit": "Créer mon compte",
+      "already_member": "Déjà membre ?",
+      "login_link": "Connectez-vous",
+      "footer": "Rejoignez Carlaville — Mobilité Supérieure"
+    },
+    "footer": "Carlaville — Performance & Élégance"
+  },
+
+  "common": {
+    "loading": "Chargement..."
+  },
+  "about": {
+    "link": "À propos",
+    "meta_title": "À propos de nous - CarLaville",
+    "meta_description": "Découvrez CarLaville, votre partenaire de confiance pour la location de voitures au Maroc. Notre mission, histoire, flotte et nos engagements pour votre mobilité.",
+    "hero_badge": "Découvrez Qui Nous Sommes",
+    "hero_title": "À propos de CarLaville",
+    "hero_subtitle": "Nous nous engageons à fournir des solutions de transport fiables, abordables et pratiques pour répondre à tous vos besoins de mobilité au Maroc.",
+    "mission_title": "Notre Mission",
+    "mission_desc": "Chez CarLaville, nous nous engageons à fournir des solutions de transport fiables, abordables et pratiques pour répondre aux besoins de mobilité de nos clients, que ce soit pour un déplacement professionnel, un voyage en famille ou une aventure sur les routes du Maroc.",
+    "history_title": "Notre Histoire",
+    "history_desc": "Fondée en 2005, CarLaville s’est imposée comme un acteur majeur de la location de voitures au Maroc. Grâce à notre expertise et à notre connaissance approfondie du marché, nous avons su nous adapter aux attentes de nos clients et offrir des services qui allient confort, sécurité et flexibilité.",
+    "experience_years": "Années d'expérience",
+    "customer_support": "Support client",
+    "satisfied_clients": "Clients satisfaits",
+    "transparency": "Transparence",
+    "fleet_badge": "Découvrez",
+    "fleet_title": "Notre Flotte",
+    "fleet_desc": "Nous proposons une vaste sélection de véhicules adaptés à tous types de trajets et de budgets. Tous nos véhicules sont soigneusement entretenus et régulièrement contrôlés pour garantir sécurité et performance.",
+    "economy_title": "Voitures économiques",
+    "economy_desc": "Idéales pour les petits budgets et les trajets urbains faciles dans toutes les villes.",
+    "suv_title": "SUV et 4x4",
+    "suv_desc": "Parfaits pour les escapades en montagne, le désert, ou les longues routes à travers le Maroc.",
+    "popular_badge": "LE PLUS POPULAIRE",
+    "luxury_title": "Berlines et luxe",
+    "luxury_desc": "Pour un maximum de confort, d'élégance et de prestige lors de vos déplacements professionnels ou personnels.",
+    "commitment_title": "Notre Engagement",
+    "commitment_desc": "Nous nous efforçons d’offrir un service exceptionnel à nos clients grâce à :",
+    "competitive_prices": "Des tarifs compétitifs et transparents",
+    "competitive_prices_desc": "Aucun frais caché, des offres adaptées à tous les budgets.",
+    "support_24h": "Un service client 24h/24 et 7j/7",
+    "support_24h_desc": "Une assistance experte disponible à tout moment, où que vous soyez.",
+    "easy_booking": "Une réservation rapide et facile",
+    "easy_booking_desc": "Via notre site web moderne ou notre service client, en quelques étapes.",
+    "maintained_vehicles": "Des véhicules bien entretenus",
+    "maintained_vehicles_desc": "Des inspections régulières pour garantir votre confort optimal et votre sécurité absolue.",
+    "values_title": "Nos Valeurs",
+    "values_desc": "Chez CarLaville, toute notre équipe met au quotidien un accent très fort sur :",
+    "customer_satisfaction": "La satisfaction client",
+    "customer_satisfaction_desc": "Une écoute attentive et un service sur mesure.",
+    "integrity": "L’intégrité et transparence",
+    "integrity_desc": "Aucune mauvaise surprise, un service 100% fiable.",
+    "excellence": "L’excellence",
+    "excellence_desc": "Une amélioration continue pour notre marché.",
+    "contact_cta_title": "Contactez-Nous",
+    "contact_cta_desc": "N'hésitez pas à nous contacter pour toute question ou pour réserver votre véhicule dès aujourd'hui. Nous sommes impatients de vous servir et de rendre votre voyage au Maroc inoubliable.",
+    "contact_btn": "Nous Contacter",
+    "rent_btn": "Louer un véhicule"
+  },
+  "blogs": {
+    "link": "Blogs",
+    "title": "Blog & Conseils",
+    "subtitle": "Retrouvez toutes les actualités de Carlaville et nos conseils pour vos locations de voitures au Maroc.",
+    "read_more": "Tout lire",
+    "no_articles": "Aucun article disponible pour le moment.",
+    "back_to_articles": "Retour aux articles",
+    "blog_badge": "Blog Carlaville",
+    "latest": "Dernièrement",
+    "unfound": "Introuvable",
+    "thanks": "Merci de lire Carlaville Blog. \nSuivez-nous pour plus de conseils mobilité au Maroc."
   }
 }
+
+
+
+

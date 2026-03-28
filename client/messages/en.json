@@ -1,18 +1,274 @@
 {
   "home": {
-    "title": "Welcome to CarLaville",
-    "subtitle": "Rent the car of your dreams with ease",
-    "search": "Search for a car",
-    "exclusive_offers": "Exclusive offers"
+    "hero": {
+      "badge": "Premium Experience 2026",
+      "title_p1": "Your Journey",
+      "title_p2": "Starts",
+      "title_italic": "Here.",
+      "subtitle": "Discover absolute freedom with our exclusive selection of prestige vehicles. Simple, fast and without compromise on quality.",
+      "joined": "Joined by over 5,000 drivers"
+    },
+    "categories": {
+      "title": "What vehicle are you looking for?",
+      "subtitle": "A wide range adapted to all your mobility needs in Morocco.",
+      "citadines": "Citadines",
+      "berlines": "Sedans",
+      "suv": "SUV & 4x4",
+      "luxe": "Luxury",
+      "utilitaires": "Commercial",
+      "count": "{count} vehicles"
+    },
+    "vehicles": {
+      "title": "Our Available vehicles",
+      "view_all": "View all",
+      "empty": "No vehicles available at the moment."
+    },
+    "services": {
+      "badge": "Carlaville Services",
+      "title": "More than just a car rental.",
+      "discover": "Discover our offers",
+      "digital_exp": "100% Digital Experience",
+      "item1": {
+        "title": "Home & Airport Delivery",
+        "desc": "We deliver your vehicle directly upon your arrival or to your home, anywhere in Morocco."
+      },
+      "item2": {
+        "title": "Premium 24/7 Assistance",
+        "desc": "A dedicated team to support you at every stage of your journey, day and night."
+      },
+      "item3": {
+        "title": "No-commitment Subscription",
+        "desc": "Need a vehicle for the long term? Enjoy our flexible offers without constraints."
+      }
+    },
+    "stats": {
+      "agencies": "Agencies in Morocco",
+      "vehicles": "Available vehicles",
+      "clients": "Satisfied clients",
+      "support": "Customer Support"
+    },
+    "agencies": {
+      "title": "An agency network at your service",
+      "subtitle": "Find Carlaville in the largest cities and airports of the Kingdom.",
+      "details": "Agency Details"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "item1": {
+        "q": "Necessary documents?",
+        "a": "Driver's license, ID card and credit card."
+      },
+      "item2": {
+        "q": "Mileage?",
+        "a": "Unlimited mileage is included in most of our offers."
+      },
+      "item3": {
+        "q": "Modification?",
+        "a": "Free up to 48 hours before pick-up."
+      }
+    },
+    "blogs": {
+      "title": "Our Latest Articles"
+    }
   },
   "nav": {
     "home": "Home",
     "cars": "Cars",
     "about": "About",
     "contact": "Contact",
-    "login": "Login"
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "articles": "Articles & Tips",
+    "agency": "Carlaville Agency",
+    "search": {
+      "destination": "Destination",
+      "placeholder": "Where are you going?",
+      "pickup": "Pickup",
+      "return": "Return",
+      "button": "Search",
+      "mileage": "Unlimited mileage",
+      "insurance": "Insurance included",
+      "assistance": "24/7 Support"
+    }
   },
   "footer": {
+    "description": "Prestige car rental in Morocco. Enjoy unbeatable rates and exceptional customer service.",
+    "links": "Quick Links",
+    "contact": "Contact",
+    "newsletter": "Newsletter",
+    "newsletter_desc": "Sign up for our exclusive offers.",
+    "my_account": "My Account",
     "rights": "All rights reserved"
+  },
+  "cars": {
+    "badge": "2026 Catalog",
+    "title_p1": "Find Your",
+    "title_p2": "Next Destination.",
+    "subtitle": "Unlimited exploration with our premium selection of vehicles, perfectly maintained for your comfort.",
+    "stats": {
+      "reservations": "More than 2,400 bookings already this month"
+    },
+    "empty": {
+      "title": "No vehicles available",
+      "subtitle": "Please try again later or change your criteria."
+    },
+    "filters": {
+      "title": "Filters",
+      "reset": "Reset",
+      "search_label": "Search",
+      "search_placeholder": "Brand, model...",
+      "category": "Category",
+      "all_categories": "All categories",
+      "transmission": "Transmission",
+      "all_transmissions": "All transmissions",
+      "fuel": "Fuel",
+      "all_fuels": "All fuels",
+      "sort_label": "Sort by price",
+      "sort_low": "Lowest Price",
+      "sort_high": "Highest Price"
+    },
+    "results_count": "vehicles available",
+    "no_results": "No results match your criteria.",
+    "currency": "MAD",
+    "per_day": "per day",
+    "book_now": "Book this vehicle"
+  },
+  "details": {
+    "not_found": "Vehicle not found",
+    "back": "← Back to catalog",
+    "base_rate": "Base rate",
+    "per_day": "/ day",
+    "specs": {
+      "seats": "Seats",
+      "seats_count": "{count} Seats",
+      "transmission": "Transmission",
+      "fuel": "Fuel",
+      "region": "Region"
+    },
+    "equipments": {
+      "title": "Equipments & Guarantees",
+      "ac": "Automatic air conditioning",
+      "mileage": "Unlimited mileage",
+      "assistance": "24/7 Roadside assistance",
+      "insurance": "Comprehensive insurance",
+      "fuel_full": "Full fuel tank",
+      "cleaning": "Professional cleaning",
+      "shield": "Vehicle disinfected and certified for each rental."
+    }
+  },
+  "reservation": {
+    "title": "Book now",
+    "success": {
+      "title": "Booking created!",
+      "subtitle": "Loading payment..."
+    },
+    "error": {
+      "network": "Network error"
+    },
+    "fields": {
+      "pickup_date": "Pick-up",
+      "return_date": "Return",
+      "time": "Time",
+      "pickup_location": "Pick-up location",
+      "extras": "Additional options"
+    },
+    "total_price": "Total price ({days}d):",
+    "submit": "Validate for {price} MAD",
+    "secure_payment": "Secure payment by SSL"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back!",
+      "subtitle": "Access your privileged Carlaville space.",
+      "error_invalid": "Incorrect email or password",
+      "email_label": "Email",
+      "password_label": "Password",
+      "forgot_password": "Forgot?",
+      "submit": "Log in",
+      "new_here": "New here?",
+      "register_link": "Create an account"
+    },
+    "register": {
+      "title": "Join us",
+      "subtitle": "Create your profile in a few moments.",
+      "error_generic": "Error during registration",
+      "first_name": "First Name",
+      "last_name": "Last Name",
+      "phone": "Phone",
+      "submit": "Create my account",
+      "already_member": "Already a member?",
+      "login_link": "Log in",
+      "footer": "Join Carlaville — Superior Mobility"
+    },
+    "footer": "Carlaville — Performance & Elegance"
+  },
+
+  "common": {
+    "loading": "Loading..."
+  },
+  "about": {
+    "link": "About Us",
+    "meta_title": "About Us - CarLaville",
+    "meta_description": "Discover CarLaville, your trusted partner for car rental in Morocco. Our mission, history, fleet, and our commitments to your mobility.",
+    "hero_badge": "Discover Who We Are",
+    "hero_title": "About CarLaville",
+    "hero_subtitle": "We are committed to providing reliable, affordable, and convenient transport solutions to meet all your mobility needs in Morocco.",
+    "mission_title": "Our Mission",
+    "mission_desc": "At CarLaville, we are committed to providing reliable, affordable, and convenient transport solutions to meet our customers' mobility needs, whether for a business trip, a family journey, or an adventure on the roads of Morocco.",
+    "history_title": "Our History",
+    "history_desc": "Founded in 2005, CarLaville has established itself as a major player in car rental in Morocco. Thanks to our expertise and deep market knowledge, we have adapted to our customers' expectations and offer services that combine comfort, safety, and flexibility.",
+    "experience_years": "Years of experience",
+    "customer_support": "Customer support",
+    "satisfied_clients": "Satisfied clients",
+    "transparency": "Transparency",
+    "fleet_badge": "Discover",
+    "fleet_title": "Our Fleet",
+    "fleet_desc": "We offer a wide selection of vehicles suitable for all types of journeys and budgets. All our vehicles are carefully maintained and regularly checked to ensure safety and performance.",
+    "economy_title": "Economy cars",
+    "economy_desc": "Ideal for small budgets and easy city trips in all cities.",
+    "suv_title": "SUV and 4x4",
+    "suv_desc": "Perfect for mountain escapes, the desert, or long roads across Morocco.",
+    "popular_badge": "MOST POPULAR",
+    "luxury_title": "Sedans and luxury",
+    "luxury_desc": "For maximum comfort, elegance, and prestige during your professional or personal travels.",
+    "commitment_title": "Our Commitment",
+    "commitment_desc": "We strive to offer exceptional service to our customers through:",
+    "competitive_prices": "Competitive and transparent rates",
+    "competitive_prices_desc": "No hidden fees, offers tailored to all budgets.",
+    "support_24h": "24/7 client service",
+    "support_24h_desc": "Expert assistance available at all times, wherever you are.",
+    "easy_booking": "Quick and easy booking",
+    "easy_booking_desc": "Via our modern website or our customer service, in just a few steps.",
+    "maintained_vehicles": "Well-maintained vehicles",
+    "maintained_vehicles_desc": "Regular inspections to ensure your optimal comfort and absolute safety.",
+    "values_title": "Our Values",
+    "values_desc": "At CarLaville, our entire team places a very strong emphasis every day on:",
+    "customer_satisfaction": "Customer satisfaction",
+    "customer_satisfaction_desc": "Attentive listening and tailor-made service.",
+    "integrity": "Integrity and transparency",
+    "integrity_desc": "No bad surprises, 100% reliable service.",
+    "excellence": "Excellence",
+    "excellence_desc": "Continuous improvement for our market.",
+    "contact_cta_title": "Contact Us",
+    "contact_cta_desc": "Feel free to contact us with any questions or to book your vehicle today. We look forward to serving you and making your trip to Morocco unforgettable.",
+    "contact_btn": "Contact Us",
+    "rent_btn": "Rent a vehicle"
+  },
+  "blogs": {
+    "link": "Blogs",
+    "title": "Blog & Tips",
+    "subtitle": "Find all the latest CarLaville news and our tips for your car rentals in Morocco.",
+    "read_more": "Read all",
+    "no_articles": "No articles available at the moment.",
+    "back_to_articles": "Back to articles",
+    "blog_badge": "CarLaville Blog",
+    "latest": "Recently",
+    "unfound": "Not found",
+    "thanks": "Thank you for reading CarLaville Blog. \nFollow us for more mobility tips in Morocco."
   }
 }
+
+
+
+

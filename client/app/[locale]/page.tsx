@@ -1,8 +1,9 @@
-import VehicleCard from '../components/VehicleCard';
+import VehicleCard from '../../components/VehicleCard';
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { Star, Clock, Laptop, ShieldCheck, CreditCard, Compass, ChevronDown, Plane, Shield, Zap, Search, MapPin } from 'lucide-react';
-import HomeSearchWidget from '../components/HomeSearchWidget';
+import HomeSearchWidget from '../../components/HomeSearchWidget';
+import { getTranslations } from 'next-intl/server';
 
 async function getCars() {
   try {
@@ -33,6 +34,7 @@ export default async function Home() {
   const cars = data?.cars || [];
   const blogsData = await getBlogs();
   const blogs = blogsData?.blogs || [];
+  const t = await getTranslations('home');
 
   return (
     <div className="w-full bg-white overflow-x-hidden">
@@ -50,13 +52,13 @@ export default async function Home() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </span>
-                Expérience Premium 2026
+                {t('hero.badge')}
               </div>
               <h1 className="text-4xl md:text-6xl lg:text-[5.5rem] font-black text-gray-900 mb-6 lg:mb-8 tracking-tighter leading-[1.1] lg:leading-[0.95]">
-                Votre Voyage <br/>Commence <span className="text-primary italic">Ici.</span>
+                {t('hero.title_p1')} <br/>{t('hero.title_p2')} <span className="text-primary italic">{t('hero.title_italic')}</span>
               </h1>
               <p className="text-base lg:text-xl text-gray-400 max-w-lg leading-relaxed font-medium mb-8 lg:mb-10">
-                Découvrez la liberté absolue avec notre sélection exclusive de véhicules de prestige. Simple, rapide et sans compromis sur la qualité.
+                {t('hero.subtitle')}
               </p>
               
               <div className="flex items-center gap-6 lg:gap-8 pt-2 lg:pt-4">
@@ -68,7 +70,7 @@ export default async function Home() {
                     ))}
                  </div>
                  <p className="text-[10px] lg:text-xs font-bold text-gray-500 uppercase tracking-widest leading-tight">
-                    Rejoint par plus de <br/><span className="text-gray-900">5,000 conducteurs</span>
+                    {t('hero.joined')}
                  </p>
               </div>
             </div>
@@ -104,20 +106,21 @@ export default async function Home() {
         </div>
       </section>
 
+
       {/* 🚗 Category Selection Section - Ada Inspired */}
       <section className="py-20 bg-gray-50 border-b border-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Quel véhicule recherchez-vous ?</h2>
-            <p className="text-gray-500 text-sm font-medium">Une large gamme adaptée à tous vos besoins de mobilité au Maroc.</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">{t('categories.title')}</h2>
+            <p className="text-gray-500 text-sm font-medium">{t('categories.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 lg:gap-8">
-            <CategoryCard title="Citadines" icon={<Zap className="w-5 h-5" />} count="12+ véhicules" href="/cars?category=citadine" />
-            <CategoryCard title="Berlines" icon={<Compass className="w-5 h-5" />} count="8+ véhicules" href="/cars?category=berline" />
-            <CategoryCard title="SUV & 4x4" icon={<Compass className="w-5 h-5" />} count="15+ véhicules" href="/cars?category=suv" />
-            <CategoryCard title="Luxe" icon={<Star className="w-5 h-5" />} count="5+ véhicules" href="/cars?category=luxe" />
-            <CategoryCard title="Utilitaires" icon={<Laptop className="w-5 h-5" />} count="10+ véhicules" href="/cars?category=utilitaire" />
+            <CategoryCard title={t('categories.citadines')} icon={<Zap className="w-5 h-5" />} count={t('categories.count', {count: 12})} href="/cars?category=citadine" />
+            <CategoryCard title={t('categories.berlines')} icon={<Compass className="w-5 h-5" />} count={t('categories.count', {count: 8})} href="/cars?category=berline" />
+            <CategoryCard title={t('categories.suv')} icon={<Compass className="w-5 h-5" />} count={t('categories.count', {count: 15})} href="/cars?category=suv" />
+            <CategoryCard title={t('categories.luxe')} icon={<Star className="w-5 h-5" />} count={t('categories.count', {count: 5})} href="/cars?category=luxe" />
+            <CategoryCard title={t('categories.utilitaires')} icon={<Laptop className="w-5 h-5" />} count={t('categories.count', {count: 10})} href="/cars?category=utilitaire" />
           </div>
         </div>
       </section>
@@ -127,11 +130,11 @@ export default async function Home() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Nos véhicules disponibles</h2>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{t('vehicles.title')}</h2>
               <div className="h-1 w-12 bg-primary mt-3 rounded-full"></div>
             </div>
             <Link href="/cars" className="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-primary transition-all shadow-lg active:scale-95">
-              Tout voir
+              {t('vehicles.view_all')}
             </Link>
           </div>
 
@@ -143,7 +146,7 @@ export default async function Home() {
             </div>
           ) : (
             <div className="text-center py-20 bg-gray-50 rounded-2xl border border-gray-100 max-w-2xl mx-auto">
-              <p className="text-gray-400 font-medium">Aucun véhicule disponible pour le moment.</p>
+              <p className="text-gray-400 font-medium">{t('vehicles.empty')}</p>
             </div>
           )}
         </div>
@@ -155,24 +158,24 @@ export default async function Home() {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <span className="text-primary font-bold text-xs uppercase tracking-[0.3em] mb-4 block">Services Carlaville</span>
-              <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">Plus qu'une simple <br /> location de voiture.</h2>
+              <span className="text-primary font-bold text-xs uppercase tracking-[0.3em] mb-4 block">{t('services.badge')}</span>
+              <h2 className="text-4xl md:text-5xl font-bold mb-8 leading-tight">{t('services.title')}</h2>
               <div className="space-y-8">
                 <ServiceRow
-                  title="Livraison à domicile & Aéroport"
-                  desc="Nous vous livrons votre véhicule directement à votre arrivée ou chez vous, partout au Maroc."
+                  title={t('services.item1.title')}
+                  desc={t('services.item1.desc')}
                 />
                 <ServiceRow
-                  title="Assistance Premium 24h/7j"
-                  desc="Une équipe dédiée pour vous accompagner à chaque étape de votre voyage, jour et nuit."
+                  title={t('services.item2.title')}
+                  desc={t('services.item2.desc')}
                 />
                 <ServiceRow
-                  title="Abonnement sans engagement"
-                  desc="Besoin d'un véhicule sur le long terme ? Profitez de nos offres flexibles et sans contraintes."
+                  title={t('services.item3.title')}
+                  desc={t('services.item3.desc')}
                 />
               </div>
               <button className="mt-12 px-10 py-4 border-2 border-white/20 hover:border-primary hover:bg-primary rounded-full font-bold text-xs uppercase tracking-widest transition-all">
-                Découvrir nos offres
+                {t('services.discover')}
               </button>
             </div>
             <div className="relative group">
@@ -180,13 +183,13 @@ export default async function Home() {
               <div className="relative aspect-video bg-gray-800 rounded-3xl border border-white/10 flex items-center justify-center overflow-hidden">
                 <Image 
                   src="/digital-experience.png" 
-                  alt="Expérience Digitalisée" 
+                  alt={t('services.digital_exp')} 
                   fill
                   className="object-cover group-hover:scale-110 transition-transform duration-700" 
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
                 <div className="absolute bottom-6 left-6">
-                  <p className="text-xl font-black text-white italic tracking-tighter">Expérience 100% Digitalisée</p>
+                  <p className="text-xl font-black text-white italic tracking-tighter">{t('services.digital_exp')}</p>
                 </div>
               </div>
             </div>
@@ -198,10 +201,10 @@ export default async function Home() {
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatItem value="15+" label="Agences au Maroc" />
-            <StatItem value="500+" label="Véhicules disponibles" />
-            <StatItem value="10k+" label="Clients satisfaits" />
-            <StatItem value="24/7" label="Support Client" />
+            <StatItem value="15+" label={t('stats.agencies')} />
+            <StatItem value="500+" label={t('stats.vehicles')} />
+            <StatItem value="10k+" label={t('stats.clients')} />
+            <StatItem value="24/7" label={t('stats.support')} />
           </div>
         </div>
       </section>
@@ -210,17 +213,17 @@ export default async function Home() {
       <section className="py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6 tracking-tight">Un réseau d'agences à votre écoute</h2>
-            <p className="text-gray-500 text-lg">Retrouvez Carlaville dans les plus grandes villes et aéroports du Royaume.</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-6 tracking-tight">{t('agencies.title')}</h2>
+            <p className="text-gray-500 text-lg">{t('agencies.subtitle')}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <AgencyItem city="Tanger" agencies={["Aéroport Ibn Battouta", "Tanger Ville", "Tanger Med"]} />
-            <AgencyItem city="Casablanca" agencies={["Aéroport Med V", "Casa Portfolio", "Maarif"]} />
-            <AgencyItem city="Marrakech" agencies={["Aéroport Menara", "Guéliz", "Hivernage"]} />
-            <AgencyItem city="Rabat" agencies={["Aéroport Rabat-Salé", "Rabat Agdal"]} />
-            <AgencyItem city="Agadir" agencies={["Aéroport Al Massira", "Agadir Baie"]} />
-            <AgencyItem city="Fès" agencies={["Aéroport Fès-Saïss", "Fès Centre"]} />
+            <AgencyItem city="Tanger" agencies={["Aéroport Ibn Battouta", "Tanger Ville", "Tanger Med"]} detailsLabel={t('agencies.details')} />
+            <AgencyItem city="Casablanca" agencies={["Aéroport Med V", "Casa Portfolio", "Maarif"]} detailsLabel={t('agencies.details')} />
+            <AgencyItem city="Marrakech" agencies={["Aéroport Menara", "Guéliz", "Hivernage"]} detailsLabel={t('agencies.details')} />
+            <AgencyItem city="Rabat" agencies={["Aéroport Rabat-Salé", "Rabat Agdal"]} detailsLabel={t('agencies.details')} />
+            <AgencyItem city="Agadir" agencies={["Aéroport Al Massira", "Agadir Baie"]} detailsLabel={t('agencies.details')} />
+            <AgencyItem city="Fès" agencies={["Aéroport Fès-Saïss", "Fès Centre"]} detailsLabel={t('agencies.details')} />
           </div>
         </div>
       </section>
@@ -228,11 +231,11 @@ export default async function Home() {
       {/* 💬 Simple FAQ */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Questions fréquentes</h2>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">{t('faq.title')}</h2>
           <div className="space-y-4">
-            <SimpleFAQItem q="Documents nécessaires ?" a="Permis de conduire, carte d'identité et carte bancaire." />
-            <SimpleFAQItem q="Kilométrage ?" a="Le kilométrage illimité est inclus dans la plupart de nos offres." />
-            <SimpleFAQItem q="Modification ?" a="Gratuited jusqu'à 48h avant la prise en charge." />
+            <SimpleFAQItem q={t('faq.item1.q')} a={t('faq.item1.a')} />
+            <SimpleFAQItem q={t('faq.item2.q')} a={t('faq.item2.a')} />
+            <SimpleFAQItem q={t('faq.item3.q')} a={t('faq.item3.a')} />
           </div>
         </div>
       </section>
@@ -240,7 +243,7 @@ export default async function Home() {
       {/* ✍️ Blogs Preview */}
       <section className="py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">Nos derniers articles</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">{t('blogs.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogs.map((blog: any) => (
               <Link key={blog._id} href={`/blogs/${blog.slug}`} className="group block">
@@ -286,7 +289,7 @@ const StatItem = ({ value, label }: any) => (
   </div>
 );
 
-const AgencyItem = ({ city, agencies }: any) => (
+const AgencyItem = ({ city, agencies, detailsLabel }: any) => (
   <div className="p-8 bg-gray-50 border border-gray-100 rounded-2xl hover:border-primary transition-all">
     <div className="flex items-center gap-3 mb-6">
       <div className="p-2 bg-primary/10 rounded-lg">
@@ -303,7 +306,7 @@ const AgencyItem = ({ city, agencies }: any) => (
       ))}
     </ul>
     <button className="w-full mt-8 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-primary border-t border-gray-50 transition-colors">
-      Détails de l'agence
+      {detailsLabel}
     </button>
   </div>
 );
@@ -319,4 +322,5 @@ const SimpleFAQItem = ({ q, a }: any) => (
     </div>
   </details>
 );
+
 

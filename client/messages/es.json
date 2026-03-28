@@ -1,0 +1,273 @@
+{
+  "home": {
+    "hero": {
+      "badge": "Experiencia Premium 2026",
+      "title_p1": "Su Viaje",
+      "title_p2": "Comienza",
+      "title_italic": "Aquí.",
+      "subtitle": "Descubra la libertad absoluta con nuestra exclusiva selección de vehículos de prestigio. Simple, rápido y sin comprometer la calidad.",
+      "joined": "Se han unido más de 5,000 conductores"
+    },
+    "categories": {
+      "title": "¿Qué vehículo está buscando?",
+      "subtitle": "Una amplia gama adaptada a todas sus necesidades de movilidad en Marruecos.",
+      "citadines": "Ciudad",
+      "berlines": "Sedanes",
+      "suv": "SUV y 4x4",
+      "luxe": "Lujo",
+      "utilitaires": "Comerciales",
+      "count": "{count} vehículos"
+    },
+    "vehicles": {
+      "title": "Nuestros vehículos disponibles",
+      "view_all": "Ver todo",
+      "empty": "No hay vehículos disponibles en este momento."
+    },
+    "services": {
+      "badge": "Servicios Carlaville",
+      "title": "Más que un simple alquiler de coches.",
+      "discover": "Descubre nuestras ofertas",
+      "digital_exp": "Experiencia 100% Digital",
+      "item1": {
+        "title": "Entrega a domicilio y aeropuerto",
+        "desc": "Entregamos su vehículo directamente a su llegada o en su casa, en cualquier lugar de Marruecos."
+      },
+      "item2": {
+        "title": "Asistencia Premium 24/7",
+        "desc": "Un equipo dedicado para acompañarle en cada etapa de su viaje, día y noche."
+      },
+      "item3": {
+        "title": "Suscripción sin compromiso",
+        "desc": "¿Necesita un vehículo a largo plazo? Disfrute de nuestras ofertas flexibles sin restricciones."
+      }
+    },
+    "stats": {
+      "agencies": "Agencias en Marruecos",
+      "vehicles": "Vehículos disponibles",
+      "clients": "Clientes satisfechos",
+      "support": "Atención al Cliente"
+    },
+    "agencies": {
+      "title": "Una red de agencias a su servicio",
+      "subtitle": "Encuentre Carlaville en las principales ciudades y aeropuertos del Reino.",
+      "details": "Detalles de la agencia"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "item1": {
+        "q": "¿Documentos necesarios?",
+        "a": "Permiso de conducir, documento de identidad y tarjeta bancaria."
+      },
+      "item2": {
+        "q": "¿Kilometraje?",
+        "a": "El kilometraje ilimitado está incluido en la mayoría de nuestras ofertas."
+      },
+      "item3": {
+        "q": "¿Modificación?",
+        "a": "Gratis hasta 48 horas antes de la recogida."
+      }
+    },
+    "blogs": {
+      "title": "Nuestros últimos artículos"
+    }
+  },
+  "nav": {
+    "home": "Inicio",
+    "cars": "Coches",
+    "about": "Nosotros",
+    "contact": "Contacto",
+    "login": "Login",
+    "register": "Registrarse",
+    "dashboard": "Panel de Control",
+    "articles": "Artículos y consejos",
+    "agency": "La agencia Carlaville",
+    "search": {
+      "destination": "Destino",
+      "placeholder": "¿A dónde vas?",
+      "pickup": "Recogida",
+      "return": "Devolución",
+      "button": "Buscar",
+      "mileage": "Kilometraje ilimitado",
+      "insurance": "Seguro incluido",
+      "assistance": "Soporte 24/7"
+    }
+  },
+  "footer": {
+    "description": "Alquiler de coches de prestigio en Marruecos. Disfrute de tarifas imbatibles y un servicio al cliente excepcional.",
+    "links": "Enlaces Rápidos",
+    "contact": "Contacto",
+    "newsletter": "Boletín informativo",
+    "newsletter_desc": "Regístrese para nuestras ofertas exclusivas.",
+    "my_account": "Mi Cuenta",
+    "rights": "Todos los derechos reservados"
+  },
+  "cars": {
+    "badge": "Catálogo 2026",
+    "title_p1": "Encuentra Tu",
+    "title_p2": "Próximo Destino.",
+    "subtitle": "Exploración ilimitada con nuestra selección de vehículos premium, perfectamente mantenidos para su comodidad.",
+    "stats": {
+      "reservations": "Más de 2.400 reservas ya este mes"
+    },
+    "empty": {
+      "title": "No hay vehículos disponibles",
+      "subtitle": "Inténtelo de nuevo más tarde o cambie sus criterios."
+    },
+    "filters": {
+      "title": "Filtros",
+      "reset": "Reiniciar",
+      "search_label": "Buscar",
+      "search_placeholder": "Marca, modelo...",
+      "category": "Categoría",
+      "all_categories": "Todas las categorías",
+      "transmission": "Transmisión",
+      "all_transmissions": "Todas las transmisiones",
+      "fuel": "Combustible",
+      "all_fuels": "Todos los combustibles",
+      "sort_label": "Ordenar por precio",
+      "sort_low": "Precio más bajo",
+      "sort_high": "Precio más alto"
+    },
+    "results_count": "vehículos disponibles",
+    "no_results": "Ningún resultado coincide con sus criterios.",
+    "currency": "MAD",
+    "per_day": "por día",
+    "book_now": "Reservar este vehículo"
+  },
+  "details": {
+    "not_found": "Vehículo no encontrado",
+    "back": "← Volver al catálogo",
+    "base_rate": "Tarifa base",
+    "per_day": "/ día",
+    "specs": {
+      "seats": "Asientos",
+      "seats_count": "{count} Asientos",
+      "transmission": "Transmisión",
+      "fuel": "Combustible",
+      "region": "Región"
+    },
+    "equipments": {
+      "title": "Equipamiento y Garantías",
+      "ac": "Aire acondicionado automático",
+      "mileage": "Kilometraje ilimitado",
+      "assistance": "Asistencia en carretera 24/7",
+      "insurance": "Seguro a todo riesgo",
+      "fuel_full": "Tanque lleno",
+      "cleaning": "Limpieza profesional",
+      "shield": "Vehículo desinfectado y certificado para cada alquiler."
+    }
+  },
+  "reservation": {
+    "title": "Reservar ahora",
+    "success": {
+      "title": "¡Reserva creada!",
+      "subtitle": "Cargando pago..."
+    },
+    "error": {
+      "network": "Error de red"
+    },
+    "fields": {
+      "pickup_date": "Recogida",
+      "return_date": "Devolución",
+      "time": "Hora",
+      "pickup_location": "Lugar de recogida",
+      "extras": "Opciones adicionales"
+    },
+    "total_price": "Precio total ({days}d):",
+    "submit": "Validar por {price} MAD",
+    "secure_payment": "Pago seguro por SSL"
+  },
+  "auth": {
+    "login": {
+      "title": "¡Bienvenido de nuevo!",
+      "subtitle": "Acceda a su espacio privilegiado de Carlaville.",
+      "error_invalid": "Email o contraseña incorrectos",
+      "email_label": "Email",
+      "password_label": "Contraseña",
+      "forgot_password": "¿Olvidó?",
+      "submit": "Iniciar sesión",
+      "new_here": "¿Nuevo aquí?",
+      "register_link": "Crear una cuenta"
+    },
+    "register": {
+      "title": "Únase a nosotros",
+      "subtitle": "Cree su perfil en unos instantes.",
+      "error_generic": "Error durante el registro",
+      "first_name": "Nombre",
+      "last_name": "Apellido",
+      "phone": "Teléfono",
+      "submit": "Crear mi cuenta",
+      "already_member": "¿Ya es miembro?",
+      "login_link": "Inicie sesión",
+      "footer": "Únase a Carlaville — Movilidad Superior"
+    },
+    "footer": "Carlaville — Rendimiento y Elegancia"
+  },
+
+  "common": {
+    "loading": "Cargando..."
+  },
+  "about": {
+    "link": "Sobre Nosotros",
+    "meta_title": "Sobre Nosotros - CarLaville",
+    "meta_description": "Descubre CarLaville, tu socio de confianza para el alquiler de coches en Marruecos. Nuestra misión, historia, flota y nuestros compromisos con tu movilidad.",
+    "hero_badge": "Descubre Quiénes Somos",
+    "hero_title": "Sobre CarLaville",
+    "hero_subtitle": "Nos comprometemos a proporcionar soluciones de transporte fiables, asequibles y prácticas para satisfacer todas tus necesidades de movilidad en Marruecos.",
+    "mission_title": "Nuestra Misión",
+    "mission_desc": "En CarLaville, nos comprometemos a ofrecer soluciones de transporte fiables, asequibles y prácticas para satisfacer las necesidades de movilidad de nuestros clientes, ya sea para un viaje de negocios, un viaje en familia o un aventura por las carreteras de Marruecos.",
+    "history_title": "Nuestra Historia",
+    "history_desc": "Fundada en 2005, CarLaville se ha consolidado como un actor principal en el alquiler de coches en Marruecos. Gracias a nuestra experiencia y profundo conocimiento del mercado, nos hemos adaptado a las expectativas de nuestros clientes ofreciendo servicios que combinan confort, seguridad y flexibilidad.",
+    "experience_years": "Años de experiencia",
+    "customer_support": "Atención al cliente",
+    "satisfied_clients": "Clientes satisfechos",
+    "transparency": "Transparencia",
+    "fleet_badge": "Descubre",
+    "fleet_title": "Nuestra Flota",
+    "fleet_desc": "Ofrecemos una amplia selección de vehículos adecuados para todo tipo de trayectos y presupuestos. Todos nuestros vehículos están cuidadosamente mantenidos y se revisan regularmente para garantizar seguridad y rendimiento.",
+    "economy_title": "Coches económicos",
+    "economy_desc": "Ideales para presupuestos ajustados y trayectos urbanos fáciles en todas las ciudades.",
+    "suv_title": "SUV y 4x4",
+    "suv_desc": "Perfectos para escapadas a la montaña, el desierto o largas carreteras por Marruecos.",
+    "popular_badge": "MÁS POPULAR",
+    "luxury_title": "Berlinas y lujo",
+    "luxury_desc": "Para el máximo confort, elegancia y prestigio durante tus desplazamientos profesionales o personales.",
+    "commitment_title": "Nuestro Compromiso",
+    "commitment_desc": "Nos esforzamos por ofrecer un servicio excepcional a nuestros clientes a través de :",
+    "competitive_prices": "Tarifas competitivas y transparentes",
+    "competitive_prices_desc": "Sin cargos ocultos, ofertas adaptadas a todos los presupuestos.",
+    "support_24h": "Atención al cliente 24/7",
+    "support_24h_desc": "Asistencia experta disponible en todo momento, estés donde estés.",
+    "easy_booking": "Reserva rápida y fácil",
+    "easy_booking_desc": "A través de nuestro sitio web moderno o nuestro servicio de atención al cliente, en pocos pasos.",
+    "maintained_vehicles": "Vehículos bien mantenitos",
+    "maintained_vehicles_desc": "Inspecciones periódicas para garantizar tu confort óptimo y seguridad absoluta.",
+    "values_title": "Nuestros Valores",
+    "values_desc": "En CarLaville, todo nuestro equipo pone un fuerte énfasis diario en:",
+    "customer_satisfaction": "Satisfacción del cliente",
+    "customer_satisfaction_desc": "Escucha atenta y servicio a medida.",
+    "integrity": "Integridad y transparencia",
+    "integrity_desc": "Sin malas sorpresas, servicio 100% fiable.",
+    "excellence": "Excelencia",
+    "excellence_desc": "Mejora continua para nuestro mercado.",
+    "contact_cta_title": "Contáctanos",
+    "contact_cta_desc": "No dudes en contactarnos para cualquier pregunta o para reservar tu vehículo hoy mismo. Estamos deseando servirte y hacer que tu viaje a Marruecos sea inolvidable.",
+    "contact_btn": "Contáctanos",
+    "rent_btn": "Alquilar un vehículo"
+  },
+  "blogs": {
+    "link": "Blogs",
+    "title": "Blog y Consejos",
+    "subtitle": "Encuentra todas las últimas noticias de CarLaville y nuestros consejos para tus alquileres de coches en Marruecos.",
+    "read_more": "Leer todo",
+    "no_articles": "No hay artículos disponibles por el momento.",
+    "back_to_articles": "Volver a los artículos",
+    "blog_badge": "Blog CarLaville",
+    "latest": "Recientemente",
+    "unfound": "No encontrado",
+    "thanks": "Gracias por leer el Blog de CarLaville. \nSíguenos para más consejos de movilidad en Marruecos."
+  }
+}
+
+
+

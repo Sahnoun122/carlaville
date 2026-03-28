@@ -1,11 +1,15 @@
 "use client";
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { UserPlus, ArrowRight, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 function RegisterForm() {
+  const t = useTranslations('auth.register');
+  const tl = useTranslations('auth.login');
   const router = useRouter();
+
   const searchParams = useSearchParams();
   const redirectParams = searchParams.get('redirect') || '/dashboard';
   
@@ -33,7 +37,7 @@ function RegisterForm() {
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.message || 'Erreur lors de l\'inscription');
+        throw new Error(errData.message || t('error_generic'));
       }
 
       const data = await res.json();
@@ -59,8 +63,8 @@ function RegisterForm() {
             <div className="inline-flex w-16 h-16 bg-neutral-900 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-neutral-900/20 hover:scale-110 transition-transform">
               <UserPlus className="w-8 h-8" />
             </div>
-            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">Nous rejoindre</h2>
-            <p className="text-gray-400 font-medium text-sm">Créez votre profil en quelques instants.</p>
+            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">{t('title')}</h2>
+            <p className="text-gray-400 font-medium text-sm">{t('subtitle')}</p>
           </div>
           
           <form className="space-y-8" onSubmit={handleSubmit}>
@@ -72,23 +76,23 @@ function RegisterForm() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Prénom</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{t('first_name')}</label>
                 <input name="firstName" type="text" required className="input-premium" placeholder="Jean" />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Nom</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{t('last_name')}</label>
                 <input name="lastName" type="text" required className="input-premium" placeholder="Dupont" />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Email</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{tl('email_label')}</label>
                 <input name="email" type="email" required className="input-premium" placeholder="name@example.com" />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Téléphone</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{t('phone')}</label>
                 <input name="phone" type="tel" required className="input-premium" placeholder="+212 ..." />
               </div>
               <div className="space-y-2 md:col-span-2">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">Mot de passe</label>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{tl('password_label')}</label>
                 <input name="password" type="password" required className="input-premium" placeholder="••••••••" />
               </div>
             </div>
@@ -97,22 +101,22 @@ function RegisterForm() {
               <div className="absolute inset-0 bg-gray-50/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="relative z-10 flex items-center justify-center gap-3">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                  <>Créer mon compte <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>
+                  <>{t('submit')} <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" /></>
                 )}
               </span>
             </button>
             
             <div className="text-center pt-8 border-t border-gray-50">
               <p className="text-sm font-medium text-gray-400">
-                Déjà membre ?{' '}
-                <Link href="/auth/login" className="font-black text-red-600 hover:text-neutral-900 transition-colors">Connectez-vous</Link>
+                {t('already_member')}{' '}
+                <Link href="/auth/login" className="font-black text-red-600 hover:text-neutral-900 transition-colors">{t('login_link')}</Link>
               </p>
             </div>
           </form>
         </div>
         
         <p className="mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
-          Rejoignez Carlaville — Mobilité Supérieure
+          {t('footer')}
         </p>
       </div>
     </div>
@@ -120,8 +124,9 @@ function RegisterForm() {
 }
 
 export default function RegisterPage() {
+  const t = useTranslations('common');
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-black text-gray-300 uppercase tracking-widest text-xs">Chargement...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-black text-gray-300 uppercase tracking-widest text-xs">{t('loading')}</div>}>
       <RegisterForm />
     </Suspense>
   );

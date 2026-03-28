@@ -1,19 +1,23 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { User, Car, Menu, X } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { User, Menu, X, Globe, ChevronDown } from 'lucide-react';
+import { usePathname, useRouter, Link, routing } from '@/i18n/routing';
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Navbar() {
+  const t = useTranslations('nav');
+  const locale = useLocale();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const syncAuthState = () => {
-      const token = localStorage.getItem('carlaville_token');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('carlaville_token') : null;
       setIsAuthenticated(Boolean(token));
     };
 
@@ -33,9 +37,25 @@ export default function Navbar() {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setLangMenuOpen(false);
   }, [pathname]);
 
   const isAuthPage = pathname?.startsWith('/auth');
+
+  const handleLocaleChange = (newLocale: string) => {
+    router.replace(pathname, { locale: newLocale });
+    setLangMenuOpen(false);
+  };
+
+  const languages = [
+    { code: 'fr', name: 'Français' },
+    { code: 'en', name: 'English' },
+    { code: 'it', name: 'Italiano' },
+    { code: 'es', name: 'Español' },
+    { code: 'de', name: 'Deutsch' }
+  ];
+
+  const currentLangName = languages.find(l => l.code === locale)?.name || 'Français';
 
   return (
     <header 
@@ -64,33 +84,64 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center gap-10">
-          <NavLink href="/" active={pathname === '/'}>Accueil</NavLink>
-          <NavLink href="/cars" active={pathname.startsWith('/cars')}>Véhicules</NavLink>
-          <NavLink href="/blogs" active={pathname.startsWith('/blogs')}>Blogs</NavLink>
-          <NavLink href="/about" active={pathname === '/about'}>À Propos</NavLink>
+          <NavLink href="/" active={pathname === '/'}>{t('home')}</NavLink>
+          <NavLink href="/cars" active={pathname.startsWith('/cars')}>{t('cars')}</NavLink>
+          <NavLink href="/blogs" active={pathname.startsWith('/blogs')}>{t('articles')}</NavLink>
+          <NavLink href="/about" active={pathname === '/about'}>{t('about')}</NavLink>
         </nav>
 
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
+          {/* Language Switcher */}
+          <div className="relative">
+            <button 
+              onClick={() => setLangMenuOpen(!langMenuOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors text-[10px] font-black uppercase tracking-widest text-gray-600"
+            >
+              <Globe className="w-4 h-4" />
+              <span>{locale.toUpperCase()}</span>
+              <ChevronDown className={`w-3 h-3 transition-transform ${langMenuOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {langMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleLocaleChange(lang.code)}
+                    className={`w-full text-left px-4 py-3 text-xs font-bold transition-colors hover:bg-gray-50 flex items-center justify-between ${
+                      locale === lang.code ? 'text-primary' : 'text-gray-600'
+                    }`}
+                  >
+                    {lang.name}
+                    {locale === lang.code && <div className="w-1.5 h-1.5 bg-primary rounded-full" />}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="w-px h-4 bg-gray-200" />
+
           {isAuthenticated ? (
             <Link 
               href="/dashboard" 
-              className="px-6 py-2.5 bg-neutral-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-red-600 transition-all shadow-lg hover:shadow-red-500/20 active:scale-95"
+              className="px-6 py-2.5 bg-neutral-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-primary transition-all shadow-lg active:scale-95"
             >
-              Dashboard
+              {t('dashboard')}
             </Link>
           ) : (
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-6">
               <Link 
                 href="/auth/login" 
-                className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] hover:text-red-600 transition-colors flex items-center gap-2"
+                className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.2em] hover:text-primary transition-colors flex items-center gap-2"
               >
-                <User className="w-4 h-4" /> Connexion
+                <User className="w-4 h-4" /> {t('login')}
               </Link>
               <Link 
                 href="/auth/register" 
-                className="px-6 py-2.5 bg-red-600 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-neutral-900 transition-all shadow-lg shadow-red-600/20 active:scale-95"
+                className="px-6 py-2.5 bg-primary text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-neutral-900 transition-all shadow-lg active:scale-95"
               >
-                S'inscrire
+                {t('register')}
               </Link>
             </div>
           )}
@@ -108,25 +159,41 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu - Enhanced with Glassmorphism */}
+      {/* Mobile Menu */}
       <div className={`lg:hidden fixed inset-x-0 top-[72px] bg-white/95 backdrop-blur-2xl border-b border-gray-100 shadow-2xl transition-all duration-500 ease-in-out origin-top z-40 ${
         mobileMenuOpen ? 'opacity-100 scale-y-100 translate-y-0' : 'opacity-0 scale-y-0 -translate-y-4 pointer-events-none'
       }`}>
           <div className="p-8 flex flex-col gap-8">
             <nav className="flex flex-col gap-6">
-              <MobileNavLink href="/" active={pathname === '/'}>Accueil</MobileNavLink>
-              <MobileNavLink href="/cars" active={pathname.startsWith('/cars')}>Véhicules</MobileNavLink>
-              <MobileNavLink href="/blogs" active={pathname.startsWith('/blogs')}>Articles & Conseils</MobileNavLink>
-              <MobileNavLink href="/about" active={pathname === '/about'}>L'agence Carlaville</MobileNavLink>
+              <MobileNavLink href="/" active={pathname === '/'}>{t('home')}</MobileNavLink>
+              <MobileNavLink href="/cars" active={pathname.startsWith('/cars')}>{t('cars')}</MobileNavLink>
+              <MobileNavLink href="/blogs" active={pathname.startsWith('/blogs')}>{t('articles')}</MobileNavLink>
+              <MobileNavLink href="/about" active={pathname === '/about'}>{t('about')}</MobileNavLink>
             </nav>
+
+            <div className="flex flex-wrap gap-2 pt-4">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLocaleChange(lang.code)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                    locale === lang.code 
+                    ? 'bg-primary border-primary text-white' 
+                    : 'bg-gray-50 border-gray-100 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  {lang.code.toUpperCase()}
+                </button>
+              ))}
+            </div>
             
-            <div className="pt-8 border-t border-gray-100 flex flex-col gap-4">
+             <div className="pt-8 border-t border-gray-100 flex flex-col gap-4">
                {isAuthenticated ? (
                  <Link 
                    href="/dashboard" 
-                   className="w-full py-4 bg-gray-900 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-gray-200"
+                   className="w-full py-4 bg-gray-900 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest"
                  >
-                   Accéder au Dashboard
+                   {t('dashboard')}
                  </Link>
                ) : (
                  <>
@@ -134,17 +201,18 @@ export default function Navbar() {
                      href="/auth/login" 
                      className="w-full py-4 text-center font-black text-gray-900 bg-gray-50 rounded-2xl text-xs uppercase tracking-widest border border-gray-100"
                    >
-                     Se Connecter
+                     {t('login')}
                    </Link>
                    <Link 
                      href="/auth/register" 
-                     className="w-full py-4 bg-red-600 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-red-500/20"
+                     className="w-full py-4 bg-primary text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest"
                    >
-                     Créer un compte
+                     {t('register')}
                    </Link>
                  </>
                )}
             </div>
+
           </div>
       </div>
     </header>
@@ -155,11 +223,11 @@ const NavLink = ({ href, children, active }: any) => (
   <Link 
     href={href} 
     className={`text-[10px] font-black uppercase tracking-[0.3em] transition-all relative group ${
-      active ? 'text-red-600' : 'text-neutral-400 hover:text-neutral-900'
+      active ? 'text-primary' : 'text-neutral-400 hover:text-neutral-900'
     }`}
   >
     {children}
-    <span className={`absolute -bottom-1.5 left-0 w-full h-0.5 bg-red-600 rounded-full transition-all duration-300 ${
+    <span className={`absolute -bottom-1.5 left-0 w-full h-0.5 bg-primary rounded-full transition-all duration-300 ${
       active ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-50 group-hover:opacity-50'
     }`}></span>
   </Link>
@@ -169,10 +237,11 @@ const MobileNavLink = ({ href, children, active }: any) => (
   <Link 
     href={href} 
     className={`text-lg font-black tracking-tight ${
-      active ? 'text-red-600' : 'text-neutral-900'
+      active ? 'text-primary' : 'text-neutral-900'
     }`}
   >
     {children}
   </Link>
 );
+
 

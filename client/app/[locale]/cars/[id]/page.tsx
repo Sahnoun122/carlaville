@@ -1,6 +1,8 @@
 import { Users, Fuel, Settings, MapPin, Check, ChevronLeft, ShieldCheck } from 'lucide-react';
 import ReservationForm from './ReservationForm';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
+import { getTranslations } from 'next-intl/server';
+
 
 async function getCar(id: string) {
   try {
@@ -13,6 +15,7 @@ async function getCar(id: string) {
 }
 
 export default async function CarDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations('details');
   const { id } = await params;
   const car = await getCar(id);
   const previewImage = car?.images?.[0] || car?.imageUrl;
@@ -20,8 +23,8 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
   if (!car) {
     return (
       <div className="container mx-auto px-4 py-24 text-center">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Véhicule introuvable</h1>
-        <Link href="/cars" className="text-primary font-bold hover:underline">← Retour au catalogue</Link>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('not_found')}</h1>
+        <Link href="/cars" className="text-primary font-bold hover:underline">{t('back')}</Link>
       </div>
     );
   }
@@ -33,7 +36,7 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
         {/* Simple Navigation */}
         <div className="mb-8">
            <Link href="/cars" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-primary transition-colors">
-              <ChevronLeft className="w-4 h-4" /> Retour au catalogue
+              <ChevronLeft className="w-4 h-4" /> {t('back')}
            </Link>
         </div>
 
@@ -55,8 +58,8 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
                      </div>
                   </div>
                   <div className="bg-white p-4 rounded-xl border border-gray-100 text-right min-w-[140px]">
-                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Tarif de base</p>
-                     <p className="text-2xl font-black text-gray-900 tracking-tight">{car.dailyPrice} MAD <span className="text-xs font-normal text-gray-400">/ jour</span></p>
+                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{t('base_rate')}</p>
+                     <p className="text-2xl font-black text-gray-900 tracking-tight">{car.dailyPrice} MAD <span className="text-xs font-normal text-gray-400">{t('per_day')}</span></p>
                   </div>
                </div>
 
@@ -71,28 +74,28 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
 
                {/* Specs Grid */}
                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <SpecCard icon={<Users className="w-5 h-5" />} label="Places" value={`${car.seats} Places`} />
-                  <SpecCard icon={<Settings className="w-5 h-5" />} label="Boîte" value={car.transmission} />
-                  <SpecCard icon={<Fuel className="w-5 h-5" />} label="Énergie" value={car.fuelType} />
-                  <SpecCard icon={<MapPin className="w-5 h-5" />} label="Région" value={car.city} />
+                  <SpecCard icon={<Users className="w-5 h-5" />} label={t('specs.seats')} value={t('specs.seats_count', { count: car.seats })} />
+                  <SpecCard icon={<Settings className="w-5 h-5" />} label={t('specs.transmission')} value={car.transmission} />
+                  <SpecCard icon={<Fuel className="w-5 h-5" />} label={t('specs.fuel')} value={car.fuelType} />
+                  <SpecCard icon={<MapPin className="w-5 h-5" />} label={t('specs.region')} value={car.city} />
                </div>
             </div>
 
             {/* Equipments */}
             <div className="bg-white rounded-2xl border border-gray-100 p-8 soft-shadow">
-               <h2 className="text-xl font-bold text-gray-900 mb-6">Équipements & Garanties</h2>
+               <h2 className="text-xl font-bold text-gray-900 mb-6">{t('equipments.title')}</h2>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
-                  <Inclusion text="Climatisation automatique" />
-                  <Inclusion text="Kilométrage illimité" />
-                  <Inclusion text="Assistance routière 24/7" />
-                  <Inclusion text="Assurance tous risques" />
-                  <Inclusion text="Plein de carburant" />
-                  <Inclusion text="Nettoyage professionnel" />
+                  <Inclusion text={t('equipments.ac')} />
+                  <Inclusion text={t('equipments.mileage')} />
+                  <Inclusion text={t('equipments.assistance')} />
+                  <Inclusion text={t('equipments.insurance')} />
+                  <Inclusion text={t('equipments.fuel_full')} />
+                  <Inclusion text={t('equipments.cleaning')} />
                </div>
                
                <div className="mt-8 bg-emerald-50 text-emerald-700 p-4 rounded-xl text-sm font-medium flex gap-3 items-center border border-emerald-100">
                   <ShieldCheck className="w-5 h-5 shrink-0" />
-                  Véhicule désinfecté et certifié conforme pour chaque location.
+                  {t('equipments.shield')}
                </div>
             </div>
           </div>
