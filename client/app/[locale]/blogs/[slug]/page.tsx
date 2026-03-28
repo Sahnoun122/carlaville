@@ -1,30 +1,11 @@
 import Link from 'next/link';
 import { ChevronLeft, Calendar, Share2, Clock, Bookmark } from 'lucide-react';
 
-interface Blog {
-  _id?: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  coverImage?: string;
-  images?: string[];
-  createdAt?: string;
-}
-
-async function getBlog(slug: string) {
-  try {
-    const res = await fetch(`http://localhost:3009/api/blogs/${slug}`, { next: { revalidate: 60 } });
-    if (!res.ok) return null;
-    return (await res.json()) as Blog;
-  } catch {
-    return null;
-  }
-}
+import { getBlogBySlug } from '@/services/api/blog';
 
 export default async function BlogDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const blog = await getBlog(slug);
+  const blog = await getBlogBySlug(slug);
 
   if (!blog) return <div className="py-40 text-center"><h1 className="text-2xl font-bold">Introuvable</h1></div>;
 
@@ -59,7 +40,7 @@ export default async function BlogDetailsPage({ params }: { params: Promise<{ sl
 
            {gallery.length > 1 && (
              <div className="grid grid-cols-2 gap-4 mt-8">
-                {gallery.slice(1).map((img, i) => (
+                {gallery.slice(1).map((img: string, i: number) => (
                   <img key={i} src={img} className="w-full h-64 rounded-xl object-cover border border-gray-100" />
                 ))}
              </div>

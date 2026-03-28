@@ -2,25 +2,7 @@ import { Link } from '@/i18n/routing';
 import { ChevronRight, Calendar, Bookmark } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
-interface Blog {
-  _id?: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  coverImage?: string;
-  images?: string[];
-  createdAt?: string;
-}
-
-async function getBlogs() {
-  try {
-    const res = await fetch('http://localhost:3009/api/blogs?limit=30', { next: { revalidate: 60 } });
-    if (!res.ok) return { blogs: [] as Blog[] };
-    return (await res.json()) as { blogs: Blog[] };
-  } catch {
-    return { blogs: [] as Blog[] };
-  }
-}
+import { getBlogs } from '@/services/api/blog';
 
 export async function generateMetadata() {
   const t = await getTranslations('blogs');
