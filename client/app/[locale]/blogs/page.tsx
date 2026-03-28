@@ -1,5 +1,6 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { ChevronRight, Calendar, Bookmark } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 interface Blog {
   _id?: string;
@@ -21,7 +22,16 @@ async function getBlogs() {
   }
 }
 
+export async function generateMetadata() {
+  const t = await getTranslations('blogs');
+  return {
+    title: t('title') + ' - CarLaville',
+    description: t('subtitle'),
+  };
+}
+
 export default async function BlogsPage() {
+  const t = await getTranslations('blogs');
   const data = await getBlogs();
   const blogs = data?.blogs || [];
 
@@ -29,8 +39,8 @@ export default async function BlogsPage() {
     <div className="min-h-screen bg-gray-50 pt-32 pb-24">
       <div className="container mx-auto px-4">
         <div className="mb-12 text-center">
-           <h1 className="text-4xl font-bold text-gray-900 mb-4">Blog & Conseils</h1>
-           <p className="text-gray-500 max-w-2xl mx-auto">Retrouvez toutes les actualités de Carlaville et nos conseils pour vos locations de voitures au Maroc.</p>
+           <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('title')}</h1>
+           <p className="text-gray-500 max-w-2xl mx-auto">{t('subtitle')}</p>
         </div>
 
         {blogs.length > 0 ? (
@@ -48,7 +58,7 @@ export default async function BlogsPage() {
                   <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors line-clamp-2">{blog.title}</h2>
                   <p className="text-gray-500 text-sm line-clamp-3 mb-6">{blog.excerpt}</p>
                   <div className="text-primary font-bold text-xs flex items-center gap-1 uppercase tracking-wider">
-                     Tout lire <ChevronRight className="w-4 h-4" />
+                     {t('read_more')} <ChevronRight className="w-4 h-4" />
                   </div>
                 </div>
               </Link>
@@ -56,7 +66,7 @@ export default async function BlogsPage() {
           </div>
         ) : (
           <div className="text-center py-20 bg-gray-50 rounded-2xl border border-gray-100 italic text-gray-400">
-             Aucun article disponible pour le moment.
+             {t('no_articles')}
           </div>
         )}
       </div>
