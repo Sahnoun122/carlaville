@@ -115,4 +115,32 @@ export class PaymentsService {
       throw new BadRequestException(`Stripe Error: ${err.message}`);
     }
   }
+
+  async confirmPickup(reservationId: string) {
+    this.logger.log(`Confirming 'Pay on Pickup' for reservation: ${reservationId}`);
+    const reservation = await this.reservationModel.findById(reservationId);
+    if (!reservation) {
+      throw new NotFoundException(`Reservation with id ${reservationId} not found`);
+    }
+
+    if (reservation.paymentStatus === 'paid') {
+      throw new BadRequestException('Reservation is already paid');
+    }
+
+    const updatedReservation = await this.reservationModel.findByIdAndUpdate(
+      reservationId,
+      {
+        status: 'confirmed' as any,
+        paymentStatus: 'unpaid',
+      },
+      { new: true },
+    );
+
+    if (!updatedReservation) {
+      throw new NotFoundException(`Reservation with id ${reservationId} not found`);
+    }
+
+    this.logger.log(`Reservation ${reservationId} confirmed via Pay on Pickup`);
+    return { success: true, bookingReference: updatedReservation.bookingReference };
+  }
 }

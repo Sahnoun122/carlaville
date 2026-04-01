@@ -9,15 +9,19 @@ import {
   Filter, 
   Clock,
   ChevronRight,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 import Link from 'next/link';
+import ReservationDetailModal from '@/components/ReservationDetailModal';
 
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchReservations() {
@@ -153,21 +157,32 @@ export default function ReservationsPage() {
                        <p className="text-[10px] font-bold text-gray-400 uppercase">Montant total</p>
                        <p className="text-xl font-bold text-gray-900">{(res.pricingBreakdown?.total || (res.pricingBreakdown?.daily * res.rentalDays) || 0).toLocaleString()} MAD</p>
                     </div>
-                    <Link href={`/checkout/${res._id}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">
-                       Détails <ChevronRight className="w-4 h-4" />
-                    </Link>
+                    {['pending', 'unpaid'].includes(res.status) ? (
+                       <Link href={`/checkout/${res._id}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">
+                          Finaliser <ChevronRight className="w-4 h-4" />
+                       </Link>
+                    ) : (
+                       <button 
+                         onClick={() => { setSelectedReservation(res); setIsModalOpen(true); }}
+                         className="text-xs font-black text-neutral-900 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg flex items-center gap-1 uppercase tracking-wider transition-all"
+                       >
+                          Suivi <ChevronRight className="w-4 h-4 text-red-600" />
+                       </button>
+                    )}
                  </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <ReservationDetailModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        reservation={selectedReservation} 
+      />
     </div>
   );
-}
-
-function Plus(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
 }
 
 const InfoItem = ({ icon, text }: any) => (

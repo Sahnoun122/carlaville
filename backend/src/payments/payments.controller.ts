@@ -24,4 +24,9 @@ export class PaymentsController {
   async verifyPayment(@Param('id') id: string) {
     return this.paymentsService.verifyPayment(id);
   }
+
+  @Post('confirm-pickup/:id')
+  async confirmPickup(@Param('id') id: string) {
+    return this.paymentsService.confirmPickup(id);
+  }
 }

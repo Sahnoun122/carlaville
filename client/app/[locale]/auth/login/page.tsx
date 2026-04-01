@@ -4,11 +4,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { Car, ArrowRight, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/providers/auth-provider';
 
 function LoginForm() {
   const t = useTranslations('auth.login');
   const tf = useTranslations('auth');
   const router = useRouter();
+  const { login } = useAuth();
 
   const searchParams = useSearchParams();
   const redirectParams = searchParams.get('redirect') || '/dashboard';
@@ -37,9 +39,7 @@ function LoginForm() {
       }
 
       const data = await res.json();
-      localStorage.setItem('carlaville_token', data.accessToken);
-      localStorage.setItem('carlaville_user', JSON.stringify(data.user));
-      
+      login(data);
       router.push(redirectParams);
     } catch (err: any) {
       setError(err.message);

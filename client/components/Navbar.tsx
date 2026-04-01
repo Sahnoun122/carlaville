@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { User, Menu, X, Globe, ChevronDown } from 'lucide-react';
+import { User, Menu, X, Globe, ChevronDown, LogOut } from 'lucide-react';
 import { usePathname, useRouter, Link, routing } from '@/i18n/routing';
 import { useTranslations, useLocale } from 'next-intl';
+import { useAuth } from '@/providers/auth-provider';
 
 export default function Navbar() {
   const t = useTranslations('nav');
   const locale = useLocale();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated, logout, user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
@@ -16,21 +17,12 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    const syncAuthState = () => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('carlaville_token') : null;
-      setIsAuthenticated(Boolean(token));
-    };
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
 
-    syncAuthState();
-    window.addEventListener('storage', syncAuthState);
     window.addEventListener('scroll', handleScroll);
-
     return () => {
-      window.removeEventListener('storage', syncAuthState);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -123,12 +115,22 @@ export default function Navbar() {
           <div className="w-px h-4 bg-gray-200" />
 
           {isAuthenticated ? (
-            <Link 
-              href="/dashboard" 
-              className="px-6 py-2.5 bg-neutral-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-primary transition-all shadow-lg active:scale-95"
-            >
-              {t('dashboard')}
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/dashboard" 
+                className="px-6 py-2.5 bg-neutral-900 text-white font-black text-[10px] uppercase tracking-[0.2em] rounded-xl hover:bg-primary transition-all shadow-lg active:scale-95 flex items-center gap-2"
+              >
+                <User className="w-3.5 h-3.5" />
+                {user?.firstName || t('dashboard')}
+              </Link>
+              <button
+                onClick={() => logout()}
+                className="p-2.5 bg-gray-50 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all border border-gray-100"
+                title="Déconnexion"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           ) : (
             <div className="flex items-center gap-6">
               <Link 
