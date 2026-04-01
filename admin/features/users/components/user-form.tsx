@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { User, Role } from '@/types';
 import type { UserFormValues } from '@/features/users/services/user-service';
+import { User as UserIcon, Mail, Phone, Lock, Shield } from 'lucide-react';
 
 const optionalPhoneSchema = z
   .string()
@@ -85,88 +86,137 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom complet</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>E-mail</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {!user && (
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2 text-slate-700">
+                  <UserIcon size={14} className="text-slate-400" />
+                  Nom complet
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="Jean Dupont" 
+                    {...field} 
+                    disabled={isLoading} 
+                    className="focus:ring-red-100"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2 text-slate-700">
+                  <Mail size={14} className="text-slate-400" />
+                  E-mail
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="jean@example.com" 
+                    {...field} 
+                    disabled={isLoading} 
+                    className="focus:ring-red-100"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2 text-slate-700">
+                  <Phone size={14} className="text-slate-400" />
+                  Téléphone
+                </FormLabel>
+                <FormControl>
+                  <Input 
+                    placeholder="06 12 34 56 78" 
+                    {...field} 
+                    disabled={isLoading} 
+                    className="focus:ring-red-100"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2 text-slate-700">
+                  <Shield size={14} className="text-slate-400" />
+                  Rôle
+                </FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="focus:ring-red-100">
+                      <SelectValue placeholder="Sélectionnez un rôle" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.values(Role).map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {(!user || form.watch('password')) && (
           <FormField
             control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mot de passe</FormLabel>
+                <FormLabel className="flex items-center gap-2 text-slate-700">
+                  <Lock size={14} className="text-slate-400" />
+                  {user ? 'Nouveau mot de passe (optionnel)' : 'Mot de passe'}
+                </FormLabel>
                 <FormControl>
-                  <Input type="password" {...field} disabled={isLoading} />
+                  <Input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    {...field} 
+                    disabled={isLoading} 
+                    className="focus:ring-red-100"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         )}
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rôle</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un rôle" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(Role).map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Enregistrement...' : 'Enregistrer'}
-        </Button>
+
+        <div className="pt-4">
+          <Button 
+            type="submit" 
+            disabled={isLoading} 
+            className="w-full h-11 bg-gradient-to-r from-red-700 to-red-600 font-bold shadow-lg shadow-red-200 transition-all hover:scale-[1.01] hover:shadow-xl active:scale-[0.99] disabled:opacity-70"
+          >
+            {isLoading ? 'Enregistrement en cours...' : 'Enregistrer les modifications'}
+          </Button>
+        </div>
       </form>
     </Form>
   );

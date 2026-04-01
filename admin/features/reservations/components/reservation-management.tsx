@@ -2,22 +2,24 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { 
   Plus, 
   Search, 
   Filter, 
-  RefreshCw, 
+  RefreshCcw, 
   Check, 
   X, 
   Clock, 
-  Mail, 
-  Phone, 
   Calendar as CalendarIcon, 
-  MapPin, 
   User, 
   Car as CarIcon,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Banknote,
+  Navigation,
+  ShieldCheck,
+  AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
@@ -32,8 +34,9 @@ import {
   verifyReservationPayment,
 } from '@/features/reservations/services/reservation-service';
 import { useAuth } from '@/providers/auth-provider';
-import { PageHeader } from '@/components/shared/page-header';
 import { Car, Reservation, ReservationStatus, Role } from '@/types';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 const resolveCarId = (car: Car) => car.id || (car as Car & { _id?: string })._id || '';
 
@@ -47,23 +50,16 @@ const resolveVehicleLabel = (reservation: Reservation) => {
   return 'Véhicule inconnu';
 };
 
-const statusOptions = [
-  { label: 'Tous les statuts', value: 'all' },
-  { label: 'En attente', value: ReservationStatus.PENDING },
-  { label: 'Confirmée', value: ReservationStatus.CONFIRMED },
-  { label: 'Rejetée', value: ReservationStatus.REJECTED },
-];
-
-const reservationStatusBadgeClass: Record<string, string> = {
-  [ReservationStatus.PENDING]: 'bg-amber-50 text-amber-600 border border-amber-100',
-  [ReservationStatus.CONFIRMED]: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
-  [ReservationStatus.REJECTED]: 'bg-red-50 text-red-600 border border-red-100',
+const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+  [ReservationStatus.PENDING]: { label: 'En attente', class: 'border-amber-200 bg-amber-50 text-amber-700 shadow-sm shadow-amber-100/50', icon: Clock },
+  [ReservationStatus.CONFIRMED]: { label: 'Confirmée', class: 'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50', icon: ShieldCheck },
+  [ReservationStatus.REJECTED]: { label: 'Rejetée', class: 'border-rose-200 bg-rose-50 text-rose-700 shadow-sm shadow-rose-100/50', icon: AlertCircle },
 };
 
-const paymentStatusBadgeClass: Record<string, string> = {
-  paid: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
-  unpaid: 'bg-amber-50 text-amber-600 border border-amber-100',
-  failed: 'bg-red-50 text-red-600 border border-red-100',
+const paymentConfig: Record<string, { label: string; class: string }> = {
+  paid: { label: 'Payé', class: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
+  unpaid: { label: 'Non payé', class: 'border-slate-200 bg-slate-50 text-slate-500' },
+  failed: { label: 'Échec', class: 'border-rose-200 bg-rose-50 text-rose-700' },
 };
 
 export const ReservationManagement = () => {
@@ -72,8 +68,6 @@ export const ReservationManagement = () => {
   const [page] = useState(1);
   const [selectedCarId, setSelectedCarId] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
@@ -121,7 +115,7 @@ export const ReservationManagement = () => {
   const createMutation = useMutation({
     mutationFn: createReservation,
     onSuccess: () => {
-      setCreateError(null);
+      setIsCreateModalOpen(false);
       setFormData({
         customerName: '',
         customerEmail: '',
@@ -137,97 +131,56 @@ export const ReservationManagement = () => {
         selectedExtras: '',
         estimatedTotal: '',
       });
-      setIsCreateModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      toast.success('Réservation enregistrée');
     },
-    onError: (error: unknown) => {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Failed to create reservation.';
-      setCreateError(message);
+    onError: (error: any) => {
+      toast.error(error.message || 'Échec de la réservation.');
     },
   });
 
-  const onMutationSuccess = () => {
-    setActionError(null);
-    queryClient.invalidateQueries({ queryKey: ['reservations'] });
-  };
-
   const confirmMutation = useMutation({
     mutationFn: confirmReservation,
-    onSuccess: onMutationSuccess,
-    onError: (error: unknown) => {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Échec de la confirmation.';
-      setActionError(message);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      toast.success('Réservation confirmée');
     },
+    onError: (error: any) => toast.error(error.message || 'Erreur'),
   });
 
   const rejectMutation = useMutation({
     mutationFn: rejectReservation,
-    onSuccess: onMutationSuccess,
-    onError: (error: unknown) => {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Échec du rejet.';
-      setActionError(message);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      toast.error('Réservation rejetée');
     },
+    onError: (error: any) => toast.error(error.message || 'Erreur'),
   });
 
   const pendingMutation = useMutation({
     mutationFn: markReservationPending,
-    onSuccess: onMutationSuccess,
-    onError: (error: unknown) => {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Échec de la mise en attente.';
-      setActionError(message);
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      toast.info('Réservation mise en attente');
     },
+    onError: (error: any) => toast.error(error.message || 'Erreur'),
   });
 
   const verifyMutation = useMutation({
     mutationFn: verifyReservationPayment,
-    onSuccess: onMutationSuccess,
-    onError: (error: any) => {
-      setActionError(error.message || 'La vérification a échoué.');
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      toast.success('Paiement vérifié');
     },
+    onError: (error: any) => toast.error(error.message || 'Vérification échouée'),
   });
 
   const isActionPending =
     confirmMutation.isPending || rejectMutation.isPending || pendingMutation.isPending || verifyMutation.isPending;
 
   const handleCreateReservation = () => {
-    if (
-      !formData.customerName ||
-      !formData.customerEmail ||
-      !formData.customerPhone ||
-      !formData.agencyId ||
-      !formData.carId ||
-      !formData.pickupLocation ||
-      !formData.returnLocation ||
-      !formData.pickupDate ||
-      !formData.returnDate ||
-      !formData.pickupTime ||
-      !formData.returnTime
-    ) {
-      setCreateError('Veuillez remplir tous les champs obligatoires.');
+    if (!formData.customerName || !formData.carId) {
+      toast.error('Champs manquants');
       return;
     }
 
@@ -255,17 +208,6 @@ export const ReservationManagement = () => {
     });
   };
 
-  const openCreateModal = () => {
-    setCreateError(null);
-    setIsCreateModalOpen(true);
-  };
-
-  const closeCreateModal = () => {
-    if (!createMutation.isPending) {
-      setIsCreateModalOpen(false);
-    }
-  };
-
   const vehicleFilterOptions = useMemo(
     () =>
       (carsQuery.data?.cars ?? []).map((car) => ({
@@ -276,368 +218,266 @@ export const ReservationManagement = () => {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <PageHeader 
-        title="Gestion des Réservations" 
-        description="Centralisez toutes les demandes de location et gérez les flux opérationnels."
-      >
-        <Button 
-          onClick={openCreateModal}
-          className="bg-red-600 hover:bg-red-700 shadow-lg shadow-red-600/20 text-white font-bold h-11 px-6 rounded-xl transition-all hover:-translate-y-0.5"
+    <div className="w-full space-y-8 pb-12">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+            Réservations
+          </h1>
+          <p className="mt-2 text-slate-500">
+            Suivez et gérez l'ensemble des demandes de location en temps réel.
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="h-12 gap-2 bg-slate-900 px-6 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95"
         >
-          <Plus className="w-5 h-5 mr-2" />
-          Nouvelle Réservation
+          <Plus size={20} />
+          Nouvelle réservation
         </Button>
-      </PageHeader>
+      </div>
 
-      <Modal
-        isOpen={isCreateModalOpen}
-        onClose={closeCreateModal}
-        title="Nouvelle Réservation"
-        contentClassName="max-w-4xl rounded-[2.5rem]"
-      >
-        <div className="p-2">
-          {createError && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm font-bold text-red-600">
-              {createError}
-            </div>
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[65vh] overflow-y-auto pr-4 scrollbar-thin">
-             {/* Section: Client */}
-             <div className="space-y-4">
-               <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Informations Client</h3>
-               <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    placeholder="Nom complet du client"
-                    value={formData.customerName}
-                    onChange={(e) => setFormData(p => ({ ...p, customerName: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 transition-all font-bold text-gray-900"
-                  />
-               </div>
-               <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="email"
-                    placeholder="Adresse email"
-                    value={formData.customerEmail}
-                    onChange={(e) => setFormData(p => ({ ...p, customerEmail: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 transition-all font-bold text-gray-900"
-                  />
-               </div>
-               <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    placeholder="Numéro de téléphone"
-                    value={formData.customerPhone}
-                    onChange={(e) => setFormData(p => ({ ...p, customerPhone: e.target.value }))}
-                    className="w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 transition-all font-bold text-gray-900"
-                  />
-               </div>
-             </div>
-
-             {/* Section: Véhicule & Agence */}
-             <div className="space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Véhicule & Agence</h3>
-                <div className="relative">
-                  <select
-                    value={formData.agencyId}
-                    onChange={(e) => setFormData(p => ({ ...p, agencyId: e.target.value }))}
-                    className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-900 cursor-pointer"
-                  >
-                    <option value="">Sélectionner une agence</option>
-                    {(agenciesQuery.data?.agencies ?? []).map((agency) => (
-                      <option key={agency.id || agency._id} value={agency.id || agency._id}>
-                        {agency.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="relative">
-                  <select
-                    value={formData.carId}
-                    onChange={(e) => setFormData(p => ({ ...p, carId: e.target.value }))}
-                    className="w-full pl-4 pr-10 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-900 cursor-pointer"
-                  >
-                    <option value="">Sélectionner un véhicule</option>
-                    {(carsQuery.data?.cars ?? []).map((car) => {
-                      const carId = resolveCarId(car);
-                      return <option key={carId} value={carId}>{car.brand} {car.model}</option>;
-                    })}
-                  </select>
-                </div>
-             </div>
-
-             {/* Section: Dates & Lieux */}
-             <div className="space-y-4 md:col-span-2">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Logistique</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-gray-400 uppercase ml-4">Prise en charge</p>
-                    <div className="grid grid-cols-2 gap-2">
-                       <input type="date" value={formData.pickupDate} onChange={e => setFormData(p => ({...p, pickupDate: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
-                       <input type="time" value={formData.pickupTime} onChange={e => setFormData(p => ({...p, pickupTime: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
-                    </div>
-                    <input placeholder="Lieu de prise en charge" value={formData.pickupLocation} onChange={e => setFormData(p => ({...p, pickupLocation: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
-                  </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-gray-400 uppercase ml-4">Retour</p>
-                    <div className="grid grid-cols-2 gap-2">
-                       <input type="date" value={formData.returnDate} onChange={e => setFormData(p => ({...p, returnDate: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
-                       <input type="time" value={formData.returnTime} onChange={e => setFormData(p => ({...p, returnTime: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
-                    </div>
-                    <input placeholder="Lieu de retour" value={formData.returnLocation} onChange={e => setFormData(p => ({...p, returnLocation: e.target.value}))} className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900" />
-                  </div>
-                </div>
-             </div>
-
-             {/* Section: Options & Total */}
-             <div className="space-y-4 md:col-span-2">
-                <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Extras & Tarification</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    placeholder="Options (ex: Siège bébé, GPS...)"
-                    value={formData.selectedExtras}
-                    onChange={(e) => setFormData(p => ({ ...p, selectedExtras: e.target.value }))}
-                    className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900"
-                  />
-                  <div className="relative">
-                    <input
-                      type="number"
-                      placeholder="Total estimé (MAD)"
-                      value={formData.estimatedTotal}
-                      onChange={(e) => setFormData(p => ({ ...p, estimatedTotal: e.target.value }))}
-                      className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 font-bold text-gray-900"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400 uppercase">MAD</span>
-                  </div>
-                </div>
-             </div>
-          </div>
-
-          <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
-            <Button variant="outline" className="font-bold text-gray-500 border-none hover:bg-gray-50 h-12 px-8 rounded-2xl" onClick={closeCreateModal}>Annuler</Button>
-            <Button 
-               className="bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 text-white font-bold h-12 px-10 rounded-2xl transition-all" 
-               onClick={handleCreateReservation} 
-               disabled={createMutation.isPending}
-            >
-              Finaliser la Réservation
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {actionError && (
-        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl text-sm font-bold text-red-600 animate-in slide-in-from-top duration-300">
-          {actionError}
-        </div>
-      )}
-
-      {/* Filters Section */}
-      <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-           <Filter className="w-5 h-5 text-gray-400" />
-           <h3 className="text-xs font-black uppercase tracking-widest text-gray-400">Filtres de recherche</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2 relative">
-            <CarIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <select
-              value={selectedCarId}
-              onChange={(e) => setSelectedCarId(e.target.value)}
-              className="w-full pl-11 pr-10 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-800 cursor-pointer"
-            >
-              <option value="all">Tous les véhicules</option>
-              {vehicleFilterOptions.map((car) => (
-                <option key={car.id} value={car.id}>{car.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="relative">
-            <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full pl-11 pr-10 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-red-500 appearance-none font-bold text-gray-800 cursor-pointer"
-            >
-              {statusOptions.map((status) => (
-                <option key={status.value} value={status.value}>{status.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <Button 
-            variant="outline"
-            className="h-full rounded-2xl border-gray-100 bg-gray-50 hover:bg-gray-100 font-bold transition-all flex items-center gap-2"
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['reservations'] })}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        {/* Car Filter */}
+        <div className="md:col-span-2 relative group">
+          <CarIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
+          <select
+            value={selectedCarId}
+            onChange={(e) => setSelectedCarId(e.target.value)}
+            className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-10 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50 appearance-none font-medium"
           >
-            <RefreshCw className={`w-4 h-4 ${reservationsQuery.isFetching ? 'animate-spin' : ''}`} />
-            Actualiser
+            <option value="all">Tous les véhicules</option>
+            {vehicleFilterOptions.map((car) => (
+              <option key={car.id} value={car.id}>{car.label}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Status Filter */}
+        <div className="relative group">
+          <Filter className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
+          <select
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-10 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50 appearance-none font-medium"
+          >
+            <option value="all">Tous les statuts</option>
+            <option value={ReservationStatus.PENDING}>En attente</option>
+            <option value={ReservationStatus.CONFIRMED}>Confirmée</option>
+            <option value={ReservationStatus.REJECTED}>Rejetée</option>
+          </select>
+        </div>
+
+        {/* Refresh */}
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex items-center gap-3 px-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <CalendarIcon size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Total</p>
+              <p className="text-lg font-black text-slate-900 leading-none">{reservationsQuery.data?.count || 0}</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => reservationsQuery.refetch()}
+            disabled={reservationsQuery.isLoading || reservationsQuery.isRefetching}
+            className="h-10 w-10 rounded-xl p-0 hover:bg-slate-50"
+          >
+            <RefreshCcw size={16} className={cn(reservationsQuery.isRefetching && "animate-spin")} />
           </Button>
         </div>
       </div>
 
-      {/* Main Table */}
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
-        {reservationsQuery.isLoading ? (
-          <div className="p-20 text-center">
-            <div className="w-12 h-12 border-4 border-red-100 border-t-red-600 rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-400 font-bold">Chargement des données...</p>
+      {reservationsQuery.isLoading && !reservationsQuery.isRefetching ? (
+        <div className="flex h-64 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/30">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCcw className="h-8 w-8 animate-spin text-slate-300" />
+            <p className="text-sm font-bold text-slate-400">Chargement des réservations...</p>
           </div>
-        ) : reservationsQuery.isError ? (
-          <div className="p-20 text-center text-red-600 font-bold">Erreur lors du chargement des réservations.</div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="bg-gray-50/50">
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] rounded-tl-[2.5rem]">Référence / Véhicule</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Client</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Dates & Durée</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Paiement</th>
-                  <th className="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Statut</th>
-                  <th className="px-6 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] rounded-tr-[2.5rem]">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {reservationsQuery.data?.reservations.map((reservation) => {
-                  const reservationId = resolveReservationId(reservation);
-                  return (
-                    <tr key={reservationId} className="group hover:bg-gray-50 transition-all duration-300">
-                      <td className="px-6 py-6 align-middle">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-mono text-xs font-black text-gray-900 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-200 self-start">
-                            {reservation.bookingReference}
-                          </span>
-                          <span className="text-xs font-bold text-gray-600 ml-1">{resolveVehicleLabel(reservation)}</span>
+        </div>
+      ) : reservationsQuery.isError ? (
+        <div className="p-12 text-center text-rose-600 font-bold bg-rose-50 rounded-3xl border border-rose-100">
+           Impossible de charger les réservations.
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden overflow-x-auto transition-all hover:shadow-md">
+          <table className="min-w-full divide-y divide-slate-100">
+            <thead>
+              <tr className="bg-slate-50/50">
+                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Référence / Véhicule</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Client</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Dates & Durée</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Paiement</th>
+                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-5 text-right text-xs font-bold text-slate-900 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {(reservationsQuery.data?.reservations || []).map((reservation) => {
+                const rid = resolveReservationId(reservation);
+                const status = statusConfig[reservation.status] || { label: reservation.status, class: 'bg-slate-100 text-slate-600', icon: Clock };
+                const payment = paymentConfig[reservation.paymentStatus || 'unpaid'] || paymentConfig.unpaid;
+
+                return (
+                  <tr key={rid} className="group transition-colors hover:bg-slate-50/50">
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-mono text-[10px] font-black text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 self-start">
+                          {reservation.bookingReference}
+                        </span>
+                        <span className="text-xs font-bold text-slate-900">{resolveVehicleLabel(reservation)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                         <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 ring-2 ring-white transition-all group-hover:bg-red-50 group-hover:text-red-700">
+                            <User size={18} />
+                         </div>
+                         <div className="flex flex-col">
+                            <span className="font-bold text-slate-900 text-sm leading-tight">{reservation.customerName}</span>
+                            <span className="text-[10px] font-bold text-slate-400">{reservation.customerPhone}</span>
+                         </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                           <span className="text-slate-900">{new Date(reservation.pickupDate).toLocaleDateString()}</span>
+                           <ChevronRight className="w-3 h-3 text-slate-300" />
+                           <span className="text-slate-500">{new Date(reservation.returnDate).toLocaleDateString()}</span>
                         </div>
-                      </td>
-                      <td className="px-6 py-6 align-middle">
-                        <div className="flex items-start gap-3">
-                           <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-600 border border-red-100 shadow-sm shrink-0">
-                              <User className="w-5 h-5" />
-                           </div>
-                           <div>
-                              <p className="text-sm font-black text-gray-900">{reservation.customerName}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                 <Phone className="w-2.5 h-2.5 text-gray-300" />
-                                 <span className="text-[10px] font-bold text-gray-400">{reservation.customerPhone}</span>
-                              </div>
-                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-6 align-middle">
-                        <div className="flex flex-col gap-1.5 pl-1">
-                          <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
-                             <span className="text-gray-900">{new Date(reservation.pickupDate).toLocaleDateString()}</span>
-                             <ChevronRight className="w-3 h-3 text-gray-300" />
-                             <span className="text-gray-500 font-medium">{new Date(reservation.returnDate).toLocaleDateString()}</span>
-                          </div>
-                          <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-full border border-red-100 self-start">
-                             {reservation.rentalDays} JOURS
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-6 align-middle text-left">
-                        <div className="flex flex-col gap-1.5">
-                          <span
-                            className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest border w-fit ${
-                              paymentStatusBadgeClass[reservation.paymentStatus || 'unpaid']
-                            }`}
-                          >
-                            {reservation.paymentStatus || 'unpaid'}
+                        <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-full border border-red-100 self-start shadow-sm shadow-red-100/50">
+                           {reservation.rentalDays} JOURS
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className={cn(
+                            "inline-flex px-2.5 py-0.5 rounded-full border text-[10px] font-black uppercase tracking-tight",
+                            payment.class
+                          )}>
+                            {payment.label}
                           </span>
                           {reservation.paymentStatus !== 'paid' && (
                             <button
-                              className="text-[9px] font-bold text-blue-600 hover:text-blue-800 underline flex items-center gap-1 mt-1 transition-colors"
-                              onClick={() => verifyMutation.mutate(reservationId)}
+                              onClick={() => verifyMutation.mutate(rid)}
                               disabled={verifyMutation.isPending}
+                              className="text-slate-400 hover:text-red-600 transition-colors"
+                              title="Vérifier Stripe"
                             >
-                              <RefreshCw className={`w-2.5 h-2.5 ${verifyMutation.isPending ? 'animate-spin' : ''}`} />
-                              Vérifier Stripe
+                              <RefreshCcw size={12} className={cn(verifyMutation.isPending && "animate-spin")} />
                             </button>
                           )}
-                          {reservation.pricingBreakdown?.total && (
-                            <span className="text-xs font-black text-gray-900 ml-1">
-                              {reservation.pricingBreakdown.total.toLocaleString()} MAD
-                            </span>
-                          )}
                         </div>
-                      </td>
-                      <td className="px-6 py-6 align-middle">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1.5 text-[10px] font-black uppercase tracking-widest ${
-                            reservationStatusBadgeClass[reservation.status] ?? 'bg-gray-50 text-gray-500 border border-gray-200'
-                          }`}
-                        >
-                          {reservation.status}
+                        <span className="text-sm font-black text-slate-900">
+                          {reservation.pricingBreakdown?.total?.toLocaleString() || '0'} <span className="text-[9px] text-slate-400">MAD</span>
                         </span>
-                      </td>
-                      <td className="px-6 py-6 text-right align-middle">
-                        <div className="flex justify-end gap-2">
-                           {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
-                             <>
-                               <Button
-                                 size="sm"
-                                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 px-4 transition-all hover:-translate-y-0.5"
-                                 onClick={() => confirmMutation.mutate(reservationId)}
-                                 disabled={isActionPending}
-                               >
-                                 <Check className="w-4 h-4 mr-1.5" />
-                                 Accepter
-                               </Button>
-                               <Button
-                                 size="sm"
-                                 variant="destructive"
-                                 className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-600/20 px-4 transition-all hover:-translate-y-0.5"
-                                 onClick={() => rejectMutation.mutate(reservationId)}
-                                 disabled={isActionPending}
-                               >
-                                 <X className="w-4 h-4 mr-1.5" />
-                                 Rejeter
-                               </Button>
-                             </>
-                           )}
-
-                           {canManageReservationStatus && (reservation.status === ReservationStatus.CONFIRMED ||
-                             reservation.status === ReservationStatus.REJECTED) && (
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tight",
+                        status.class
+                      )}>
+                        <status.icon size={12} />
+                        {status.label}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <div className="flex justify-end gap-2">
+                         {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
+                           <>
+                             <Button
+                               size="sm"
+                               onClick={() => confirmMutation.mutate(rid)}
+                               disabled={isActionPending}
+                               className="h-9 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all shadow-lg shadow-emerald-100"
+                             >
+                               <Check size={14} className="mr-1.5" />
+                               Accepter
+                             </Button>
                              <Button
                                size="sm"
                                variant="outline"
-                               className="border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:text-red-100 transition-all"
-                               onClick={() => pendingMutation.mutate(reservationId)}
+                               onClick={() => rejectMutation.mutate(rid)}
                                disabled={isActionPending}
+                               className="h-9 px-4 rounded-lg border-rose-100 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-all font-bold"
                              >
-                                <Clock className="w-4 h-4 mr-1.5" />
-                                Suspendre
+                               <X size={14} className="mr-1.5" />
+                               Rejeter
                              </Button>
-                           )}
+                           </>
+                         )}
 
-                           <button className="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-gray-100 transition-all text-gray-400">
-                              <MoreHorizontal className="w-4 h-4" />
-                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                         {canManageReservationStatus && (reservation.status === ReservationStatus.CONFIRMED ||
+                           reservation.status === ReservationStatus.REJECTED) && (
+                           <Button
+                             size="sm"
+                             variant="outline"
+                             onClick={() => pendingMutation.mutate(rid)}
+                             disabled={isActionPending}
+                             className="h-9 px-4 rounded-lg border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                           >
+                              <Clock size={14} className="mr-1.5" />
+                              Suspendre
+                           </Button>
+                         )}
+
+                         <button className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-all text-slate-400">
+                            <MoreHorizontal size={16} />
+                         </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="bg-slate-50/50 px-6 py-4 border-t border-slate-100 flex justify-between items-center">
+             <p className="text-xs font-bold text-slate-400">Affichage de {reservationsQuery.data?.reservations?.length || 0} résultats</p>
+             <div className="flex gap-2">
+                <Button variant="outline" disabled className="h-8 px-4 rounded-lg border-slate-200 text-slate-400 text-xs font-bold">Précédent</Button>
+                <Button variant="outline" disabled className="h-8 px-4 rounded-lg border-slate-200 text-slate-400 text-xs font-bold">Suivant</Button>
+             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Pagination Placeholder */}
-      <div className="flex justify-between items-center px-4">
-         <p className="text-xs font-bold text-gray-400">Affichage de {reservationsQuery.data?.reservations?.length || 0} réservations sur {reservationsQuery.data?.count || 0}</p>
-         <div className="flex gap-2">
-            <Button variant="outline" disabled className="h-9 px-4 rounded-xl border-gray-100 font-bold text-gray-400">Précédent</Button>
-            <Button variant="outline" disabled className="h-9 px-4 rounded-xl border-gray-100 font-bold text-gray-400">Suivant</Button>
-         </div>
-      </div>
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Nouvelle Réservation"
+        contentClassName="max-w-4xl rounded-[2.5rem]"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[70vh] overflow-y-auto p-4 scrollbar-thin">
+           <div className="space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Client</h3>
+              <input placeholder="Nom complet" value={formData.customerName} onChange={e => setFormData(p => ({...p, customerName: e.target.value}))} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold" />
+              <input placeholder="Email" value={formData.customerEmail} onChange={e => setFormData(p => ({...p, customerEmail: e.target.value}))} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold" />
+              <input placeholder="Téléphone" value={formData.customerPhone} onChange={e => setFormData(p => ({...p, customerPhone: e.target.value}))} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold" />
+           </div>
+           <div className="space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Logistique</h3>
+              <select value={formData.carId} onChange={e => setFormData(p => ({...p, carId: e.target.value}))} className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl font-bold appearance-none">
+                 <option value="">Choisir un véhicule</option>
+                 {(carsQuery.data?.cars ?? []).map(c => <option key={resolveCarId(c)} value={resolveCarId(c)}>{c.brand} {c.model}</option>)}
+              </select>
+              <div className="grid grid-cols-2 gap-2">
+                 <input type="date" value={formData.pickupDate} onChange={e => setFormData(p => ({...p, pickupDate: e.target.value}))} className="h-12 px-3 bg-slate-50 border-none rounded-xl font-bold text-xs" />
+                 <input type="date" value={formData.returnDate} onChange={e => setFormData(p => ({...p, returnDate: e.target.value}))} className="h-12 px-3 bg-slate-50 border-none rounded-xl font-bold text-xs" />
+              </div>
+           </div>
+        </div>
+        <div className="flex justify-end gap-3 mt-8 p-6 bg-slate-50 border-t border-slate-100">
+          <Button variant="outline" onClick={() => setIsCreateModalOpen(false)} className="h-12 px-8 rounded-xl font-bold border-none hover:bg-slate-100">Annuler</Button>
+          <Button onClick={handleCreateReservation} disabled={createMutation.isPending} className="h-12 px-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black shadow-xl">Confirmer</Button>
+        </div>
+      </Modal>
     </div>
   );
 };

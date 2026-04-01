@@ -1,6 +1,8 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+import { X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ModalProps {
   isOpen: boolean;
@@ -17,21 +19,57 @@ export const Modal = ({
   children,
   contentClassName,
 }: ModalProps) => {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      document.body.style.overflow = 'hidden';
+    } else {
+      const timer = setTimeout(() => setMounted(false), 200);
+      document.body.style.overflow = 'unset';
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  if (!mounted && !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/55 p-4 backdrop-blur-sm">
-      <div className={`w-full rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl ${contentClassName ?? 'max-w-md'}`}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-black tracking-tight text-gray-900">{title}</h2>
+    <div
+      className={cn(
+        "fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300",
+        isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      )}
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+        onClick={onClose}
+      />
+
+      {/* Modal Content */}
+      <div
+        className={cn(
+          "relative w-full rounded-3xl border border-white/20 bg-white/90 shadow-2xl backdrop-blur-xl transition-all duration-300 transform",
+          isOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4",
+          contentClassName ?? 'max-w-lg'
+        )}
+      >
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            {title}
+          </h2>
           <button
             onClick={onClose}
-            className="rounded-lg px-2 py-1 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-700"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 active:scale-90"
           >
-            &times;
+            <X size={18} />
           </button>
         </div>
-        {children}
+
+        <div className="p-6">
+          {children}
+        </div>
       </div>
     </div>
   );

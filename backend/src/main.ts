@@ -7,7 +7,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
-  const port = process.env.PORT || 3008;
+  const port = process.env.PORT || 3009;
   app.setGlobalPrefix('api');
   app.use(
     cors({

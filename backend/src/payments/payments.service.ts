@@ -15,7 +15,8 @@ export class PaymentsService {
     private reservationModel: Model<ReservationDocument>,
     private configService: ConfigService,
   ) {
-    const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY')!;
+    const stripeSecretKey =
+      this.configService.get<string>('STRIPE_SECRET_KEY') || 'sk_test_mock';
     this.stripe = new Stripe(stripeSecretKey);
   }
 

@@ -1,12 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Modal } from '@/components/ui/modal';
-import { PageHeader } from '@/components/shared/page-header';
-import { Car, Agency } from '@/types';
+import { toast } from 'sonner';
 import {
   createCar,
   deleteCar,
@@ -14,52 +10,24 @@ import {
   updateCar,
   type CarFormValues,
 } from '@/features/cars/services/car-service';
+import { CarTable } from './car-table';
 import { CarForm } from './car-form';
 import { getAgencies } from '@/features/agencies/services/agency-service';
+import { Button } from '@/components/ui/button';
+import { Modal } from '@/components/ui/modal';
+import { Car, Agency } from '@/types';
+import { Plus, Search, Car as CarIcon, RefreshCcw, Filter } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const resolveCarId = (car: Car) =>
   car.id || (car as Car & { _id?: string })._id || '';
 
 const resolveAgencyId = (car: Car) => {
   const rawAgencyId = (car as unknown as { agencyId?: unknown }).agencyId;
-
-  if (!rawAgencyId) {
-    return '';
-  }
-
-  if (typeof rawAgencyId === 'string') {
-    return rawAgencyId;
-  }
-
+  if (!rawAgencyId) return '';
+  if (typeof rawAgencyId === 'string') return rawAgencyId;
   const populatedAgency = rawAgencyId as { id?: string; _id?: string };
   return populatedAgency.id || populatedAgency._id || '';
-};
-
-const resolveAgencyName = (car: Car) => {
-  const agencyFromCar = car as unknown as {
-    agencyId?: unknown;
-    agency?: { name?: string };
-  };
-
-  if (agencyFromCar.agency?.name) {
-    return agencyFromCar.agency.name;
-  }
-
-  if (agencyFromCar.agencyId && typeof agencyFromCar.agencyId === 'object') {
-    const populatedAgency = agencyFromCar.agencyId as { name?: string };
-    if (populatedAgency.name) {
-      return populatedAgency.name;
-    }
-  }
-
-  return '-';
-};
-
-const statusBadgeClass: Record<string, string> = {
-  AVAILABLE: 'border border-emerald-200 bg-emerald-100 text-emerald-800',
-  RESERVED: 'border border-blue-200 bg-blue-100 text-blue-800',
-  MAINTENANCE: 'border border-amber-200 bg-amber-100 text-amber-800',
-  UNAVAILABLE: 'border border-rose-200 bg-rose-100 text-rose-800',
 };
 
 export const CarManagement = () => {
@@ -69,7 +37,6 @@ export const CarManagement = () => {
   const [filterAgency, setFilterAgency] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const carsQuery = useQuery({
     queryKey: ['cars', page, searchTerm, filterAgency],
@@ -89,40 +56,24 @@ export const CarManagement = () => {
   const createMutation = useMutation({
     mutationFn: createCar,
     onSuccess: () => {
-      setSubmitError(null);
       queryClient.invalidateQueries({ queryKey: ['cars'] });
       setIsModalOpen(false);
+      toast.success('Véhicule ajouté avec succès');
     },
-    onError: (error: unknown) => {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Échec de l\'ajout du véhicule.';
-
-      setSubmitError(message);
+    onError: (error: any) => {
+      toast.error(error.message || 'Échec de l\'ajout du véhicule.');
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: updateCar,
     onSuccess: () => {
-      setSubmitError(null);
       queryClient.invalidateQueries({ queryKey: ['cars'] });
       setIsModalOpen(false);
+      toast.success('Véhicule mis à jour avec succès');
     },
-    onError: (error: unknown) => {
-      const message =
-        typeof error === 'object' &&
-        error !== null &&
-        'message' in error &&
-        typeof (error as { message?: unknown }).message === 'string'
-          ? (error as { message: string }).message
-          : 'Échec de la modification du véhicule.';
-
-      setSubmitError(message);
+    onError: (error: any) => {
+      toast.error(error.message || 'Échec de la modification du véhicule.');
     },
   });
 
@@ -130,17 +81,19 @@ export const CarManagement = () => {
     mutationFn: deleteCar,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cars'] });
+      toast.success('Véhicule archivé');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Échec de la suppression.');
     },
   });
 
   const handleCreate = () => {
-    setSubmitError(null);
     setSelectedCar(null);
     setIsModalOpen(true);
   };
 
   const handleEdit = (car: Car) => {
-    setSubmitError(null);
     setSelectedCar({
       ...car,
       id: resolveCarId(car),
@@ -150,7 +103,9 @@ export const CarManagement = () => {
   };
 
   const handleDelete = (id: string) => {
-    deleteMutation.mutate(id);
+    if (window.confirm('Voulez-vous vraiment archiver ce véhicule ?')) {
+      deleteMutation.mutate(id);
+    }
   };
 
   const handleSubmit = (values: CarFormValues) => {
@@ -158,36 +113,53 @@ export const CarManagement = () => {
       updateMutation.mutate({ id: resolveCarId(selectedCar), ...values });
       return;
     }
-
     createMutation.mutate(values);
   };
 
   const agencies: Agency[] = agenciesQuery.data?.agencies ?? [];
 
   return (
-    <div className="space-y-6">
-      <PageHeader 
-        title="Gestion des Véhicules" 
-        description="Gérez la flotte de véhicules, ajoutez des voitures et mettez à jour les statuts."
-      >
-        <Button onClick={handleCreate}>Ajouter un Véhicule</Button>
-      </PageHeader>
-
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-[0_2px_8px_rgba(0,0,0,0.02)] gap-4">
-        <div className="w-full md:w-1/3">
-          <input
-            type="text"
-            placeholder="Rechercher par marque, modèle..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-          />
+    <div className="w-full space-y-8 pb-12">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
+            Flotte de Véhicules
+          </h1>
+          <p className="mt-2 text-slate-500">
+            Gérez votre parc automobile, les spécifications techniques et les disponibilités.
+          </p>
         </div>
-        <div className="w-full md:w-1/4">
+        <Button
+          onClick={handleCreate}
+          className="h-12 gap-2 bg-slate-900 px-6 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95"
+        >
+          <Plus size={20} />
+          Ajouter un véhicule
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        {/* Search Bar */}
+        <div className="md:col-span-2">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
+            <input
+              type="text"
+              placeholder="Rechercher par marque, modèle..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50"
+            />
+          </div>
+        </div>
+
+        {/* Agency Filter */}
+        <div className="relative group">
+          <Filter className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
           <select
             value={filterAgency}
             onChange={(e) => setFilterAgency(e.target.value)}
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200 bg-white"
+            className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xlmns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20stroke%3D%22%2364748b%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M7%207l3%203%203-3%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_1rem_center] bg-no-repeat"
           >
             <option value="ALL">Toutes les agences</option>
             {agencies.map((agency) => (
@@ -197,88 +169,53 @@ export const CarManagement = () => {
             ))}
           </select>
         </div>
+
+        {/* Stats */}
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <CarIcon size={20} />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Total</p>
+              <p className="text-lg font-black text-slate-900 leading-none">{carsQuery.data?.count || 0}</p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => carsQuery.refetch()}
+            disabled={carsQuery.isLoading || carsQuery.isRefetching}
+            className="h-10 w-10 rounded-xl p-0 hover:bg-slate-50"
+          >
+            <RefreshCcw size={16} className={cn(carsQuery.isRefetching && "animate-spin")} />
+          </Button>
+        </div>
       </div>
 
-      {carsQuery.isLoading && <p>Chargement des véhicules...</p>}
-      {carsQuery.isError && <p>Erreur lors du chargement des véhicules</p>}
-
-      {carsQuery.data && (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {carsQuery.data.cars.map((car) => {
-            const carId = resolveCarId(car);
-            const previewImage = car.images?.[0];
-
-            return (
-              <article
-                key={carId}
-                className="group rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all hover:-translate-y-1 hover:border-red-200 hover:shadow-lg"
-              >
-                {previewImage ? (
-                  <img
-                    src={previewImage}
-                    alt={`${car.brand} ${car.model}`}
-                    className="mb-4 h-44 w-full rounded-lg object-cover"
-                  />
-                ) : (
-                  <div className="mb-4 flex h-44 w-full items-center justify-center rounded-lg bg-slate-100 text-sm text-slate-500">
-                    Aucune image
-                  </div>
-                )}
-
-                <div className="mb-3 flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-800">
-                      {car.brand} {car.model}
-                    </h3>
-                    <p className="text-sm text-slate-500">{car.year} · {car.city}</p>
-                  </div>
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      statusBadgeClass[car.availabilityStatus] ||
-                      'border border-slate-200 bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {car.availabilityStatus}
-                  </span>
-                </div>
-
-                <p className="mb-1 text-sm text-slate-700">
-                  {car.category} · {car.transmission} · {car.fuelType}
-                </p>
-                <p className="mb-1 text-sm text-slate-700">
-                  {car.seats} places · Bagages : {car.luggage ?? 0}
-                </p>
-                <p className="mb-4 text-sm text-slate-700">
-                  Agence : {resolveAgencyName(car)}
-                </p>
-
-                <div className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
-                  <div className="font-semibold text-slate-800">{car.dailyPrice} MAD / jour</div>
-                  <div className="mt-1 text-slate-600">
-                    Caution : {car.depositAmount ?? 0} MAD · Livraison : {car.deliveryFee ?? 0} MAD
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Link href={`/admin/cars/${carId}`}>
-                    <Button size="sm" variant="outline">Détails</Button>
-                  </Link>
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(car)}>
-                    Modifier
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(carId)}
-                    disabled={deleteMutation.isPending}
-                  >
-                    Archiver
-                  </Button>
-                </div>
-              </article>
-            );
-          })}
+      {carsQuery.isLoading && !carsQuery.isRefetching ? (
+        <div className="flex h-64 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/30">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCcw className="h-8 w-8 animate-spin text-slate-300" />
+            <p className="text-sm font-bold text-slate-400">Préparation de la liste...</p>
+          </div>
         </div>
+      ) : carsQuery.isError ? (
+        <div className="flex h-64 flex-col items-center justify-center rounded-3xl border border-rose-100 bg-rose-50/50 text-center p-6">
+          <span className="h-12 w-12 flex items-center justify-center rounded-2xl bg-rose-100 text-rose-600 mb-4 animate-bounce">
+            ⚠️
+          </span>
+          <p className="text-rose-900 font-bold">Erreur de chargement des voitures.</p>
+          <Button onClick={() => carsQuery.refetch()} variant="outline" className="mt-4 border-rose-200 text-rose-700 bg-white hover:bg-rose-50 font-bold">
+            Réessayer
+          </Button>
+        </div>
+      ) : (
+        <CarTable
+          cars={carsQuery.data?.cars || []}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       )}
 
       <Modal
@@ -287,9 +224,6 @@ export const CarManagement = () => {
         title={selectedCar ? 'Modifier le Véhicule' : 'Ajouter un Véhicule'}
         contentClassName="max-w-4xl"
       >
-        {submitError && (
-          <p className="mb-3 text-sm text-red-600">{submitError}</p>
-        )}
         <CarForm
           car={selectedCar}
           agencies={agencies}
