@@ -18,7 +18,6 @@ const navLinks = {
     { name: 'Réservations', href: '/admin/reservations' },
     { name: 'Paramètres de réservation', href: '/admin/reservations/settings' },
     { name: 'Livraisons', href: '/admin/deliveries' },
-    { name: 'Tarification', href: '/admin/pricing' },
   ],
   [Role.RESERVATION_MANAGER]: [
     { name: 'Tableau de bord', href: '/operations' },
@@ -58,7 +57,6 @@ export const Sidebar = () => {
     'Réservations': CalendarDays,
     'Paramètres de réservation': Settings,
     Livraisons: Truck,
-    Tarification: Settings,
     'Revenus': TrendingUp,
   };
 
@@ -76,7 +74,12 @@ export const Sidebar = () => {
           <ul className="space-y-1">
             {links.map((link) => {
               const Icon = iconByName[link.name] || LayoutDashboard;
-              const isActive = pathname === link.href || (link.href !== '/admin' && link.href !== '/operations' && pathname.startsWith(link.href));
+              const isActive = pathname === link.href || (
+                link.href !== '/admin' && 
+                link.href !== '/operations' && 
+                pathname.startsWith(link.href + '/') &&
+                !links.some(l => l.href !== link.href && pathname.startsWith(l.href) && l.href.length > link.href.length)
+              );
 
               return (
                 <li key={link.name}>
