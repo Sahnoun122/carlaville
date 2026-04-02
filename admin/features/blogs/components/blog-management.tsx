@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, useMemo, useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -11,14 +11,27 @@ import {
   updateBlog,
 } from '@/features/blogs/services/blog-service';
 import { uploadImages } from '@/features/uploads/services/upload-service';
-import { BlogTable } from './blog-table';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Blog } from '@/types';
-import { Plus, Search, FileText, RefreshCcw, Filter, Image as ImageIcon } from 'lucide-react';
+import { 
+  Plus, 
+  Search, 
+  RefreshCcw, 
+  Trash2, 
+  Loader2,
+  FileText,
+  ChevronRight,
+  Filter,
+  Image as ImageIcon,
+  CheckCircle2,
+  Check
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AdminBlogCard } from './admin-blog-card';
 
 const resolveBlogId = (blog: Blog) => blog.id || blog._id || '';
+const normalizeUrl = (url: string) => url ? url.replace('127.0.0.1', 'localhost') : '';
 
 const initialFormValues: BlogFormValues = {
   title: '',
@@ -37,324 +50,194 @@ export const BlogManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'true' | 'false'>('all');
   const [formValues, setFormValues] = useState<BlogFormValues>(initialFormValues);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const blogsQuery = useQuery({
     queryKey: ['blogs', searchTerm, statusFilter],
-    queryFn: () =>
-      getBlogs({
-        page: 1,
-        limit: 50,
-        q: searchTerm || undefined,
-        published: statusFilter === 'all' ? undefined : statusFilter,
-      }),
+    queryFn: () => getBlogs({ page: 1, limit: 50, q: searchTerm || undefined, published: statusFilter === 'all' ? undefined : statusFilter }),
   });
 
   const createMutation = useMutation({
     mutationFn: createBlog,
-    onSuccess: () => {
-      setIsModalOpen(false);
-      setFormValues(initialFormValues);
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      toast.success('Article de blog créé');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Échec de la création du blog.');
-    },
+    onSuccess: () => { setIsModalOpen(false); queryClient.invalidateQueries({ queryKey: ['blogs'] }); toast.success('Créé'); },
   });
 
   const updateMutation = useMutation({
     mutationFn: updateBlog,
-    onSuccess: () => {
-      setIsModalOpen(false);
-      setSelectedBlog(null);
-      setFormValues(initialFormValues);
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      toast.success('Article de blog mis à jour');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Échec de la mise à jour.');
-    },
+    onSuccess: () => { setIsModalOpen(false); queryClient.invalidateQueries({ queryKey: ['blogs'] }); toast.success('Mis à jour'); },
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteBlog,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blogs'] });
-      toast.success('Article de blog supprimé');
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Échec de la suppression.');
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['blogs'] }); toast.success('Supprimé'); },
   });
 
-  const openCreateModal = () => {
-    setSelectedBlog(null);
-    setUploadError(null);
-    setFormValues(initialFormValues);
-    setIsModalOpen(true);
-  };
-
+  const openCreateModal = () => { setSelectedBlog(null); setFormValues(initialFormValues); setIsModalOpen(true); };
   const openEditModal = (blog: Blog) => {
     setSelectedBlog(blog);
-    setUploadError(null);
-    setFormValues({
-      title: blog.title || '',
-      slug: blog.slug || '',
-      excerpt: blog.excerpt || '',
-      content: blog.content || '',
-      coverImage: blog.coverImage || '',
-      images: blog.images || (blog.coverImage ? [blog.coverImage] : []),
-      published: blog.published,
-    });
+    setFormValues({ title: blog.title || '', slug: blog.slug || '', excerpt: blog.excerpt || '', content: blog.content || '', coverImage: blog.coverImage || '', images: blog.images || (blog.coverImage ? [blog.coverImage] : []), published: blog.published });
     setIsModalOpen(true);
   };
 
-  const closeModal = () => {
-    if (createMutation.isPending || updateMutation.isPending) return;
-    setIsModalOpen(false);
-    setSelectedBlog(null);
-    setFormValues(initialFormValues);
-    setUploadError(null);
-  };
+  const closeModal = () => { setIsModalOpen(false); setSelectedBlog(null); };
 
-  const handleImagesUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    if (selectedFiles.length === 0) return;
-    setUploadError(null);
-    setIsUploadingImages(true);
-
+  const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setIsUploading(true);
     try {
-      const uploaded = await uploadImages(selectedFiles);
-      const uploadedUrls = uploaded.map((file) => file.url);
-      setFormValues((previous) => {
-        const existingImages = previous.images || [];
-        const mergedImages = [...existingImages, ...uploadedUrls];
-        const coverImage = previous.coverImage || mergedImages[0] || '';
-        return { ...previous, images: mergedImages, coverImage };
-      });
-      toast.success('Images téléchargées avec succès');
-    } catch (error: any) {
-      setUploadError(error.message || "Échec du téléchargement.");
-      toast.error("Erreur d'upload");
-    } finally {
-      setIsUploadingImages(false);
-      event.target.value = '';
-    }
+      const uploaded = await uploadImages(files);
+      const urls = uploaded.map(f => f.url);
+      setFormValues(prev => ({ ...prev, images: [...(prev.images || []), ...urls], coverImage: prev.coverImage || urls[0] || '' }));
+    } finally { setIsUploading(false); }
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Voulez-vous vraiment supprimer cet article ?')) {
-      deleteMutation.mutate(id);
-    }
+  const removeImage = (url: string) => {
+    setFormValues(prev => ({ ...prev, images: (prev.images || []).filter(u => u !== url), coverImage: prev.coverImage === url ? (prev.images || []).filter(u => u !== url)[0] || '' : prev.coverImage }));
   };
 
   const handleSubmit = () => {
-    if (!formValues.title || !formValues.content) {
-      toast.error('Titre et contenu obligatoires');
-      return;
-    }
-    if (selectedBlog) {
-      updateMutation.mutate({ id: resolveBlogId(selectedBlog), ...formValues });
-      return;
-    }
+    if (!formValues.title || !formValues.content) return toast.error('Veuillez remplir les champs obligatoires');
+    if (selectedBlog) return updateMutation.mutate({ id: resolveBlogId(selectedBlog), ...formValues });
     createMutation.mutate(formValues);
   };
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending || isUploadingImages;
   const blogs = blogsQuery.data?.blogs ?? [];
 
+  const labelClass = "text-sm font-semibold text-[#1E293B] mb-2";
+  const inputClass = "h-12 bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 font-medium transition-all focus:bg-white focus:border-red-500 focus:ring-0 outline-none text-slate-800 placeholder:text-slate-400 text-base";
+
   return (
-    <div className="w-full space-y-8 pb-12">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-            Gestion du Blog
-          </h1>
-          <p className="mt-2 text-slate-500">
-            Publiez des actualités, des conseils et des mises à jour pour vos clients.
-          </p>
+    <div className="w-full space-y-12 pb-20 text-left">
+      {/* Editorial Header Card */}
+      <div className="bg-white p-12 rounded-[24px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-[#1E293B] tracking-tight">Espace Editorial</h1>
+          <p className="text-slate-400 text-sm italic">Gérez vos articles, actulités et récits de voyage.</p>
         </div>
-        <Button
-          onClick={openCreateModal}
-          className="h-12 gap-2 bg-slate-900 px-6 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95"
-        >
-          <Plus size={20} />
-          Nouvel article
+        <Button onClick={openCreateModal} className="mt-8 sm:mt-0 h-14 bg-red-600 text-white px-10 rounded-xl font-bold hover:bg-red-700 transition-colors">
+          <Plus size={20} className="mr-2" /> Créer un Article
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        {/* Search Bar */}
-        <div className="md:col-span-2">
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
-            <input
-              type="text"
-              placeholder="Rechercher par titre ou contenu..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50"
-            />
-          </div>
+      {/* Modern Expense-style Control Bar */}
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12 md:col-span-8 relative">
+           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+           <input 
+             type="text" 
+             placeholder="Rechercher par titre..." 
+             value={searchTerm} 
+             onChange={(e) => setSearchTerm(e.target.value)} 
+             className={cn(inputClass, "w-full pl-12 h-12 shadow-sm")} 
+           />
         </div>
-
-        {/* Status Filter */}
-        <div className="relative group">
-          <Filter className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'true' | 'false')}
-            className="h-14 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xlmns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20stroke%3D%22%2364748b%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M7%207l3%203%203-3%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_1rem_center] bg-no-repeat font-medium"
-          >
-            <option value="all">Tous les articles</option>
-            <option value="true">Publiés uniquement</option>
-            <option value="false">Brouillons uniquement</option>
-          </select>
+        <div className="col-span-12 md:col-span-3 relative">
+           <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+           <select 
+             value={statusFilter} 
+             onChange={(e) => setStatusFilter(e.target.value as 'all' | 'true' | 'false')} 
+             className={cn(inputClass, "w-full pl-12 appearance-none shadow-sm")}
+           >
+             <option value="all">Tous les articles</option>
+             <option value="true">Déjà publiés</option>
+             <option value="false">En brouillon</option>
+           </select>
         </div>
-
-        {/* Refresh */}
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-          <div className="flex items-center gap-3 px-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
-              <FileText size={20} />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">Articles</p>
-              <p className="text-lg font-black text-slate-900 leading-none">{blogsQuery.data?.count || 0}</p>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => blogsQuery.refetch()}
-            disabled={blogsQuery.isLoading || blogsQuery.isRefetching}
-            className="h-10 w-10 rounded-xl p-0 hover:bg-slate-50"
-          >
+        <div className="col-span-12 md:col-span-1">
+          <Button variant="outline" onClick={() => blogsQuery.refetch()} className="w-full h-12 border-[#EDEFF2] rounded-lg hover:bg-slate-50 transition-colors">
             <RefreshCcw size={16} className={cn(blogsQuery.isRefetching && "animate-spin")} />
           </Button>
         </div>
       </div>
 
-      {blogsQuery.isLoading && !blogsQuery.isRefetching ? (
-        <div className="flex h-64 items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/30">
-          <div className="flex flex-col items-center gap-2">
-            <RefreshCcw className="h-8 w-8 animate-spin text-slate-300" />
-            <p className="text-sm font-bold text-slate-400">Récupération des articles...</p>
-          </div>
-        </div>
-      ) : blogsQuery.isError ? (
-        <div className="flex h-64 flex-col items-center justify-center rounded-3xl border border-rose-100 bg-rose-50/50 text-center p-6">
-          <p className="text-rose-900 font-bold">Impossible de charger le blog.</p>
-          <Button onClick={() => blogsQuery.refetch()} variant="outline" className="mt-4 border-rose-200 text-rose-700 bg-white hover:bg-rose-50 font-bold">
-            Réessayer
-          </Button>
+      {blogsQuery.isLoading ? (
+        <div className="h-64 flex flex-col items-center justify-center bg-white rounded-[24px] border border-dashed border-slate-200">
+           <Loader2 className="animate-spin text-red-500" size={40} />
+           <p className="text-slate-400 text-sm mt-4 font-semibold">Analyse de la base de données...</p>
         </div>
       ) : (
-        <BlogTable
-          blogs={blogs}
-          onEdit={openEditModal}
-          onDelete={handleDelete}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {blogs.map(blog => <AdminBlogCard key={resolveBlogId(blog)} blog={blog} onEdit={openEditModal} onDelete={d => deleteMutation.mutate(resolveBlogId(blog))} />)}
+        </div>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={selectedBlog ? 'Modifier l\'article' : 'Créer un article'}
-        contentClassName="max-w-4xl rounded-[2.5rem]"
-      >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 max-h-[70vh] overflow-y-auto p-4 scrollbar-thin">
-          <div className="space-y-4">
-             <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Contenu Principal</h3>
-             <div>
-               <label className="text-xs font-bold text-slate-500 mb-1 block ml-1">Titre de l'article</label>
-               <input
-                 type="text"
-                 placeholder="Ex. 5 conseils pour louer au Maroc"
-                 value={formValues.title}
-                 onChange={(e) => setFormValues(p => ({ ...p, title: e.target.value }))}
-                 className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold text-slate-900"
+      {/* Simplified Modal (Expense Claim Style) */}
+      <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedBlog ? 'Mettre à jour Article' : 'Nouveau Récit'} contentClassName="max-w-4xl p-0 overflow-hidden rounded-[20px] shadow-2xl border border-slate-100">
+        <div className="flex flex-col h-full max-h-[88vh] bg-white text-left">
+          <div className="flex-1 overflow-y-auto p-10 md:p-14 space-y-12 scrollbar-hide">
+            
+            <div className="space-y-4">
+              <div className="w-14 h-14 bg-red-50 rounded-[14px] flex items-center justify-center text-red-600 shadow-sm border border-red-100">
+                 <FileText size={28} />
+              </div>
+              <div className="space-y-1">
+                 <h2 className="text-3xl font-bold text-[#1E293B] tracking-tight">{selectedBlog ? 'Éditer l\'article' : 'Rédiger une histoire'}</h2>
+                 <p className="text-slate-400 text-sm font-semibold italic">Partagez votre actualité avec la communauté Carlaville.</p>
+              </div>
+            </div>
+
+            {/* Media Upload Section */}
+            <div className="space-y-6 pt-10 border-t border-slate-100">
+               <div className="flex items-center justify-between">
+                 <h3 className={labelClass}>Gestion des visuels</h3>
+                 <span className="text-slate-400 text-xs italic font-medium uppercase tracking-wider">Asset Manager</span>
+               </div>
+               <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
+                 <label className="aspect-square bg-[#F8F9FA] border border-[#EDEFF2] rounded-[16px] flex flex-col items-center justify-center cursor-pointer hover:bg-red-50 hover:border-red-200 transition-all group">
+                   <input type="file" multiple accept="image/*" onChange={handleUpload} disabled={isUploading} className="hidden" />
+                   <ImageIcon size={24} className="text-slate-300 group-hover:text-red-500 transition-colors" />
+                   <span className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-wide">Add Photo</span>
+                 </label>
+                 {(formValues.images || []).map((url, idx) => (
+                   <div key={idx} className="relative aspect-square border border-slate-100 rounded-[16px] overflow-hidden group shadow-sm transition-transform hover:scale-105 duration-300">
+                     <img src={normalizeUrl(url)} className="w-full h-full object-cover" alt="" />
+                     <div className="absolute inset-0 bg-black/40 p-2 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => removeImage(url)} className="w-8 h-8 rounded-lg bg-white/20 hover:bg-red-500 text-white flex items-center justify-center transition-colors"><Trash2 size={14} /></button>
+                        <button onClick={() => setFormValues(p => ({...p, coverImage: url}))} className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors ml-2", formValues.coverImage === url ? "bg-green-500 text-white" : "bg-white/20 text-white hover:bg-white/40")}><CheckCircle2 size={14} /></button>
+                     </div>
+                     {formValues.coverImage === url && <div className="absolute top-2 left-2 bg-red-600 text-[10px] font-bold text-white px-2.5 py-1 rounded-full uppercase shadow-lg border border-red-400">Couverture</div>}
+                   </div>
+                 ))}
+               </div>
+            </div>
+
+            {/* Params Section */}
+            <div className="space-y-8 pt-10 border-t border-slate-100">
+               <h3 className={labelClass}>Configuration Editorial</h3>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                 <div className="space-y-1.5"><p className={labelClass}>Titre de l'article</p><input value={formValues.title} onChange={e => setFormValues(p => ({ ...p, title: e.target.value }))} className={cn(inputClass, "w-full")} placeholder="For example: Client meeting lunch" /></div>
+                 <div className="space-y-1.5"><p className={labelClass}>Slug (URL permaliens)</p><input value={formValues.slug} onChange={e => setFormValues(p => ({ ...p, slug: e.target.value }))} className={cn(inputClass, "w-full text-red-700")} placeholder="ex: mon-bel-article" /></div>
+                 <div className="space-y-1.5"><p className={labelClass}>Statut de publication</p><select value={formValues.published ? 'true' : 'false'} onChange={e => setFormValues(p => ({ ...p, published: e.target.value === 'true' }))} className={cn(inputClass, "w-full appearance-none")}>
+                   <option value="true">Publié (En ligne)</option>
+                   <option value="false">En brouillon (Privé)</option>
+                 </select></div>
+                 <div className="space-y-1.5"><p className={labelClass}>Résumé (Accroche)</p><textarea value={formValues.excerpt} onChange={e => setFormValues(p => ({ ...p, excerpt: e.target.value }))} className={cn(inputClass, "w-full h-24 py-4 resize-none")} placeholder="Add any context for the app-user..." /></div>
+               </div>
+            </div>
+
+            {/* Full Editor Section */}
+            <div className="space-y-6 pt-10 border-t border-slate-100 pb-10">
+               <h3 className={labelClass}>Corps de l'histoire</h3>
+               <textarea 
+                 value={formValues.content} 
+                 onChange={e => setFormValues(p => ({ ...p, content: e.target.value }))} 
+                 className="w-full min-h-[450px] border border-[#EDEFF2] bg-[#F8F9FA] rounded-[18px] p-10 outline-none text-lg leading-relaxed font-medium focus:bg-white focus:border-red-500 transition-all duration-300 placeholder:text-slate-300" 
+                 placeholder="Rédigez votre histoire ici (compatible Markdown)..." 
                />
-             </div>
-             <div>
-               <label className="text-xs font-bold text-slate-500 mb-1 block ml-1">Slug (URL)</label>
-               <input
-                 type="text"
-                 placeholder="ex-5-conseils"
-                 value={formValues.slug}
-                 onChange={(e) => setFormValues(p => ({ ...p, slug: e.target.value }))}
-                 className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-slate-400 font-medium text-slate-600"
-               />
-             </div>
-             <div>
-                <label className="text-xs font-bold text-slate-500 mb-1 block ml-1">Résumé court</label>
-                <textarea
-                  placeholder="Un bref aperçu pour la liste..."
-                  value={formValues.excerpt}
-                  onChange={(e) => setFormValues(p => ({ ...p, excerpt: e.target.value }))}
-                  rows={3}
-                  className="w-full p-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-medium text-slate-700"
-                />
-             </div>
+            </div>
           </div>
 
-          <div className="space-y-4">
-             <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Médias & Paramètres</h3>
-             <div className="p-4 bg-slate-50 rounded-2xl flex flex-col items-center justify-center border border-dashed border-slate-200 transition-all hover:bg-slate-100/50 group relative overflow-hidden">
-                {formValues.coverImage ? (
-                  <img src={formValues.coverImage} className="absolute inset-0 h-full w-full object-cover opacity-20" alt="Preview"/>
-                ) : null}
-                <div className="relative z-10 flex flex-col items-center">
-                  <ImageIcon size={32} className="text-slate-300 mb-2 group-hover:text-red-400 transition-colors" />
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Image de couverture</p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImagesUpload}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    disabled={isUploadingImages}
-                  />
-                </div>
-             </div>
+          {/* Triple Action Footer (Expense Claim Style) */}
+          <div className="px-10 py-8 border-t border-slate-100 bg-white flex items-center justify-between">
+             <button type="button" onClick={closeModal} className="text-slate-500 text-sm font-semibold hover:text-slate-700 transition-colors">Annuler</button>
+             <div className="flex gap-4">
 
-             <div>
-               <label className="text-xs font-bold text-slate-500 mb-1 block ml-1">Statut de publication</label>
-               <select
-                 value={formValues.published ? 'true' : 'false'}
-                 onChange={(e) => setFormValues(p => ({ ...p, published: e.target.value === 'true' }))}
-                 className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-red-500 font-bold text-slate-900 appearance-none"
-               >
-                 <option value="true">Publié (En ligne)</option>
-                 <option value="false">Brouillon (Interne)</option>
-               </select>
+                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending || isUploading} className="bg-red-600 text-white hover:bg-red-700 h-13 px-12 rounded-lg font-bold transition-colors flex items-center gap-2">
+                  {createMutation.isPending || updateMutation.isPending ? <Loader2 className="animate-spin" /> : <>Soumettre <Check size={18} /></>}
+                </Button>
              </div>
           </div>
-
-          <div className="md:col-span-2 pt-4">
-             <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">Corps de l'article</h3>
-             <textarea
-               placeholder="Contenu complet ici..."
-               value={formValues.content}
-               onChange={(e) => setFormValues(p => ({ ...p, content: e.target.value }))}
-               rows={12}
-               className="w-full p-6 bg-slate-50 border-none rounded-3xl focus:ring-2 focus:ring-red-500 font-medium text-slate-800 leading-relaxed"
-             />
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-8 p-6 bg-slate-50/50 border-t border-slate-100">
-          <Button variant="outline" onClick={closeModal} className="h-12 px-8 rounded-xl font-bold border-none hover:bg-slate-100 transition-all">
-            Annuler
-          </Button>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting}
-            className="h-12 px-10 rounded-xl bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 text-white font-black transition-all active:scale-95"
-          >
-            {selectedBlog ? 'Mettre à jour l\'article' : 'Publier l\'article'}
-          </Button>
         </div>
       </Modal>
     </div>

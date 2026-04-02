@@ -25,6 +25,7 @@ export class AuthService {
     );
 
     if (!user) {
+      console.log(`[AuthService] Login failed: User not found for email: ${loginDto.email}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 
@@ -34,6 +35,7 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
+      console.log(`[AuthService] Login failed: Password mismatch for email: ${loginDto.email}`);
       throw new UnauthorizedException('Invalid email or password');
     }
 

@@ -13,11 +13,13 @@ export class PublicBlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 
   @Get()
-  findAll(
+  async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
-    return this.blogsService.findPublished(page, limit);
+    const result = await this.blogsService.findPublished(page, limit);
+    console.log(`[Public API] Found ${result.blogs.length} published articles`);
+    return result;
   }
 
   @Get(':slug')

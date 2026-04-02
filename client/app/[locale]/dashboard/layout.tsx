@@ -3,13 +3,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Calendar, 
-  LogOut, 
-  Car, 
-  History, 
-  LayoutDashboard, 
-  Settings, 
+import {
+  Calendar,
+  LogOut,
+  Car,
+  History,
+  LayoutDashboard,
+  Settings,
   User as UserIcon,
   ChevronRight,
   Bell
@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     const token = localStorage.getItem('carlaville_token');
     const userData = localStorage.getItem('carlaville_user');
-    
+
     if (!token || !userData) {
       router.push('/auth/login');
     } else {
@@ -42,16 +42,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const NavLink = ({ href, icon: Icon, label }: { href: string, icon: any, label: string }) => {
     const isActive = pathname === href;
     return (
-      <Link 
-        href={href} 
-        className={`group flex items-center justify-between w-full p-4 rounded-2xl font-black transition-all duration-300 ${
-          isActive 
-            ? 'bg-neutral-900 text-white shadow-xl shadow-neutral-900/20 translate-x-1' 
-            : 'text-gray-400 hover:text-neutral-900 border-transparent hover:bg-gray-50'
-        }`}
+      <Link
+        href={href}
+        className={`group flex items-center justify-between w-full p-4 rounded-2xl font-black transition-all duration-300 ${isActive
+          ? 'bg-neutral-900 text-white shadow-xl shadow-neutral-900/20 translate-x-1'
+          : 'text-gray-400 hover:text-neutral-900 border-transparent hover:bg-gray-50'
+          }`}
       >
         <div className="flex items-center gap-4">
-          <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-red-600' : ''}`} /> 
+          <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-red-600' : ''}`} />
           <span className="text-[11px] uppercase tracking-[0.2em]">{label}</span>
         </div>
         {isActive && <ChevronRight className="w-4 h-4 text-red-600 animate-in fade-in slide-in-from-left-2" />}
@@ -68,16 +67,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row font-sans text-neutral-900 selection:bg-red-100 italic selection:text-red-900">
-      
+
       {/* Sidebar */}
       <aside className="w-full md:w-80 bg-gray-50 border-r border-gray-100 shrink-0 flex flex-col shadow-[20px_0_60px_rgba(0,0,0,0.02)] z-50">
-        
+
         {/* Brand Area */}
         <div className="p-10 border-b border-gray-50 flex flex-col items-center md:items-start">
           <Link href="/" className="mb-12 block group">
             <span className="text-3xl font-black tracking-tighter text-neutral-900 group-hover:text-red-600 transition-colors">Carlaville<span className="text-red-600 group-hover:text-neutral-900 transition-colors">.</span></span>
           </Link>
-          
+
           <div className="flex items-center gap-5">
             <div className="relative group">
               <div className="w-16 h-16 bg-red-600 text-white rounded-3xl flex items-center justify-center shadow-lg shadow-red-600/30 group-hover:scale-105 transition-all duration-500 overflow-hidden">
@@ -87,20 +86,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-4 border-white rounded-full shadow-sm"></div>
             </div>
             <div>
-               <h2 className="text-sm font-black text-neutral-900 tracking-tight leading-tight">{user?.name}</h2>
-               <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Client Vérifié</span>
-               </div>
+              <h2 className="text-sm font-black text-neutral-900 tracking-tight leading-tight">{user?.name}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">Client Vérifié</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Global Search / Info Placeholder */}
         <div className="px-8 py-6">
-           <div className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between text-gray-400">
-              <span className="text-[9px] font-black uppercase tracking-widest">Notification</span>
-              <Bell className="w-4 h-4" />
-           </div>
+          <div className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between text-gray-400">
+            <span className="text-[9px] font-black uppercase tracking-widest">Notification</span>
+            <Bell className="w-4 h-4" />
+          </div>
         </div>
 
         {/* Navigation */}
@@ -109,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <NavLink href="/dashboard" icon={LayoutDashboard} label="Tableau de bord" />
           <NavLink href="/dashboard/reservations" icon={Calendar} label="Mes Réservations" />
           <NavLink href="/dashboard/history" icon={History} label="Historique" />
-          
+
           <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mt-10 mb-4 ml-4">Services</p>
           <NavLink href="/cars" icon={Car} label="Catalogue Flotte" />
           <NavLink href="/dashboard/settings" icon={Settings} label="Paramètres" />
@@ -117,12 +116,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Footer actions */}
         <div className="p-8 border-t border-gray-50 bg-[#fafafa]/50">
-          <button 
-            onClick={handleLogout} 
+          <button
+            onClick={handleLogout}
             className="group flex items-center gap-4 w-full p-4 rounded-2xl text-gray-400 hover:bg-red-50 hover:text-red-700 font-black transition-all duration-300"
           >
             <div className="w-8 h-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:border-red-200 transition-all">
-               <LogOut className="w-4 h-4" /> 
+              <LogOut className="w-4 h-4" />
             </div>
             <span className="text-[10px] uppercase tracking-widest">Fermer Session</span>
           </button>

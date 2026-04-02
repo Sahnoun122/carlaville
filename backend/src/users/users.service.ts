@@ -21,10 +21,8 @@ export class UsersService {
       throw new ConflictException('Un utilisateur avec cet e-mail existe déjà.');
     }
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const createdUser = await this.userModel.create({
       ...createUserDto,
-      password: hashedPassword,
       email,
     });
 
@@ -93,9 +91,6 @@ export class UsersService {
       }
     }
 
-    if (payload.password) {
-      payload.password = await bcrypt.hash(payload.password, 10);
-    }
 
     const updatedUser = await this.userModel
       .findByIdAndUpdate(id, payload, { new: true })

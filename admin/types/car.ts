@@ -4,6 +4,7 @@ import {
   FuelType,
   Transmission,
 } from './car.enum';
+import { Agency } from './agency';
 
 export interface MaintenanceRecord {
   startedAt: string;
@@ -34,12 +35,10 @@ export interface Car {
   city: string;
   availabilityStatus: AvailabilityStatus;
   images?: string[];
+  description?: string;
   active: boolean;
   maintenanceHistory?: MaintenanceRecord[];
   createdAt?: string;
   updatedAt?: string;
-  agency?: {
-    id?: string;
-    name?: string;
-  };
+  agency?: Agency;
 }

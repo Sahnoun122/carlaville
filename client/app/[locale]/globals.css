@@ -3,12 +3,14 @@
 @theme {
   --color-primary: #dc2626;
   --color-primary-hover: #b91c1c;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 /* Base Professional Styles */
 body {
-  @apply bg-gray-50 text-gray-900;
-  font-family: 'Inter', sans-serif;
+  @apply bg-gray-50 text-black;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
 /* Simplified Utility Classes */
@@ -16,7 +18,7 @@ body {
   .soft-shadow {
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
   }
-  
+
   .glass {
     @apply bg-gray-50/90 backdrop-blur-md border border-gray-100;
   }
@@ -26,7 +28,7 @@ body {
   }
 
   .input-premium {
-    @apply w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all text-gray-900;
+    @apply w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all text-black;
   }
 
   .card-simple {
@@ -37,11 +39,17 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
-

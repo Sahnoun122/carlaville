@@ -65,8 +65,11 @@ UserSchema.pre('save', async function () {
     return;
   }
 
-  // Only hash if the password is not already hashed (doesn't start with $2b$)
-  if (!this.password.startsWith('$2b$')) {
+  // Only hash if the password is not already hashed
+  // Bcrypt hashes typically start with $2a$, $2b$, or $2y$
+  const isHashed = /^\$2[aby]\$\d+\$/.test(this.password);
+  
+  if (!isHashed) {
     this.password = await bcrypt.hash(this.password, 12);
   }
 });

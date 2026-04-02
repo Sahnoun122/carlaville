@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 
 async function getCars() {
   try {
-    const res = await fetch('http://localhost:3009/api/cars', { next: { revalidate: 60 } });
+    const res = await fetch('http://127.0.0.1:3009/api/cars', { cache: 'no-store' });
     if (!res.ok) return { cars: [] };
     const data = await res.json();
     return data;

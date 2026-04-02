@@ -13,6 +13,7 @@ export class PublicCarsController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     const result = await this.carsService.findAll(filterDto, page, limit);
+    console.log(`[Public API] Found ${result.cars.length} active cars`);
     return {
       count: result.count,
       cars: result.cars.map((car: any) => {

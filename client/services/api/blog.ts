@@ -1,6 +1,6 @@
 import { Blog, BlogResponse } from '@/types/blog';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3009/api';
 
 /**
  * Récupère la liste des blogs (limité aux blogs publiés par le backend public)
@@ -8,7 +8,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009/api';
 export async function getBlogs(limit = 30): Promise<BlogResponse> {
   try {
     const res = await fetch(`${API_URL}/blogs?limit=${limit}`, {
-      next: { revalidate: 60 },
+      cache: 'no-store',
     });
 
     if (!res.ok) {
@@ -30,7 +30,7 @@ export async function getBlogs(limit = 30): Promise<BlogResponse> {
 export async function getBlogBySlug(slug: string): Promise<Blog | null> {
   try {
     const res = await fetch(`${API_URL}/blogs/${slug}`, {
-      next: { revalidate: 60 },
+      cache: 'no-store',
     });
 
     if (!res.ok) {

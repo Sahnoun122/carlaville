@@ -4,26 +4,15 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Form } from '@/components/ui/form';
+import { FormInputField, FormTextareaField } from '@/components/ui/form-fields';
+import { FormSelectField } from '@/components/ui/form-select-field';
+import { FormContent, FormSection } from '@/components/ui/form-section';
+import { FormFooter } from '@/components/ui/form-footer';
+import { formStyles } from '@/components/ui/form-styles';
 import { User, Role } from '@/types';
 import type { UserFormValues } from '@/features/users/services/user-service';
-import { User as UserIcon, Mail, Phone, Lock, Shield } from 'lucide-react';
+import { User as UserIcon, Mail, Phone, Lock, Shield, Loader2, Check } from 'lucide-react';
 
 const optionalPhoneSchema = z
   .string()
@@ -84,140 +73,100 @@ export const UserForm = ({ user, onSubmit, isLoading }: UserFormProps) => {
     });
   }, [form, user]);
 
+  const roleOptions = Object.values(Role).map((role) => ({
+    label: role,
+    value: role,
+  }));
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 text-slate-700">
-                  <UserIcon size={14} className="text-slate-400" />
-                  Nom complet
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="Jean Dupont" 
-                    {...field} 
-                    disabled={isLoading} 
-                    className="focus:ring-red-100"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 text-slate-700">
-                  <Mail size={14} className="text-slate-400" />
-                  E-mail
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="jean@example.com" 
-                    {...field} 
-                    disabled={isLoading} 
-                    className="focus:ring-red-100"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={formStyles.formContainer}>
+        <FormContent
+          title={user ? "Modifier l'utilisateur" : "Nouvel utilisateur"}
+          description="Gérez les accès et les informations de profil."
+        >
+          {/* Basic Information Section */}
+          <FormSection title="Informations personnelles" layout="double">
+            <FormInputField
+              form={form}
+              name="name"
+              label="Nom complet"
+              placeholder="Jean Dupont"
+              icon={<UserIcon />}
+              required
+              type="text"
+            />
+            <FormInputField
+              form={form}
+              name="email"
+              label="Email"
+              placeholder="jean@example.com"
+              icon={<Mail />}
+              required
+              type="email"
+            />
+          </FormSection>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 text-slate-700">
-                  <Phone size={14} className="text-slate-400" />
-                  Téléphone
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    placeholder="06 12 34 56 78" 
-                    {...field} 
-                    disabled={isLoading} 
-                    className="focus:ring-red-100"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 text-slate-700">
-                  <Shield size={14} className="text-slate-400" />
-                  Rôle
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="focus:ring-red-100">
-                      <SelectValue placeholder="Sélectionnez un rôle" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(Role).map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {(!user || form.watch('password')) && (
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex items-center gap-2 text-slate-700">
-                  <Lock size={14} className="text-slate-400" />
-                  {user ? 'Nouveau mot de passe (optionnel)' : 'Mot de passe'}
-                </FormLabel>
-                <FormControl>
-                  <Input 
-                    type="password" 
-                    placeholder="••••••••" 
-                    {...field} 
-                    disabled={isLoading} 
-                    className="focus:ring-red-100"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
-        <div className="pt-4">
-          <Button 
-            type="submit" 
-            disabled={isLoading} 
-            className="w-full h-11 bg-gradient-to-r from-red-700 to-red-600 font-bold shadow-lg shadow-red-200 transition-all hover:scale-[1.01] hover:shadow-xl active:scale-[0.99] disabled:opacity-70"
+          {/* Contact & Access Section */}
+          <FormSection
+            title="Contact et accès"
+            layout="double"
+            separator
           >
-            {isLoading ? 'Enregistrement en cours...' : 'Enregistrer les modifications'}
-          </Button>
-        </div>
+            <FormInputField
+              form={form}
+              name="phone"
+              label="Téléphone"
+              placeholder="06 12 34 56 78"
+              icon={<Phone />}
+              required={!user}
+            />
+            <FormSelectField
+              form={form}
+              name="role"
+              label="Rôle"
+              options={roleOptions}
+              icon={<Shield />}
+              required
+            />
+          </FormSection>
+
+          {/* Security Section */}
+          {(!user || form.watch('password')) && (
+            <FormSection title="Sécurité" separator>
+              <FormInputField
+                form={form}
+                name="password"
+                label={user ? 'Nouveau mot de passe (optionnel)' : 'Mot de passe'}
+                placeholder="••••••••"
+                icon={<Lock />}
+                required={!user}
+                type="password"
+                help="Minimum 6 caractères"
+              />
+            </FormSection>
+          )}
+        </FormContent>
+
+        {/* Form Footer */}
+        <FormFooter
+          leftAction={{
+            label: 'Réinitialiser',
+            onClick: () => form.reset(),
+            variant: 'ghost',
+          }}
+          actions={[
+            {
+              label: 'Valider les changements',
+              onClick: form.handleSubmit(onSubmit),
+              variant: 'primary',
+              loading: isLoading,
+              icon: isLoading ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />,
+            },
+          ]}
+        />
       </form>
     </Form>
   );
 };
+

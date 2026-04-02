@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
-import { Users, Fuel, Settings, MapPin } from 'lucide-react';
+import { useMemo } from 'react';
+import { Users, Fuel, Settings, MapPin, ArrowUpRight } from 'lucide-react';
 
 interface VehicleCardProps {
   car: {
@@ -19,65 +20,85 @@ interface VehicleCardProps {
 }
 
 export default function VehicleCard({ car }: VehicleCardProps) {
-  const rawImage = car.images?.[0] || car.imageUrl;
-  const previewImage = (typeof rawImage === 'string' && rawImage.trim().length > 0) ? rawImage : null;
+  const images = car.images || [];
+  const rawImage = images.length > 0 ? images[0] : car.imageUrl;
+  
+  // Normalize URL to replace 127.0.0.1 with localhost if needed for better browser compatibility
+  const previewImage = useMemo(() => {
+    if (typeof rawImage !== 'string' || rawImage.trim().length === 0) return null;
+    return rawImage.replace('127.0.0.1', 'localhost');
+  }, [rawImage]);
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 soft-shadow overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300">
-      <div className="relative h-48 md:h-56 w-full bg-white flex items-center justify-center p-6 md:p-8 overflow-hidden">
-        {/* Subtle Background Glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    <div className="group bg-white rounded-[2.5rem] border border-gray-100 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] transition-all duration-500 hover:-translate-y-2">
+      {/* Image Area */}
+      <div className="relative h-56 md:h-64 w-full bg-[#fcfcfc] rounded-[2rem] overflow-hidden flex items-center justify-center p-8">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-500"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-black/5 rounded-full blur-2xl -ml-12 -mb-12"></div>
         
-        <div className="absolute top-4 left-4 px-3 py-1 bg-white border border-gray-100 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-primary shadow-sm z-10">
+        <div className="absolute top-6 left-6 px-3 py-1 bg-white/90 backdrop-blur-md border border-gray-100 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-black shadow-sm z-10">
           {car.category}
         </div>
         
-        {previewImage && (previewImage.startsWith('/') || previewImage.startsWith('http')) ? (
+        {previewImage ? (
           <Image 
             src={previewImage} 
             alt={`${car.brand} ${car.model}`} 
             fill
-            className="object-contain p-4 md:p-6 transition-transform duration-700 group-hover:scale-110" 
-            unoptimized={previewImage.startsWith('http') && !previewImage.includes('localhost')}
+            className="object-contain p-6 md:p-10 transition-all duration-700 group-hover:scale-110 drop-shadow-2xl" 
+            unoptimized={true}
           />
         ) : (
-          <div className="text-gray-200 font-black text-[10px] uppercase tracking-[0.3em] text-center border-2 border-dashed border-gray-50 rounded-2xl p-8 w-full h-full flex items-center justify-center">
-            {car.brand}<br/>No Image
+          <div className="flex flex-col items-center justify-center p-10 w-full h-full text-gray-200">
+            <div className="w-16 h-16 mb-4 border-2 border-dashed border-gray-100 rounded-full flex items-center justify-center">
+              <ArrowUpRight className="w-6 h-6 opacity-20 rotate-45" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{car.brand}</span>
+            <span className="text-[8px] font-bold text-gray-200/50 uppercase tracking-[0.4em] mt-1">Photo non disponible</span>
           </div>
         )}
       </div>
 
-      <div className="p-6 md:p-8 flex-1 flex flex-col pt-2">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h3 className="text-xl md:text-2xl font-black text-gray-900 tracking-tighter">
-              {car.brand} <span className="text-primary/40 font-medium">/</span> {car.model}
-            </h3>
-            <p className="text-[10px] font-bold text-gray-400 mt-1.5 flex items-center gap-1.5 uppercase tracking-widest">
-              <MapPin className="w-3 h-3 text-primary" /> {car.city}
-            </p>
-          </div>
-          <div className="text-right">
-             <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black text-gray-900">{car.dailyPrice}</span>
-                <span className="text-[10px] font-black text-primary uppercase tracking-tighter">MAD</span>
+      {/* Content Area */}
+      <div className="p-6 md:p-8 pt-6">
+        <div className="flex justify-between items-start gap-4 mb-8">
+          <div className="flex-1 min-w-0">
+             <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.1em]">{car.brand}</span>
              </div>
-             <p className="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">par jour</p>
+            <h3 className="text-xl md:text-2xl font-bold text-black tracking-tight truncate">
+              {car.model}
+            </h3>
+            <div className="flex items-center gap-1.5 mt-2 text-gray-400">
+               <MapPin className="w-3 h-3 text-black/20" />
+               <span className="text-[10px] font-bold uppercase tracking-widest">{car.city}</span>
+            </div>
+          </div>
+          
+          <div className="text-right">
+             <div className="flex items-baseline gap-1 justify-end">
+                <span className="text-2xl font-black text-black">{car.dailyPrice}</span>
+                <span className="text-[10px] font-black text-black/30 uppercase">MAD</span>
+             </div>
+             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">/ jour</p>
           </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-2 mb-8">
-           <SimpleFeature icon={<Users className="w-3 h-3" />} label={`${car.seats}`} />
-           <SimpleFeature icon={<Settings className="w-3 h-3" />} label={car.transmission[0]} />
-           <SimpleFeature icon={<Fuel className="w-3 h-3" />} label={car.fuelType[0]} />
+        {/* Refined Feature Grid */}
+        <div className="grid grid-cols-3 gap-3 mb-8">
+           <SimpleFeature icon={<Users className="w-4 h-4" />} label={`${car.seats} ${car.seats > 1 ? 'Places' : 'Place'}`} />
+           <SimpleFeature icon={<Settings className="w-4 h-4" />} label={car.transmission === 'AUTOMATIC' ? 'Auto' : 'Manuelle'} />
+           <SimpleFeature icon={<Fuel className="w-4 h-4" />} label={car.fuelType} />
         </div>
         
-        <div className="mt-auto">
+        <div className="relative group/btn">
           <Link 
             href={`/cars/${car._id}`} 
-            className="w-full py-4 bg-gray-900 text-white text-center rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary transition-all shadow-xl shadow-gray-200 active:scale-95 block"
+            className="w-full h-14 bg-black text-white flex items-center justify-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:bg-neutral-800 shadow-xl shadow-black/5 active:scale-[0.98] overflow-hidden"
           >
-            Réserver ce véhicule
+            <span>Réserver maintenant</span>
+            <ArrowUpRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" />
           </Link>
         </div>
       </div>
@@ -86,9 +107,9 @@ export default function VehicleCard({ car }: VehicleCardProps) {
 }
 
 const SimpleFeature = ({ icon, label }: any) => (
-  <div className="flex flex-col items-center justify-center gap-1.5 py-3 bg-gray-50/50 rounded-2xl border border-gray-100/50 group-hover:bg-white transition-colors">
-     <div className="text-gray-300">{icon}</div>
-     <span className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">{label}</span>
+  <div className="flex flex-col items-center justify-center gap-2 py-4 bg-gray-50/50 rounded-2xl border border-transparent group-hover:border-gray-100 group-hover:bg-white transition-all duration-300">
+     <div className="text-black/20 group-hover:text-primary transition-colors">{icon}</div>
+     <span className="text-[9px] font-black text-black/60 uppercase tracking-tighter text-center px-1">{label}</span>
   </div>
 );
 

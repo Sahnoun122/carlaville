@@ -1,21 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Form } from '@/components/ui/form';
+import { FormInputField } from '@/components/ui/form-fields';
+import { FormContent, FormSection } from '@/components/ui/form-section';
+import { FormFooter } from '@/components/ui/form-footer';
+import { formStyles } from '@/components/ui/form-styles';
 import { Agency } from '@/types';
 import type { AgencyFormValues } from '@/features/agencies/services/agency-service';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Building2, MapPin, Phone, Mail, Loader2, Check } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Le nom est requis'),
@@ -67,82 +63,78 @@ export const AgencyForm = ({ agency, onSubmit, isLoading }: AgencyFormProps) => 
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nom de l'agence</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={isLoading} placeholder="Ex: ADA Rabat Agdal" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ville</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={isLoading} placeholder="Ex: Rabat" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className={formStyles.formContainer}>
+        <FormContent
+          title={agency ? "Modifier l'agence" : "Nouvelle agence"}
+          description="Saisissez les informations de l'agence ci-dessous."
+        >
+          {/* Identity Section */}
+          <FormSection title="Identité" layout="double">
+            <FormInputField
+              form={form}
+              name="name"
+              label="Nom de l'agence"
+              placeholder="Ex: ADA Rabat Agdal"
+              icon={<Building2 />}
+              required
+            />
+            <FormInputField
+              form={form}
+              name="city"
+              label="Ville"
+              placeholder="Ex: Rabat"
+              icon={<MapPin />}
+              required
+            />
+          </FormSection>
 
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse (Optionnel)</FormLabel>
-              <FormControl>
-                <Input {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          {/* Address Section */}
+          <FormSection title="Localisation" separator>
+            <FormInputField
+              form={form}
+              name="address"
+              label="Adresse complète (Optionnel)"
+              placeholder="N°, Rue, Quartier..."
+            />
+          </FormSection>
+
+          {/* Contact Section */}
+          <FormSection title="Contact" layout="double" separator>
+            <FormInputField
+              form={form}
+              name="phone"
+              label="Téléphone"
+              placeholder="05..."
+              icon={<Phone />}
+            />
+            <FormInputField
+              form={form}
+              name="email"
+              label="Email de contact"
+              placeholder="contact@agence.ma"
+              icon={<Mail />}
+              type="email"
+            />
+          </FormSection>
+        </FormContent>
+
+        {/* Form Footer */}
+        <FormFooter
+          leftAction={{
+            label: 'Annuler',
+            onClick: () => form.reset(),
+            variant: 'ghost',
+          }}
+          actions={[
+            {
+              label: "Enregistrer l'agence",
+              onClick: form.handleSubmit(handleSubmit),
+              variant: 'primary',
+              loading: isLoading,
+              icon: isLoading ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />,
+            },
+          ]}
         />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Téléphone (Optionnel)</FormLabel>
-                <FormControl>
-                  <Input {...field} disabled={isLoading} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email (Optionnel)</FormLabel>
-                <FormControl>
-                  <Input {...field} type="email" disabled={isLoading} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? 'Enregistrement...' : 'Enregistrer'}
-        </Button>
       </form>
     </Form>
   );

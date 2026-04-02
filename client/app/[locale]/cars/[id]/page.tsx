@@ -6,7 +6,7 @@ import { getTranslations } from 'next-intl/server';
 
 async function getCar(id: string) {
   try {
-    const res = await fetch(`http://localhost:3009/api/cars/${id}`, { next: { revalidate: 0 } });
+    const res = await fetch(`http://127.0.0.1:3009/api/cars/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {
@@ -18,7 +18,12 @@ export default async function CarDetailsPage({ params }: { params: Promise<{ id:
   const t = await getTranslations('details');
   const { id } = await params;
   const car = await getCar(id);
-  const previewImage = car?.images?.[0] || car?.imageUrl;
+  
+  const images = car?.images || [];
+  const rawImage = images.length > 0 ? images[0] : car?.imageUrl;
+  const previewImage = (typeof rawImage === 'string' && rawImage.trim().length > 0) 
+    ? rawImage.replace('127.0.0.1', 'localhost') 
+    : null;
 
   if (!car) {
     return (

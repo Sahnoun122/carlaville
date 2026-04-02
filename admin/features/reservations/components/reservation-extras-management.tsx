@@ -223,200 +223,149 @@ export const ReservationExtrasManagement = () => {
 
   const handleDelete = (index: number) => {
     const nextExtras = extrasDraft.filter((_, itemIndex) => itemIndex !== index);
-    persistExtras(nextExtras, 'Extra supprimé avec succès.');
-  };
+    persistExtras(nextExtras, 'Extra supprimé avec succ�  const labelClass = "text-sm font-semibold text-[#1E293B] mb-2";
+  const inputClass = "h-12 bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 font-medium transition-all focus:bg-white focus:border-blue-500 focus:ring-0 outline-none text-slate-800 placeholder:text-slate-400 text-base";
 
   return (
-    <div className="max-w-5xl space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-800">Options & Extras</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Gérez les choix additionnels et leur tarification, sur toutes les voitures ou des voitures ciblées.
-        </p>
+    <div className="max-w-5xl space-y-8 text-left pb-20">
+      <div className="bg-white p-10 rounded-[24px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-bold text-[#1E293B]">Options & Extras</h2>
+          <p className="text-slate-400 text-sm italic">
+            Gérez les choix additionnels et leur tarification, sur toutes les voitures ou des voitures ciblées.
+          </p>
+        </div>
+        <Button type="button" onClick={handleOpenCreate} className="h-12 bg-blue-600 text-white px-8 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+          Ajouter un extra
+        </Button>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-        {submitError && <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
-        {submitSuccess && <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{submitSuccess}</p>}
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-slate-800">Catalogue des extras</p>
-            <p className="text-xs text-slate-500">Le calcul est appliqué automatiquement lors de la réservation.</p>
-          </div>
-          <Button type="button" variant="outline" onClick={handleOpenCreate}>Ajouter un extra</Button>
-        </div>
+      <div className="rounded-[24px] border border-slate-100 bg-white p-8 shadow-sm space-y-6">
+        {submitError && <p className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600 font-medium">{submitError}</p>}
+        {submitSuccess && <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-600 font-medium">{submitSuccess}</p>}
 
         {settingsQuery.isLoading ? (
-          <p className="text-sm text-slate-600">Chargement des extras...</p>
+          <div className="h-40 flex items-center justify-center"><Loader2 className="animate-spin text-blue-500" /></div>
         ) : extrasDraft.length === 0 ? (
-          <div className="rounded-md border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center text-sm text-slate-400 font-medium">
             Aucun extra configuré.
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Extra</TableHead>
-                <TableHead>Prix</TableHead>
-                <TableHead>Facturation</TableHead>
-                <TableHead>Portée</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {extrasDraft.map((extra, index) => (
-                <TableRow key={`${extra.id}-${index}`}>
-                  <TableCell>
-                    <div className="font-semibold text-slate-800">{extra.label}</div>
-                    <div className="text-xs text-slate-500">{extra.id}</div>
-                  </TableCell>
-                  <TableCell>{extra.price} MAD</TableCell>
-                  <TableCell>{extra.billingType === 'PER_DAY' ? 'Par jour' : 'Par location'}</TableCell>
-                  <TableCell>{extra.scope === 'ALL_CARS' ? 'Toutes voitures' : `${(extra.carIds || []).length} voiture(s)`}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${extra.active ? 'border border-emerald-200 bg-emerald-100 text-emerald-700' : 'border border-slate-200 bg-slate-100 text-slate-600'}`}>
-                      {extra.active ? 'Actif' : 'Inactif'}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleOpenEdit(index)}>
-                        Modifier
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(index)}
-                        disabled={updateMutation.isPending}
-                      >
-                        Supprimer
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-hidden rounded-xl border border-slate-100">
+            <Table>
+              <TableHeader className="bg-slate-50">
+                <TableRow>
+                  <TableHead className="font-bold text-slate-700">Extra</TableHead>
+                  <TableHead className="font-bold text-slate-700">Prix</TableHead>
+                  <TableHead className="font-bold text-slate-700">Facturation</TableHead>
+                  <TableHead className="font-bold text-slate-700">Portée</TableHead>
+                  <TableHead className="font-bold text-slate-700">Statut</TableHead>
+                  <TableHead className="font-bold text-slate-700 text-right">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {extrasDraft.map((extra, index) => (
+                  <TableRow key={`${extra.id}-${index}`} className="hover:bg-slate-50/50 transition-colors">
+                    <TableCell>
+                      <div className="font-bold text-slate-800">{extra.label}</div>
+                      <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">{extra.id}</div>
+                    </TableCell>
+                    <TableCell className="font-bold text-blue-600">{extra.price} MAD</TableCell>
+                    <TableCell className="text-slate-600 font-medium">{extra.billingType === 'PER_DAY' ? 'Par jour' : 'Par location'}</TableCell>
+                    <TableCell className="text-slate-600 font-medium">{extra.scope === 'ALL_CARS' ? 'Toutes voitures' : `${(extra.carIds || []).length} voiture(s)`}</TableCell>
+                    <TableCell>
+                      <span className={cn("inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-tight", extra.active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200')}>
+                        {extra.active ? 'Actif' : 'Inactif'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => handleOpenEdit(index)} className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"><Settings2 size={16} /></button>
+                        <button onClick={() => handleDelete(index)} disabled={updateMutation.isPending} className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingIndex === null ? 'Ajouter un extra' : 'Modifier un extra'}
-        contentClassName="max-w-3xl"
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">ID technique</label>
-              <input
-                value={extraForm.id}
-                onChange={(event) => setExtraForm((previous) => ({ ...previous, id: event.target.value }))}
-                placeholder="ex: baby_seat"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-              />
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingIndex === null ? 'Ajouter un extra' : 'Modifier un extra'} contentClassName="max-w-3xl p-0 overflow-hidden rounded-[20px] shadow-2xl">
+        <div className="flex flex-col bg-white text-left">
+          <div className="p-10 space-y-8">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className={labelClass}>ID technique</label>
+                <input value={extraForm.id} onChange={(e) => setExtraForm(p => ({ ...p, id: e.target.value }))} placeholder="ex: baby_seat" className={cn(inputClass, "w-full uppercase text-xs tracking-widest")} />
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Libellé</label>
+                <input value={extraForm.label} onChange={(e) => setExtraForm(p => ({ ...p, label: e.target.value }))} placeholder="ex: Siège bébé" className={cn(inputClass, "w-full")} />
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Prix (MAD)</label>
+                <input type="number" min={0} value={extraForm.price} onChange={(e) => setExtraForm(p => ({ ...p, price: Number(e.target.value) }))} className={cn(inputClass, "w-full font-bold text-blue-600")} />
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Facturation</label>
+                <select value={extraForm.billingType} onChange={(e) => setExtraForm(p => ({ ...p, billingType: e.target.value as any }))} className={cn(inputClass, "w-full appearance-none")}>
+                  <option value="PER_DAY">Par jour</option>
+                  <option value="PER_RENTAL">Par location</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelClass}>Portée</label>
+                <select value={extraForm.scope} onChange={(e) => setExtraForm(p => ({ ...p, scope: e.target.value as any, carIds: e.target.value === 'ALL_CARS' ? [] : p.carIds }))} className={cn(inputClass, "w-full appearance-none")}>
+                  <option value="ALL_CARS">Toutes les voitures</option>
+                  <option value="SELECTED_CARS">Voitures spécifiques</option>
+                </select>
+              </div>
+              <div className="flex items-center pt-8">
+                <label className="inline-flex items-center gap-3 cursor-pointer group">
+                  <div className={cn("w-5 h-5 rounded border flex items-center justify-center transition-all", extraForm.active ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white group-hover:border-blue-400")}>
+                    {extraForm.active && <Check size={14} />}
+                  </div>
+                  <input type="checkbox" checked={extraForm.active} onChange={(e) => setExtraForm(p => ({ ...p, active: e.target.checked }))} className="hidden" />
+                  <span className="text-sm font-semibold text-slate-700">Option active</span>
+                </label>
+              </div>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Libellé</label>
-              <input
-                value={extraForm.label}
-                onChange={(event) => setExtraForm((previous) => ({ ...previous, label: event.target.value }))}
-                placeholder="ex: Siège bébé"
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Prix (MAD)</label>
-              <input
-                type="number"
-                min={0}
-                value={extraForm.price}
-                onChange={(event) => setExtraForm((previous) => ({ ...previous, price: Number(event.target.value) }))}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Facturation</label>
-              <select
-                value={extraForm.billingType}
-                onChange={(event) =>
-                  setExtraForm((previous) => ({
-                    ...previous,
-                    billingType: event.target.value as ReservationExtraOption['billingType'],
-                  }))
-                }
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-              >
-                <option value="PER_DAY">Par jour</option>
-                <option value="PER_RENTAL">Par location</option>
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Portée</label>
-              <select
-                value={extraForm.scope}
-                onChange={(event) =>
-                  setExtraForm((previous) => ({
-                    ...previous,
-                    scope: event.target.value as ReservationExtraOption['scope'],
-                    carIds: event.target.value === 'ALL_CARS' ? [] : previous.carIds,
-                  }))
-                }
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200"
-              >
-                <option value="ALL_CARS">Toutes les voitures</option>
-                <option value="SELECTED_CARS">Voitures spécifiques</option>
-              </select>
-            </div>
-            <div className="flex items-end">
-              <label className="inline-flex items-center gap-2 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={extraForm.active}
-                  onChange={(event) => setExtraForm((previous) => ({ ...previous, active: event.target.checked }))}
-                />
-                Option active
-              </label>
-            </div>
+
+            {extraForm.scope === 'SELECTED_CARS' && (
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-6 space-y-4">
+                <p className="text-sm font-bold text-slate-800 uppercase tracking-tight">Voitures concernées</p>
+                {carsQuery.isLoading ? (
+                  <p className="text-xs text-slate-400 italic">Chargement...</p>
+                ) : carOptions.length === 0 ? (
+                  <p className="text-xs text-slate-400">Aucune voiture disponible.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 scrollbar-hide">
+                    {carOptions.map((car) => (
+                      <label key={car.id} className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-lg cursor-pointer hover:border-blue-200 transition-all">
+                        <input type="checkbox" checked={extraForm.carIds.includes(car.id)} onChange={() => toggleCarInForm(car.id)} className="w-4 h-4 rounded border-slate-300 text-blue-600" />
+                        <span className="text-xs font-medium text-slate-700 truncate">{car.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {extraForm.scope === 'SELECTED_CARS' && (
-            <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
-              <p className="mb-2 text-sm font-medium text-slate-700">Voitures concernées</p>
-              {carsQuery.isLoading ? (
-                <p className="text-xs text-slate-500">Chargement des voitures...</p>
-              ) : carOptions.length === 0 ? (
-                <p className="text-xs text-slate-500">Aucune voiture disponible.</p>
-              ) : (
-                <div className="max-h-44 space-y-1 overflow-y-auto pr-1">
-                  {carOptions.map((car) => (
-                    <label key={car.id} className="flex items-center gap-2 text-xs text-slate-700">
-                      <input
-                        type="checkbox"
-                        checked={extraForm.carIds.includes(car.id)}
-                        onChange={() => toggleCarInForm(car.id)}
-                      />
-                      {car.label}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsModalOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleSubmitModal} disabled={updateMutation.isPending}>
-              {editingIndex === null ? 'Ajouter' : 'Enregistrer'}
+          <div className="px-10 py-8 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-500 text-sm font-semibold hover:text-slate-700 transition-colors">Annuler</button>
+            <Button onClick={handleSubmitModal} disabled={updateMutation.isPending} className="bg-blue-600 text-white hover:bg-blue-700 h-12 px-10 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
+              {updateMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : editingIndex === null ? 'Ajouter l\'extra' : 'Enregistrer les modifications'}
             </Button>
           </div>
         </div>
       </Modal>
+    </div>
+  );
+};
+/Modal>
     </div>
   );
 };

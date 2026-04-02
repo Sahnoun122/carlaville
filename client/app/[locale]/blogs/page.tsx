@@ -1,6 +1,7 @@
 import { Link } from '@/i18n/routing';
 import { ChevronRight, Calendar, Bookmark } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import BlogCard from '@/components/BlogCard';
 
 import { getBlogs } from '@/services/api/blog';
 
@@ -18,32 +19,21 @@ export default async function BlogsPage() {
   const blogs = data?.blogs || [];
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-32 pb-24">
-      <div className="container mx-auto px-4">
-        <div className="mb-12 text-center">
-           <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('title')}</h1>
-           <p className="text-gray-500 max-w-2xl mx-auto">{t('subtitle')}</p>
+    <div className="min-h-screen bg-gray-50 pt-32 pb-24 font-geist">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="mb-20 text-center space-y-6">
+           <div className="inline-flex items-center gap-3 bg-red-50 px-4 py-1.5 rounded-2xl border border-red-100">
+              <Bookmark className="w-4 h-4 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Inspiration & Conseils</span>
+           </div>
+           <h1 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">{t('title')}</h1>
+           <p className="text-gray-500 max-w-2xl mx-auto text-lg font-medium tracking-tight leading-relaxed">{t('subtitle')}</p>
         </div>
 
         {blogs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 animate-fade-in mb-32">
             {blogs.map((blog) => (
-              <Link key={blog._id} href={`/blogs/${blog.slug}`} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:shadow-md transition-shadow">
-                <div className="h-48 overflow-hidden bg-gray-50">
-                  <img src={blog.coverImage || blog.images?.[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase mb-3">
-                     <Calendar className="w-3 h-3" />
-                     {blog.createdAt ? new Date(blog.createdAt).toLocaleDateString() : 'Mars 2026'}
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors line-clamp-2">{blog.title}</h2>
-                  <p className="text-gray-500 text-sm line-clamp-3 mb-6">{blog.excerpt}</p>
-                  <div className="text-primary font-bold text-xs flex items-center gap-1 uppercase tracking-wider">
-                     {t('read_more')} <ChevronRight className="w-4 h-4" />
-                  </div>
-                </div>
-              </Link>
+              <BlogCard key={blog._id} blog={blog} readMoreText={t('read_more')} />
             ))}
           </div>
         ) : (
