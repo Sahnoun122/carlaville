@@ -69,6 +69,8 @@ export const CarMaintenanceManagement = ({
 }: CarMaintenanceManagementProps) => {
   const queryClient = useQueryClient();
   const [page] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<AvailabilityStatus | ''>('');
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState<'start' | 'complete'>('start');
   const [maintenanceCar, setMaintenanceCar] = useState<Car | null>(null);
@@ -197,6 +199,43 @@ export const CarMaintenanceManagement = ({
           </Button>
       </div>
 
+      {/* Search Bar & Filters */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Search Bar */}
+          <div className="md:col-span-2">
+            <div className="relative group">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
+              <input
+                type="text"
+                placeholder="Rechercher par marque, modèle ou ville..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50"
+              />
+            </div>
+          </div>
+
+          {/* Status Filter */}
+          <div>
+            <div className="relative group">
+              <Filter className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-red-500" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as AvailabilityStatus | '')}
+                className="h-14 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-slate-900 shadow-sm transition-all focus:border-red-200 focus:outline-none focus:ring-4 focus:ring-red-50 appearance-none font-medium"
+              >
+                <option value="">Tous les statuts</option>
+                <option value={AvailabilityStatus.AVAILABLE}>Disponible</option>
+                <option value={AvailabilityStatus.MAINTENANCE}>En Maintenance</option>
+                <option value={AvailabilityStatus.RENTED}>Louée</option>
+                <option value={AvailabilityStatus.UNAVAILABLE}>Indisponible</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
         {carsQuery.isLoading && !carsQuery.isRefetching ? (
           <div className="p-20 text-center flex flex-col items-center gap-3">
@@ -215,7 +254,19 @@ export const CarMaintenanceManagement = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {carsQuery.data?.cars.map((car) => {
+                {carsQuery.data?.cars
+                  .filter((car) => {
+                    const searchLower = searchTerm.toLowerCase();
+                    const matchesSearch =
+                      car.brand.toLowerCase().includes(searchLower) ||
+                      car.model.toLowerCase().includes(searchLower) ||
+                      car.city.toLowerCase().includes(searchLower);
+                    
+                    const matchesStatus = statusFilter === '' || car.availabilityStatus === statusFilter;
+                    
+                    return matchesSearch && matchesStatus;
+                  })
+                  .map((car) => {
                   const carId = resolveCarId(car);
                   const status = statusConfig[car.availabilityStatus] || { label: car.availabilityStatus, class: 'bg-slate-100 text-slate-600', icon: AlertCircle };
                   return (
@@ -282,8 +333,33 @@ export const CarMaintenanceManagement = ({
                     </tr>
                   );
                 })}
+                {carsQuery.data?.cars.filter((car) => {
+                  const searchLower = searchTerm.toLowerCase();
+                  const matchesSearch =
+                    car.brand.toLowerCase().includes(searchLower) ||
+                    car.model.toLowerCase().includes(searchLower) ||
+                    car.city.toLowerCase().includes(searchLower);
+                  
+                  const matchesStatus = statusFilter === '' || car.availabilityStatus === statusFilter;
+                  
+                  return matchesSearch && matchesStatus;
+                }).length === 0 && carsQuery.data?.cars.length !== 0 && (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center">
+                      <p className="text-sm font-medium text-slate-500">
+                        Aucun véhicule trouvé {searchTerm && `pour "${searchTerm}"`}{searchTerm && statusFilter && ' avec '}{statusFilter && `le statut "${statusConfig[statusFilter]?.label}"`}
+                      </p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
+            {carsQuery.data?.cars.length === 0 && (
+              <div className="p-20 text-center flex flex-col items-center gap-3">
+                <CarIcon className="w-12 h-12 text-slate-200" />
+                <p className="text-sm font-medium text-slate-500">Aucun véhicule disponible</p>
+              </div>
+            )}
           </div>
         )}
       </div>
