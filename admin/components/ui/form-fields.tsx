@@ -189,3 +189,99 @@ export const FormTextareaField = <
     />
   );
 };
+
+export interface SelectOption {
+  label: string;
+  value: string;
+}
+
+interface FormSelectFieldProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> {
+  form: UseFormReturn<TFieldValues>;
+  name: TName;
+  label: string;
+  options: SelectOption[];
+  placeholder?: string;
+  required?: boolean;
+  help?: string;
+  className?: string;
+  icon?: React.ReactNode;
+}
+
+export const FormSelectField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  form,
+  name,
+  label,
+  options,
+  placeholder = 'Sélectionner une option',
+  required = false,
+  help,
+  className,
+  icon,
+}: FormSelectFieldProps<TFieldValues, TName>) => {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className={className}>
+          <FormLabel className={required ? formStyles.labelRequired : formStyles.label}>
+            {label}
+          </FormLabel>
+          <FormControl>
+            <div className="relative">
+              {icon && (
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                  {React.cloneElement(icon as React.ReactElement<any>, {
+                    size: iconSize,
+                  })}
+                </div>
+              )}
+              <select
+                {...field}
+                className={cn(
+                  formStyles.input,
+                  'appearance-none', // Native select look removal
+                  icon && formStyles.inputWithIcon.split('px-4')[0],
+                  field.value === '' && 'text-slate-500',
+                  className
+                )}
+              >
+                <option value="" disabled>
+                  {placeholder}
+                </option>
+                {options.map((option) => (
+                  <option key={option.value} value={option.value} className="text-slate-900">
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </div>
+            </div>
+          </FormControl>
+          {help && <p className={formStyles.help}>{help}</p>}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};

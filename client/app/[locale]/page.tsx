@@ -2,6 +2,7 @@ import VehicleCard from '../../components/VehicleCard';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Star, Clock, Laptop, ShieldCheck, CreditCard, Compass, ChevronDown, Plane, Shield, Zap, Search, MapPin } from 'lucide-react';
+import BlogCard from '../../components/BlogCard';
 import HomeSearchWidget from '../../components/HomeSearchWidget';
 import { getTranslations } from 'next-intl/server';
 
@@ -246,13 +247,7 @@ export default async function Home() {
           <h2 className="text-3xl font-bold text-gray-900 mb-12 text-center">{t('blogs.title')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {blogs.map((blog: any) => (
-              <Link key={blog._id} href={`/blogs/${blog.slug}`} className="group block">
-                <div className="relative h-48 rounded-xl overflow-hidden mb-4">
-                  <img src={blog.coverImage || blog.images?.[0]} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors">{blog.title}</h3>
-                <p className="text-gray-500 mt-2 text-sm line-clamp-2">{blog.excerpt}</p>
-              </Link>
+              <BlogCard key={blog._id} blog={blog} readMoreText={t('blogs.read_more')} />
             ))}
           </div>
         </div>

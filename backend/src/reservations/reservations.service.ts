@@ -20,6 +20,9 @@ import {
 } from './schemas/reservation-day-control.schema';
 import { UpdateDayControlSettingsDto } from './dto/update-day-control-settings.dto';
 import { Car, CarDocument } from '../cars/schemas/car.schema';
+import { RevenueService } from '../revenue/revenue.service';
+import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
+import { PaymentStatus } from '../common/enums/payment-status.enum';
 
 @Injectable()
 export class ReservationsService {
@@ -30,6 +33,7 @@ export class ReservationsService {
     private reservationDayControlModel: Model<ReservationDayControlDocument>,
     @InjectModel(Car.name)
     private carModel: Model<CarDocument>,
+    private readonly revenueService: RevenueService,
   ) {}
 
   private readonly nanoid = customAlphabet(
@@ -301,9 +305,15 @@ export class ReservationsService {
   }
 
   async markDelivered(id: string): Promise<Reservation> {
-    return this.updateStatus(id, ReservationStatus.DELIVERED, [
+    const updated = await this.updateStatus(id, ReservationStatus.DELIVERED, [
       ReservationStatus.IN_DELIVERY,
     ]);
+
+    if (updated.paymentStatus === PaymentStatus.PAID_ON_DELIVERY) {
+       await this.revenueService.recognizeFromReservation(updated as any);
+    }
+
+    return updated;
   }
 
   async markReturned(id: string): Promise<Reservation> {
@@ -354,6 +364,49 @@ export class ReservationsService {
     if (!updated) {
       throw new NotFoundException(`Reservation with id ${id} not found`);
     }
+    return updated;
+  }
+
+  async confirmPayment(id: string, dto: ConfirmPaymentDto): Promise<Reservation> {
+    console.log('--- BACKEND DEBUG: confirmPayment ---');
+    console.log('ID:', id);
+    console.log('DTO:', JSON.stringify(dto, null, 2));
+    
+    const reservation = await this.findById(id);
+    console.log('Current Status:', reservation.status);
+    // Only allow payment on relevant statuses
+    const allowedStatuses = [
+      ReservationStatus.CONFIRMED,
+      ReservationStatus.READY_FOR_DELIVERY,
+      ReservationStatus.IN_DELIVERY,
+      ReservationStatus.DELIVERED,
+      ReservationStatus.ACTIVE_RENTAL,
+      ReservationStatus.RETURN_SCHEDULED,
+      ReservationStatus.COMPLETED,
+    ];
+
+    if (!allowedStatuses.includes(reservation.status)) {
+      throw new BadRequestException(`Cannot confirm payment for reservation in ${reservation.status} status`);
+    }
+
+    const updated = await this.reservationModel.findByIdAndUpdate(
+      id,
+      {
+        paymentStatus: PaymentStatus.PAID_ON_DELIVERY,
+        paymentMethod: dto.paymentMethod,
+        amountCollected: dto.amountCollected,
+        paidAt: new Date(),
+      },
+      { new: true },
+    );
+
+    if (!updated) {
+      throw new NotFoundException(`Reservation with id ${id} not found`);
+    }
+
+    // Immediately trigger revenue recognition upon payment confirmation
+    await this.revenueService.recognizeFromReservation(updated as any);
+
     return updated;
   }
 

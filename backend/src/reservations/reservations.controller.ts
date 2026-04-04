@@ -20,6 +20,7 @@ import { FilterReservationDto } from './dto/filter-reservation.dto';
 import { AssignAgentDto } from './dto/assign-agent.dto';
 import { AddNoteDto } from './dto/add-note.dto';
 import { UpdateDayControlSettingsDto } from './dto/update-day-control-settings.dto';
+import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('admin/reservations')
@@ -54,10 +55,16 @@ export class ReservationsController {
     return this.reservationsService.getDayControlSettings();
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Patch('settings/day-control')
   updateDayControlSettings(@Body() dto: UpdateDayControlSettingsDto) {
     return this.reservationsService.updateDayControlSettings(dto);
+  }
+
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER, Role.DELIVERY_AGENT)
+  @Patch(':id/confirm-payment')
+  confirmPayment(@Param('id') id: string, @Body() dto: ConfirmPaymentDto) {
+    return this.reservationsService.confirmPayment(id, dto);
   }
 
   /**
@@ -144,9 +151,8 @@ export class ReservationsController {
     return this.reservationsService.complete(id);
   }
 
-  /**
-   * @example POST http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/notes
-   */
+
+
   @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Post(':id/notes')
   addInternalNote(@Param('id') id: string, @Body() addNoteDto: AddNoteDto) {

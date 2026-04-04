@@ -14,6 +14,7 @@ import { RolesModule } from './roles/roles.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { PaymentsModule } from './payments/payments.module';
+import { RevenueModule } from './revenue/revenue.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import * as path from 'path';
@@ -28,7 +29,7 @@ import {
     I18nModule.forRoot({
       fallbackLanguage: 'fr',
       loaderOptions: {
-        path: path.join(__dirname, '/i18n/'),
+        path: path.join(process.cwd(), 'src/i18n/'),
         watch: true,
       },
       resolvers: [
@@ -61,6 +62,7 @@ import {
     BlogsModule,
     UploadsModule,
     PaymentsModule,
+    RevenueModule,
   ],
   controllers: [AppController],
   providers: [AppService],

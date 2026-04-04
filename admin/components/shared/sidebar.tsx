@@ -12,7 +12,7 @@ const navLinks = {
     { name: 'Blogs', href: '/admin/blogs' },
     { name: 'Utilisateurs', href: '/admin/users' },
     { name: 'Agences', href: '/admin/agencies' },
-    { name: 'Revenus', href: '/admin/revenue' },
+    { name: 'Revenus', href: '/admin/revenues' },
     { name: 'Véhicules', href: '/admin/cars' },
     { name: 'Maintenance', href: '/admin/maintenance' },
     { name: 'Réservations', href: '/admin/reservations' },
@@ -57,7 +57,7 @@ export const Sidebar = () => {
     'Réservations': CalendarDays,
     'Paramètres de réservation': Settings,
     Livraisons: Truck,
-    'Revenus': TrendingUp,
+    'Revenus': DollarSign,
   };
 
   return (

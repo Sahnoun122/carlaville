@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { ReservationStatus } from '../../common/enums/reservation-status.enum';
+import { PaymentStatus } from '../../common/enums/payment-status.enum';
+import { PaymentMethod } from '../../common/enums/payment-method.enum';
 
 export type ReservationDocument = Reservation & Document;
 
@@ -63,10 +65,23 @@ export class Reservation {
 
   @Prop({
     type: String,
-    enum: ['unpaid', 'paid', 'failed'],
-    default: 'unpaid',
+    enum: Object.values(PaymentStatus),
+    default: PaymentStatus.UNPAID,
   })
-  paymentStatus: string;
+  paymentStatus: PaymentStatus;
+
+  @Prop({
+    type: String,
+    enum: Object.values(PaymentMethod),
+    required: false,
+  })
+  paymentMethod: PaymentMethod;
+
+  @Prop({ default: 0 })
+  amountCollected: number;
+
+  @Prop()
+  paidAt: Date;
 
   @Prop()
   stripePaymentIntentId: string;

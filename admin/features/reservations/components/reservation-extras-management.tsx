@@ -17,6 +17,13 @@ import {
   getReservationDayControlSettings,
   updateReservationDayControlSettings,
 } from '@/features/reservations/services/reservation-settings-service';
+import {
+  Settings2,
+  Trash2,
+  Loader2,
+  Check,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { ReservationExtraOption } from '@/types';
 
 interface ExtraFormState {
@@ -223,7 +230,10 @@ export const ReservationExtrasManagement = () => {
 
   const handleDelete = (index: number) => {
     const nextExtras = extrasDraft.filter((_, itemIndex) => itemIndex !== index);
-    persistExtras(nextExtras, 'Extra supprimé avec succ�  const labelClass = "text-sm font-semibold text-[#1E293B] mb-2";
+    persistExtras(nextExtras, 'Extra supprimé avec succès');
+  };
+
+  const labelClass = "text-sm font-semibold text-[#1E293B] mb-2";
   const inputClass = "h-12 bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 font-medium transition-all focus:bg-white focus:border-blue-500 focus:ring-0 outline-none text-slate-800 placeholder:text-slate-400 text-base";
 
   return (
@@ -362,10 +372,6 @@ export const ReservationExtrasManagement = () => {
           </div>
         </div>
       </Modal>
-    </div>
-  );
-};
-/Modal>
     </div>
   );
 };

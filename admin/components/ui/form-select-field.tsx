@@ -102,11 +102,14 @@ export const FormSelectField = <
                     })}
                   </div>
                 )}
+
                 <SelectTrigger
+
                   className={cn(
                     formStyles.selectTrigger,
                     icon && 'pl-12',
                     className
+                    
                   )}
                 >
                   <SelectValue placeholder={placeholder} />

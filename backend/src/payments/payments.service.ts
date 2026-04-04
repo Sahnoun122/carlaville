@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { Reservation, ReservationDocument } from '../reservations/schemas/reservation.schema';
+import { PaymentStatus } from '../common/enums/payment-status.enum';
 
 @Injectable()
 export class PaymentsService {
@@ -26,7 +27,7 @@ export class PaymentsService {
       throw new NotFoundException(`Reservation with id ${reservationId} not found`);
     }
 
-    if (reservation.paymentStatus === 'paid') {
+    if (reservation.paymentStatus === PaymentStatus.PAID) {
       throw new BadRequestException('Reservation is already paid');
     }
 
@@ -68,7 +69,7 @@ export class PaymentsService {
       const reservation = await this.reservationModel.findById(reservationId);
       if (reservation) {
         await this.reservationModel.findByIdAndUpdate(reservationId, {
-          paymentStatus: 'paid',
+          paymentStatus: PaymentStatus.PAID,
           status: 'confirmed' as any,
         });
         this.logger.log(`Payment confirmed for reservation ${reservationId}`);
@@ -86,7 +87,7 @@ export class PaymentsService {
       throw new NotFoundException(`Reservation with id ${reservationId} not found`);
     }
 
-    if (reservation.paymentStatus === 'paid') {
+    if (reservation.paymentStatus === PaymentStatus.PAID) {
       this.logger.log(`Reservation ${reservationId} already paid`);
       return { success: true, status: 'paid' };
     }
@@ -102,7 +103,7 @@ export class PaymentsService {
 
       if (paymentIntent.status === 'succeeded') {
         await this.reservationModel.findByIdAndUpdate(reservationId, {
-          paymentStatus: 'paid',
+          paymentStatus: PaymentStatus.PAID,
           status: 'confirmed' as any,
         });
         this.logger.log(`Payment confirmed and marked as PAID for ${reservationId}`);
@@ -123,7 +124,7 @@ export class PaymentsService {
       throw new NotFoundException(`Reservation with id ${reservationId} not found`);
     }
 
-    if (reservation.paymentStatus === 'paid') {
+    if (reservation.paymentStatus === PaymentStatus.PAID) {
       throw new BadRequestException('Reservation is already paid');
     }
 
@@ -131,7 +132,7 @@ export class PaymentsService {
       reservationId,
       {
         status: 'confirmed' as any,
-        paymentStatus: 'unpaid',
+        paymentStatus: PaymentStatus.UNPAID,
       },
       { new: true },
     );

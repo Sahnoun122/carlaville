@@ -8,24 +8,28 @@ import {
   Search, 
   Filter, 
   RefreshCcw, 
-  Check, 
-  X, 
-  Clock, 
-  Calendar as CalendarIcon, 
-  User, 
+  Check,
+  X,
+  Clock,
+  Calendar as CalendarIcon,
+  User,
   Car as CarIcon,
   ChevronRight,
   MoreHorizontal,
-  Banknote,
   Navigation,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  Wallet,
+  CheckCircle2,
+  Timer
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { getCars } from '@/features/cars/services/car-service';
 import { getAgencies } from '@/features/agencies/services/agency-service';
 import {
+  confirmPayment,
   confirmReservation,
   createReservation,
   getReservations,
@@ -37,6 +41,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { Car, Reservation, ReservationStatus, Role } from '@/types';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { ReservationDetailsModal } from './ReservationDetailsModal';
 
 const resolveCarId = (car: Car) => car.id || (car as Car & { _id?: string })._id || '';
 
@@ -56,10 +61,11 @@ const statusConfig: Record<string, { label: string; class: string; icon: any }> 
   [ReservationStatus.REJECTED]: { label: 'Rejetée', class: 'border-rose-200 bg-rose-50 text-rose-700 shadow-sm shadow-rose-100/50', icon: AlertCircle },
 };
 
-const paymentConfig: Record<string, { label: string; class: string }> = {
-  paid: { label: 'Payé', class: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
-  unpaid: { label: 'Non payé', class: 'border-slate-200 bg-slate-50 text-slate-500' },
-  failed: { label: 'Échec', class: 'border-rose-200 bg-rose-50 text-rose-700' },
+const paymentConfig: Record<string, { label: string; class: string; icon?: any }> = {
+  'paid': { label: 'Payé (En ligne)', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: CheckCircle2 },
+  'paid-on-delivery': { label: 'Encaissé (Local)', class: 'border-blue-200 bg-blue-50 text-blue-700', icon: Wallet },
+  'unpaid': { label: 'À encaisser', class: 'border-slate-200 bg-slate-50 text-slate-500', icon: Timer },
+  'failed': { label: 'Échec Stripe', class: 'border-rose-200 bg-rose-50 text-rose-700', icon: AlertCircle },
 };
 
 export const ReservationManagement = () => {
@@ -69,6 +75,8 @@ export const ReservationManagement = () => {
   const [selectedCarId, setSelectedCarId] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -175,8 +183,23 @@ export const ReservationManagement = () => {
     onError: (error: any) => toast.error(error.message || 'Vérification échouée'),
   });
 
+  const settleMutation = useMutation({
+    mutationFn: (data: { id: string, amountCollected: number, method?: string }) => 
+      confirmPayment(data.id, { paymentMethod: data.method || 'cash', amountCollected: data.amountCollected }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      queryClient.invalidateQueries({ queryKey: ['revenues'] });
+      toast.success('Règlement effectué avec succès');
+    },
+    onError: (error: any) => toast.error(error.message || 'Erreur lors du règlement'),
+  });
+
   const isActionPending =
-    confirmMutation.isPending || rejectMutation.isPending || pendingMutation.isPending || verifyMutation.isPending;
+    confirmMutation.isPending || 
+    rejectMutation.isPending || 
+    pendingMutation.isPending || 
+    verifyMutation.isPending ||
+    settleMutation.isPending;
 
   const handleCreateReservation = () => {
     if (!formData.customerName || !formData.carId) {
@@ -206,6 +229,11 @@ export const ReservationManagement = () => {
           : 0,
       },
     });
+  };
+  
+  const handleViewDetails = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setIsDetailsModalOpen(true);
   };
 
   const vehicleFilterOptions = useMemo(
@@ -358,20 +386,23 @@ export const ReservationManagement = () => {
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-2">
                           <span className={cn(
-                            "inline-flex px-2.5 py-0.5 rounded-full border text-[10px] font-black uppercase tracking-tight",
+                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[10px] font-black uppercase tracking-tight",
                             payment.class
                           )}>
+                            {payment.icon && <payment.icon size={12} />}
                             {payment.label}
                           </span>
-                          {reservation.paymentStatus !== 'paid' && (
-                            <button
-                              onClick={() => verifyMutation.mutate(rid)}
-                              disabled={verifyMutation.isPending}
-                              className="text-slate-400 hover:text-red-600 transition-colors"
-                              title="Vérifier Stripe"
-                            >
-                              <RefreshCcw size={12} className={cn(verifyMutation.isPending && "animate-spin")} />
-                            </button>
+                          {reservation.paymentStatus === 'unpaid' && (
+                             <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => verifyMutation.mutate(rid)}
+                                disabled={verifyMutation.isPending}
+                                className="text-slate-400 hover:text-blue-600 transition-colors"
+                                title="Vérifier Stripe"
+                              >
+                                <RefreshCcw size={12} className={cn(verifyMutation.isPending && "animate-spin")} />
+                              </button>
+                             </div>
                           )}
                         </div>
                         <span className="text-sm font-black text-slate-900">
@@ -428,9 +459,41 @@ export const ReservationManagement = () => {
                            </Button>
                          )}
 
-                         <button className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-all text-slate-400">
-                            <MoreHorizontal size={16} />
-                         </button>
+                          {canManageReservationStatus && reservation.paymentStatus === 'unpaid' && reservation.status === ReservationStatus.CONFIRMED && (
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                // Explicitly convert to number and handle NaN to avoid 400 Bad Request
+                                const calculatedAmount = Number(
+                                  reservation.pricingBreakdown?.total || 
+                                  reservation.pricingBreakdown?.totalAmount ||
+                                  reservation.pricingBreakdown?.estimatedTotal || 
+                                  0
+                                );
+                                const amount = isNaN(calculatedAmount) ? 0 : calculatedAmount;
+                                if (confirm(`Régler la réservation ${reservation.bookingReference} pour ${amount} MAD ?`)) {
+                                  settleMutation.mutate({ id: rid, amountCollected: amount });
+                                }
+                              }}
+                              disabled={isActionPending}
+                              className="h-9 px-4 rounded-lg bg-slate-900 border-none text-white font-black hover:bg-slate-800 transition-all shadow-lg active:scale-95 mx-1"
+                            >
+                               <Wallet size={14} className="mr-1.5" />
+                               Régler
+                            </Button>
+                          )}
+
+                          <button 
+                             onClick={() => handleViewDetails(reservation)}
+                             className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-all text-slate-400 group-hover:text-red-600"
+                             title="Voir les détails"
+                          >
+                             <Eye size={16} />
+                          </button>
+                          
+                          <button className="h-9 w-9 flex items-center justify-center rounded-lg hover:bg-slate-100 transition-all text-slate-400">
+                             <MoreHorizontal size={16} />
+                          </button>
                       </div>
                     </td>
                   </tr>
@@ -478,6 +541,16 @@ export const ReservationManagement = () => {
           <Button onClick={handleCreateReservation} disabled={createMutation.isPending} className="h-12 px-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black shadow-xl">Confirmer</Button>
         </div>
       </Modal>
+
+      <ReservationDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        reservation={selectedReservation}
+        onConfirm={(id) => confirmMutation.mutate(id)}
+        onReject={(id) => rejectMutation.mutate(id)}
+        onSuspend={(id) => pendingMutation.mutate(id)}
+        isActionPending={isActionPending}
+      />
     </div>
   );
 };

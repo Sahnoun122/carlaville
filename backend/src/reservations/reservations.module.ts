@@ -10,6 +10,7 @@ import {
   ReservationDayControlSchema,
 } from './schemas/reservation-day-control.schema';
 import { Car, CarSchema } from '../cars/schemas/car.schema';
+import { RevenueModule } from '../revenue/revenue.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { Car, CarSchema } from '../cars/schemas/car.schema';
         schema: CarSchema,
       },
     ]),
+    RevenueModule,
   ],
   controllers: [
     ReservationsController,

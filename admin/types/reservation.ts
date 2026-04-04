@@ -34,7 +34,10 @@ export interface Reservation {
   selectedExtras?: string[];
   pricingBreakdown?: Record<string, number>;
   status: ReservationStatus;
-  paymentStatus?: 'unpaid' | 'paid' | 'failed';
+  paymentStatus: 'unpaid' | 'paid-on-delivery' | 'refunded' | 'partially-paid' | 'failed';
+  paymentMethod?: 'cash' | 'bank-transfer' | 'credit-card' | 'online';
+  amountCollected?: number;
+  paidAt?: string;
   stripePaymentIntentId?: string;
   internalNotes?: string;
   createdAt?: string;

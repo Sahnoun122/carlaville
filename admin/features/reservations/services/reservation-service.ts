@@ -113,3 +113,7 @@ export const verifyReservationPayment = async (id: string) => {
 export const getRevenueAnalytics = async () => {
   return get<RevenueAnalytics>('/admin/dashboard/analytics/revenue');
 };
+
+export const confirmPayment = async (id: string, data: { paymentMethod: string; amountCollected: number }) => {
+  return patch<Reservation>(`/admin/reservations/${id}/confirm-payment`, data);
+};
