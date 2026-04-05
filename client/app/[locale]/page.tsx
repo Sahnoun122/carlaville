@@ -8,7 +8,8 @@ import { getTranslations } from 'next-intl/server';
 
 async function getCars() {
   try {
-    const res = await fetch('http://localhost:3009/api/cars?limit=6', { next: { revalidate: 60 } });
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const res = await fetch(`${API_URL}/api/cars?limit=6`, { next: { revalidate: 60 } });
     if (!res.ok) return { cars: [] };
     const data = await res.json();
     return data;
@@ -19,7 +20,8 @@ async function getCars() {
 
 async function getBlogs() {
   try {
-    const res = await fetch('http://localhost:3009/api/blogs?limit=3', {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const res = await fetch(`${API_URL}/api/blogs?limit=3`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return { blogs: [] };

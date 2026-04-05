@@ -24,7 +24,8 @@ export default function HistoryPage() {
     async function fetchReservations() {
       const token = localStorage.getItem('carlaville_token');
       try {
-        const res = await fetch('http://localhost:3009/api/client/reservations?limit=100', {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+        const res = await fetch(`${API_URL}/api/client/reservations?limit=100`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {

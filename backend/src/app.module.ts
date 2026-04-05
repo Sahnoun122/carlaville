@@ -44,11 +44,13 @@ import {
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        uri:
-          configService.get<string>('database.uri') ||
-          'mongodb://localhost:27017/carlaville',
-      }),
+      useFactory: (configService: ConfigService) => {
+        const uri = configService.get<string>('database.uri');
+        if (!uri) {
+          throw new Error('DATABASE_URI is not defined in environment variables');
+        }
+        return { uri };
+      },
     }),
     UsersModule,
     AuthModule,

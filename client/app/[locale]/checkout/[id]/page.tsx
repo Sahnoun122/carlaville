@@ -38,7 +38,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     async function fetchReservation() {
       const token = localStorage.getItem('carlaville_token');
       try {
-        const res = await fetch(`http://localhost:3009/api/client/reservations/${id}`, {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+        const res = await fetch(`${API_URL}/api/client/reservations/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Réservation non trouvée.');
@@ -57,7 +58,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`http://localhost:3009/api/payments/confirm-pickup/${id}`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+      const res = await fetch(`${API_URL}/api/payments/confirm-pickup/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });

@@ -86,7 +86,8 @@ export default function HomeSearchWidget() {
   useEffect(() => {
     const loadDayControlSettings = async () => {
       try {
-        const res = await fetch('http://localhost:3009/api/reservations/settings/day-control', {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+        const res = await fetch(`${API_URL}/api/reservations/settings/day-control`, {
           cache: 'no-store',
         });
 

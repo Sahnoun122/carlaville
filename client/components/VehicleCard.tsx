@@ -23,10 +23,15 @@ export default function VehicleCard({ car }: VehicleCardProps) {
   const images = car.images || [];
   const rawImage = images.length > 0 ? images[0] : car.imageUrl;
   
-  // Normalize URL to replace 127.0.0.1 with localhost if needed for better browser compatibility
+  // Normalize URL to handle local vs production image paths
   const previewImage = useMemo(() => {
     if (typeof rawImage !== 'string' || rawImage.trim().length === 0) return null;
-    return rawImage.replace('127.0.0.1', 'localhost');
+    
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const backendHost = new URL(API_URL).host;
+    
+    // If the image URL points to a local address, replace it with the current backend host
+    return rawImage.replace('127.0.0.1:3009', backendHost).replace('localhost:3009', backendHost);
   }, [rawImage]);
 
   return (
