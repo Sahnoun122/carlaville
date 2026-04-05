@@ -37,7 +37,7 @@ export const RevenueForm = ({ revenue, onSubmit, isLoading }: RevenueFormProps) 
     resolver: zodResolver(formSchema),
     defaultValues: {
       amount: revenue?.amount || 0,
-      date: (revenue?.date || revenue?.recognizedDate) ? new Date(revenue.date || (revenue.recognizedDate as any)).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date: (revenue?.date || revenue?.recognizedDate) ? new Date(revenue.date || revenue.recognizedDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       agencyId: revenue?.agencyId?._id || revenue?.agencyId?.id || revenue?.agencyId || '',
       carId: revenue?.carId?._id || revenue?.carId?.id || revenue?.carId || '',
       category: revenue?.category || 'RENTAL',
