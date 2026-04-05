@@ -46,9 +46,18 @@ import {
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const uri = configService.get<string>('database.uri');
-        if (!uri) {
-          throw new Error('DATABASE_URI is not defined in environment variables');
+        const nodeEnv = configService.get<string>('NODE_ENV');
+        
+        // Safety Fallback for LOCAL DEVELOPMENT ONLY
+        if (!uri && nodeEnv !== 'production') {
+          console.warn('DATABASE_URI is not defined. Falling back to localhost for development.');
+          return { uri: 'mongodb://127.0.0.1:27017/carlaville' };
         }
+
+        if (!uri) {
+          throw new Error('FATAL: DATABASE_URI is not defined in environment variables. Check your Vercel/Local .env configuration.');
+        }
+
         return { uri };
       },
     }),
