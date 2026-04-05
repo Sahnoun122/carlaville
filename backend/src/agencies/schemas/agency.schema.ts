@@ -33,6 +33,9 @@ export class Agency {
 
   @Prop({ default: true })
   active: boolean;
+
+  @Prop({ default: 15 })
+  commissionRate: number;
 }
 
 export const AgencySchema = SchemaFactory.createForClass(Agency);

@@ -16,9 +16,10 @@ import { cn } from '@/lib/utils';
 
 interface RevenueDashboardCardsProps {
   agencyId?: string;
+  agency?: any;
 }
 
-export const RevenueDashboardCards = ({ agencyId }: RevenueDashboardCardsProps) => {
+export const RevenueDashboardCards = ({ agencyId, agency }: RevenueDashboardCardsProps) => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['revenue-timeframe-analytics', agencyId],
     queryFn: () => getTimeframeAnalytics(agencyId),
@@ -82,8 +83,13 @@ export const RevenueDashboardCards = ({ agencyId }: RevenueDashboardCardsProps) 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {kpis.map((kpi, idx) => {
-        const trend = kpi.previous !== undefined ? calculateTrend(kpi.value, kpi.previous) : null;
+          const trend = kpi.previous !== undefined ? calculateTrend(kpi.value, kpi.previous) : null;
         
+          const commissionRate = agency?.commissionRate ?? 15;
+          const agencyRate = 100 - commissionRate;
+          const platformAmount = kpi.value * (commissionRate / 100);
+          const agencyAmount = kpi.value - platformAmount;
+
         return (
           <div key={idx} className="group relative bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 group-hover:bg-blue-50 transition-colors"></div>
@@ -118,14 +124,14 @@ export const RevenueDashboardCards = ({ agencyId }: RevenueDashboardCardsProps) 
                    
                    <div className="mt-3 space-y-1.5 pt-3 border-t border-slate-50">
                       <div className="flex items-center justify-between">
-                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Agence (85%)</span>
-                         <span className="text-xs font-black text-emerald-600">{formatCurrency(kpi.net)}</span>
+                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Agence ({agencyRate}%)</span>
+                         <span className="text-xs font-black text-emerald-600">{formatCurrency(agencyAmount)}</span>
                       </div>
                       <div className="flex items-center justify-between">
                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Plateforme</span>
                          <div className="flex items-center gap-1.5">
-                            <span className="text-[8px] font-black bg-amber-100 text-amber-700 px-1 rounded-sm">15%</span>
-                            <span className="text-xs font-black text-amber-600">{formatCurrency(kpi.value - kpi.net)}</span>
+                            <span className="text-[8px] font-black bg-amber-100 text-amber-700 px-1 rounded-sm">{commissionRate}%</span>
+                            <span className="text-xs font-black text-amber-600">{formatCurrency(platformAmount)}</span>
                          </div>
                       </div>
                    </div>

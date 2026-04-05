@@ -7,4 +7,5 @@ export interface Agency {
   phone?: string;
   email?: string;
   active: boolean;
+  commissionRate?: number;
 }

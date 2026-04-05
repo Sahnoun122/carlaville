@@ -1,16 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Schema as MongooseSchema } from 'mongoose';
+import { Model, Schema as MongooseSchema, Types } from 'mongoose';
 import { Revenue, RevenueDocument } from './schemas/revenue.schema';
 import { CreateRevenueDto, UpdateRevenueDto } from './dto/create-revenue.dto';
 import { ReservationDocument } from '../reservations/schemas/reservation.schema';
 import { PaymentStatus } from '../common/enums/payment-status.enum';
+import { Agency, AgencyDocument } from '../agencies/schemas/agency.schema';
 
 @Injectable()
 export class RevenueService {
   constructor(
     @InjectModel(Revenue.name)
     private readonly revenueModel: Model<RevenueDocument>,
+    @InjectModel(Agency.name)
+    private readonly agencyModel: Model<AgencyDocument>,
   ) {}
 
   async create(createRevenueDto: CreateRevenueDto): Promise<RevenueDocument> {
@@ -58,8 +61,12 @@ export class RevenueService {
 
   async getSummary(agencyId?: string, carId?: string): Promise<{ total: number }> {
     const filter: any = {};
-    if (agencyId) filter.agencyId = agencyId;
-    if (carId) filter.carId = carId;
+    if (agencyId) {
+      filter.agencyId = { $in: [agencyId, new Types.ObjectId(agencyId)] };
+    }
+    if (carId) {
+      filter.carId = { $in: [carId, new Types.ObjectId(carId)] };
+    }
 
     const result = await this.revenueModel.aggregate([
       { $match: filter },
@@ -85,8 +92,16 @@ export class RevenueService {
     const deliveryFee = pricing.deliveryFee || 0;
     const taxAmount = pricing.taxAmount || 0;
     
-    // Logic for commission (15% Platform, 85% Agency)
-    const commissionRate = 0.15; 
+    
+    // Logic for commission
+    let commissionRate = 0.15; 
+    if (reservation.agencyId) {
+       const agency = await this.agencyModel.findById(reservation.agencyId).exec();
+       if (agency && agency.commissionRate !== undefined) {
+         commissionRate = agency.commissionRate / 100;
+       }
+    }
+
     const commissionAmount = amount * commissionRate;
     const netAmount = amount - commissionAmount;
 
@@ -196,10 +211,18 @@ export class RevenueService {
     const yearStart = new Date(now.getFullYear(), 0, 1);
 
     const matchAndSum = async (startDate: Date, endDate?: Date) => {
-      const match: any = { recognizedDate: { $gte: startDate } };
-      if (endDate) match.recognizedDate.$lt = endDate;
-      if (agencyId) match.agencyId = new MongooseSchema.Types.ObjectId(agencyId);
+      const match: any = {};
       
+      if (agencyId && agencyId !== 'all') {
+        match.agencyId = { $in: [agencyId, new Types.ObjectId(agencyId)] };
+      }
+
+      const dateQuery: any = { $gte: startDate };
+      if (endDate) {
+        dateQuery.$lt = endDate;
+      }
+      match.recognizedDate = dateQuery;
+
       const result = await this.revenueModel.aggregate([
         { $match: match },
         { 
@@ -211,6 +234,7 @@ export class RevenueService {
           } 
         }
       ]);
+      
       return result[0] || { total: 0, net: 0, count: 0 };
     };
 
@@ -233,7 +257,9 @@ export class RevenueService {
 
   async getTurnoverBreakdown(agencyId?: string): Promise<any[]> {
     const match: any = { agencyId: { $ne: null } };
-    if (agencyId) match.agencyId = new MongooseSchema.Types.ObjectId(agencyId);
+    if (agencyId) {
+      match.agencyId = { $in: [agencyId, new Types.ObjectId(agencyId)] };
+    }
 
     return this.revenueModel.aggregate([
       // Only keep records attached to an agency

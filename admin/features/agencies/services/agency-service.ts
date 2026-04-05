@@ -7,6 +7,7 @@ export interface AgencyFormValues {
   address?: string;
   phone?: string;
   email?: string;
+  commissionRate?: number;
 }
 
 export const getAgencies = async (params: { page: number; limit: number; q?: string }) => {

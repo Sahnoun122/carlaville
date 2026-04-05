@@ -112,5 +112,8 @@ export interface TimeframeAnalytics {
 }
 
 export const getTimeframeAnalytics = async (agencyId?: string) => {
-  return get<TimeframeAnalytics>('/revenue/analytics/timeframe', { params: { agencyId } });
+  console.log('[DEBUG] Calling Analytics for Agency:', agencyId || 'GLOBAL');
+  const response = await get<TimeframeAnalytics>('/revenue/analytics/timeframe', { params: { agencyId } });
+  console.log('[DEBUG] Analytics Response:', response);
+  return response;
 };

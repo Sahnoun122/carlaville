@@ -13,15 +13,25 @@ import { Agency } from '@/types';
 import type { AgencyFormValues } from '@/features/agencies/services/agency-service';
 import { Building2, MapPin, Phone, Mail, Loader2, Check } from 'lucide-react';
 
+const baseSchema = z.object({
+  name: z.string().min(2, 'Le nom est requis'),
+  city: z.string().min(2, 'La ville est requise'),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email('Email invalide').optional().or(z.literal('')),
+  commissionRate: z.number().min(0).max(100).optional(),
+});
+
+type FormInput = z.infer<typeof baseSchema>;
+
 const formSchema = z.object({
   name: z.string().min(2, 'Le nom est requis'),
   city: z.string().min(2, 'La ville est requise'),
   address: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email('Email invalide').optional().or(z.literal('')),
-});
-
-type FormInput = z.infer<typeof formSchema>;
+  commissionRate: z.preprocess((val) => (val === '' || val === undefined ? undefined : Number(val)), z.number().min(0).max(100).optional()),
+}) as unknown as z.ZodType<FormInput, any, any>;
 
 export interface AgencyFormProps {
   agency?: Agency | null;
@@ -30,7 +40,7 @@ export interface AgencyFormProps {
 }
 
 export const AgencyForm = ({ agency, onSubmit, isLoading }: AgencyFormProps) => {
-  const form = useForm<FormInput>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: agency?.name || '',
@@ -38,6 +48,7 @@ export const AgencyForm = ({ agency, onSubmit, isLoading }: AgencyFormProps) => 
       address: agency?.address || '',
       phone: agency?.phone || '',
       email: agency?.email || '',
+      commissionRate: agency?.commissionRate ?? 15,
     },
   });
 
@@ -48,16 +59,18 @@ export const AgencyForm = ({ agency, onSubmit, isLoading }: AgencyFormProps) => 
       address: agency?.address || '',
       phone: agency?.phone || '',
       email: agency?.email || '',
+      commissionRate: agency?.commissionRate ?? 15,
     });
   }, [agency, form]);
 
-  const handleSubmit = (values: FormInput) => {
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit({
       name: values.name,
       city: values.city,
       address: values.address || undefined,
       phone: values.phone || undefined,
       email: values.email || undefined,
+      commissionRate: values.commissionRate,
     });
   };
 
@@ -114,6 +127,17 @@ export const AgencyForm = ({ agency, onSubmit, isLoading }: AgencyFormProps) => 
               placeholder="contact@agence.ma"
               icon={<Mail />}
               type="email"
+            />
+          </FormSection>
+
+          {/* Settings Section */}
+          <FormSection title="Configuration Financière" separator>
+            <FormInputField
+              form={form}
+              name="commissionRate"
+              label="Commission Plateforme (%)"
+              placeholder="Ex: 15"
+              type="number"
             />
           </FormSection>
         </FormContent>

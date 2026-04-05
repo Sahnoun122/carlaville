@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateAgencyDto {
   @IsString()
@@ -24,4 +24,8 @@ export class CreateAgencyDto {
   @IsString()
   @IsOptional()
   contactPerson?: string;
+
+  @IsNumber()
+  @IsOptional()
+  commissionRate?: number;
 }

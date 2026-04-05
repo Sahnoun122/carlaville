@@ -108,25 +108,25 @@ export default function AgencyRevenuePage() {
               <h3 className="font-black text-lg uppercase tracking-wider">Pilotage Agence</h3>
             </div>
             <p className="text-indigo-100/60 text-sm font-medium leading-relaxed max-w-sm">
-              Vue consolidée des performances financières. La répartition <span className="text-white font-bold underline decoration-indigo-500 decoration-2 underline-offset-4">85% Agence / 15% Plateforme</span> est appliquée en temps réel.
+              Vue consolidée des performances financières. La répartition <span className="text-white font-bold underline decoration-indigo-500 decoration-2 underline-offset-4">{100 - (agency?.commissionRate || 15)}% Agence / {agency?.commissionRate || 15}% Plateforme</span> est appliquée en temps réel.
             </p>
           </div>
 
           <div className="flex flex-col justify-center gap-2 p-6 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-sm">
             <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-indigo-300">
               <span>Commission Plateforme</span>
-              <span className="bg-indigo-500 text-white px-2 py-0.5 rounded">15%</span>
+              <span className="bg-indigo-500 text-white px-2 py-0.5 rounded">{agency?.commissionRate || 15}%</span>
             </div>
-            <div className="text-3xl font-black">{new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 }).format((stats?.thisMonth?.total || 0) * 0.15)}</div>
+            <div className="text-3xl font-black">{new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 }).format((stats?.thisMonth?.total || 0) * ((agency?.commissionRate || 15) / 100))}</div>
             <p className="text-[10px] font-medium text-white/40">Gains estimés sur le mois en cours</p>
           </div>
 
           <div className="flex flex-col justify-center gap-2 p-6 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm">
              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-emerald-400">
               <span>Revenu Net Agence</span>
-              <span className="bg-emerald-500 text-white px-2 py-0.5 rounded">85%</span>
+              <span className="bg-emerald-500 text-white px-2 py-0.5 rounded">{100 - (agency?.commissionRate || 15)}%</span>
             </div>
-            <div className="text-3xl font-black text-emerald-400">{new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 }).format(stats?.thisMonth?.net || 0)}</div>
+            <div className="text-3xl font-black text-emerald-400">{new Intl.NumberFormat('fr-MA', { style: 'currency', currency: 'MAD', maximumFractionDigits: 0 }).format((stats?.thisMonth?.total || 0) * ((100 - (agency?.commissionRate || 15)) / 100))}</div>
             <p className="text-[10px] font-medium text-white/40">Montant total à reverser à l'agence</p>
           </div>
         </div>
@@ -140,7 +140,7 @@ export default function AgencyRevenuePage() {
           </div>
           <h2 className="text-xl font-bold text-slate-800">Indicateurs de Performance</h2>
         </div>
-        <RevenueDashboardCards agencyId={agencyId} />
+        <RevenueDashboardCards agencyId={agencyId} agency={agency} />
       </div>
 
       {/* Full Transaction History */}
