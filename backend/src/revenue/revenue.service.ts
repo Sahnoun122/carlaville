@@ -17,7 +17,25 @@ export class RevenueService {
   ) {}
 
   async create(createRevenueDto: CreateRevenueDto): Promise<RevenueDocument> {
-    const createdRevenue = new this.revenueModel(createRevenueDto);
+    const { date, ...data } = createRevenueDto;
+    
+    // Calculate net and commission based on agency
+    const agency = await this.agencyModel.findById(data.agencyId);
+    const commissionRate = (agency?.commissionRate || 15) / 100;
+    const commissionAmount = data.amount * commissionRate;
+    const netAmount = data.amount - commissionAmount;
+
+    const createdRevenue = new this.revenueModel({
+      ...data,
+      recognizedDate: date ? new Date(date) : new Date(),
+      commissionAmount,
+      netAmount,
+      source: 'MANUAL',
+      // Manual entries need total same as base for now
+      baseAmount: data.amount,
+      bookingReference: `MANUAL-${Date.now()}`,
+      reservationId: new Types.ObjectId(), // Placeholder for manual entries
+    });
     return createdRevenue.save();
   }
 

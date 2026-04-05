@@ -65,6 +65,12 @@ export class Revenue {
 
   @Prop({ default: 'AUTO' })
   source: string; // 'AUTO' or 'MANUAL'
+  
+  @Prop({ required: false })
+  category?: string;
+
+  @Prop({ required: false })
+  description?: string;
 }
 
 export const RevenueSchema = SchemaFactory.createForClass(Revenue);

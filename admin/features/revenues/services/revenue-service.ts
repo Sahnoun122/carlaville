@@ -20,6 +20,9 @@ export interface Revenue {
   agencyId: any;
   carId: any;
   source: string;
+  category?: string;
+  description?: string;
+  date?: string | Date;
   createdAt?: string;
   updatedAt?: string;
 }
