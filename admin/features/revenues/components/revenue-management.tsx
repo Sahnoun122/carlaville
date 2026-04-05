@@ -88,11 +88,11 @@ export const RevenueManagement = () => {
             <div className="flex gap-4">
                <div className="bg-slate-800/50 backdrop-blur-md border border-slate-700 p-4 rounded-3xl text-center min-w-[120px]">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Part Agence</p>
-                  <p className="text-xl font-black text-indigo-400 italic">85%</p>
+                  <p className="text-xl font-black text-indigo-400 italic">Variable</p>
                </div>
                <div className="bg-amber-500 p-4 rounded-3xl text-center min-w-[120px] text-amber-950 shadow-xl shadow-amber-500/20">
                   <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Plateforme</p>
-                  <p className="text-xl font-black italic">15%</p>
+                  <p className="text-xl font-black italic">Dynamique</p>
                </div>
             </div>
          </div>
