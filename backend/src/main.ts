@@ -31,6 +31,7 @@ async function bootstrap(expressInstance: Express) {
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    /https?:\/\/.*\.vercel\.app$/, // Allow Vercel preview domains
   ].filter(Boolean);
 
   app.enableCors({
