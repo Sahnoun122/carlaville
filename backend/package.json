@@ -34,7 +34,7 @@
     "class-validator": "^0.14.4",
     "minio": "^8.0.7",
     "mongoose": "^9.3.0",
-    "nanoid": "^5.1.6",
+    "nanoid": "^3.3.4",
     "nestjs-i18n": "^10.6.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
