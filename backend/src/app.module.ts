@@ -69,14 +69,15 @@ import {
         const logger = new Logger('MongooseModule');
 
         if (uri) {
-          // Log obfuscated version for debugging in Vercel
+          const source = configService.get<string>('DATABASE_URI') ? 'DATABASE_URI' : 'MONGODB_URI';
           const parts = uri.split('@');
           if (parts.length > 1) {
              const protocol = parts[0].split('://')[0];
              const cluster = parts[1].split('/')[0];
-             logger.log(`Connecting to: ${protocol}://***:***@${cluster}`);
+             // Use console.info to ensure visibility in Vercel
+             console.info(`[MongooseModule] Using ${source}. Connecting to: ${protocol}://***:***@${cluster}`);
           } else {
-             logger.log(`Connecting with URI (Length: ${uri.length})`);
+             console.info(`[MongooseModule] Using ${source}. Connecting with URI (Length: ${uri.length})`);
           }
         }
 
