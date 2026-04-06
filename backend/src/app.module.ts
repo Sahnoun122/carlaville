@@ -18,6 +18,7 @@ import { RevenueModule } from './revenue/revenue.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from './config/configuration';
 import * as path from 'path';
+import * as fs from 'fs';
 import {
   AcceptLanguageResolver,
   I18nModule,
@@ -29,7 +30,24 @@ import {
     I18nModule.forRoot({
       fallbackLanguage: 'fr',
       loaderOptions: {
-        path: path.join(__dirname, 'i18n/'),
+        path: (() => {
+          // 1. Try absolute path from process.cwd() (Direct source or standard root build)
+          const cwdSrcPath = path.join(process.cwd(), 'src/i18n/');
+          const cwdDistPath = path.join(process.cwd(), 'dist/i18n/');
+          
+          if (fs.existsSync(cwdSrcPath)) return cwdSrcPath;
+          if (fs.existsSync(cwdDistPath)) return cwdDistPath;
+
+          // 2. Try relative to __dirname (Flexible for nested builds)
+          const relPath = path.join(__dirname, 'i18n/');
+          const relParentPath = path.join(__dirname, '../i18n/');
+          
+          if (fs.existsSync(relPath)) return relPath;
+          if (fs.existsSync(relParentPath)) return relParentPath;
+
+          // Fallback to standard src path
+          return cwdSrcPath;
+        })(),
         watch: true,
       },
       resolvers: [
