@@ -29,7 +29,7 @@ import {
     I18nModule.forRoot({
       fallbackLanguage: 'fr',
       loaderOptions: {
-        path: path.join(process.cwd(), 'src/i18n/'),
+        path: path.join(__dirname, 'i18n/'),
         watch: true,
       },
       resolvers: [
