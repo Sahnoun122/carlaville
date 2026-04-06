@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -48,9 +48,23 @@ import {
         const uri = configService.get<string>('database.uri');
         const nodeEnv = configService.get<string>('NODE_ENV');
         
+        const logger = new Logger('MongooseModule');
+
+        if (uri) {
+          // Log obfuscated version for debugging in Vercel
+          const parts = uri.split('@');
+          if (parts.length > 1) {
+             const protocol = parts[0].split('://')[0];
+             const cluster = parts[1].split('/')[0];
+             logger.log(`Connecting to: ${protocol}://***:***@${cluster}`);
+          } else {
+             logger.log(`Connecting with URI (Length: ${uri.length})`);
+          }
+        }
+
         // Safety Fallback for LOCAL DEVELOPMENT ONLY
         if (!uri && nodeEnv !== 'production') {
-          console.warn('DATABASE_URI is not defined. Falling back to localhost for development.');
+          logger.warn('DATABASE_URI is not defined. Falling back to localhost for development.');
           return { uri: 'mongodb://127.0.0.1:27017/carlaville' };
         }
 
