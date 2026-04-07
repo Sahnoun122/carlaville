@@ -6,7 +6,8 @@ import { getTranslations } from 'next-intl/server';
 
 async function getCar(id: string) {
   try {
-    const res = await fetch(`http://127.0.0.1:3009/api/cars/${id}`, { cache: 'no-store' });
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const res = await fetch(`${API_URL}/api/cars/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {

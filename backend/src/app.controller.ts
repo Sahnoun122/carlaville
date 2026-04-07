@@ -6,14 +6,18 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  getHello() {
+    return {
+      success: true,
+      message: "Backend is running successfully"
+    };
   }
 
   @Get('health')
   getHealth() {
     return {
-      status: 'ok',
+      ok: true,
+      message: "API is healthy",
       timestamp: new Date().toISOString(),
       service: 'carlaville-backend',
       environment: process.env.NODE_ENV || 'development'

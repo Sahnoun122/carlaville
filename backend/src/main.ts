@@ -56,15 +56,18 @@ async function bootstrap(expressInstance: Express) {
   return app;
 }
 
-// Export the handler for Vercel
 export default async (req: Request, res: Response) => {
-  await bootstrap(server);
-  return server(req, res);
+  try {
+    await bootstrap(server);
+    return server(req, res);
+  } catch (error) {
+    console.error('Bootstrap error', error);
+    res.status(500).send({ success: false, message: 'Internal Server Error' });
+  }
 };
 
-// For local development (Non-serverless environments)
 if (process.env.NODE_ENV !== 'production') {
-  const localPort = process.env.PORT || 3009;
+  const localPort = process.env.PORT || 3000;
   const localServer = express();
   bootstrap(localServer).then(() => {
     localServer.listen(localPort, () => {
