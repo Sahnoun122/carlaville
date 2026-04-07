@@ -240,7 +240,7 @@ export const CarMaintenanceManagement = ({
         {carsQuery.isLoading && !carsQuery.isRefetching ? (
           <div className="p-20 text-center flex flex-col items-center gap-3">
              <RefreshCcw className="w-8 h-8 animate-spin text-slate-200" />
-             <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Sychronisation...</p>
+             <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Synchronisation...</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

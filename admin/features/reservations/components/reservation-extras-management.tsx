@@ -233,29 +233,36 @@ export const ReservationExtrasManagement = () => {
     persistExtras(nextExtras, 'Extra supprimé avec succès');
   };
 
-  const labelClass = "text-sm font-semibold text-[#1E293B] mb-2";
-  const inputClass = "h-12 bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 font-medium transition-all focus:bg-white focus:border-blue-500 focus:ring-0 outline-none text-slate-800 placeholder:text-slate-400 text-base";
+  const labelClass = "text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1";
+  const inputClass = "h-12 bg-slate-50 border-none rounded-xl px-4 font-bold transition-all focus:bg-white focus:ring-2 focus:ring-slate-900 outline-none text-slate-900 placeholder:text-slate-300 text-sm";
 
   return (
     <div className="max-w-5xl space-y-8 text-left pb-20">
-      <div className="bg-white p-10 rounded-[24px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold text-[#1E293B]">Options & Extras</h2>
-          <p className="text-slate-400 text-sm italic">
-            Gérez les choix additionnels et leur tarification, sur toutes les voitures ou des voitures ciblées.
+      <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 transition-all hover:shadow-md">
+        <div className="space-y-2">
+          <h2 className="text-3xl font-black text-slate-900 leading-tight">Options & Extras</h2>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+            Configuration technique et tarification additionnelle.
           </p>
         </div>
-        <Button type="button" onClick={handleOpenCreate} className="h-12 bg-blue-600 text-white px-8 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+        <Button 
+           type="button" 
+           onClick={handleOpenCreate} 
+           className="h-14 bg-slate-950 text-white px-10 rounded-2xl font-black hover:bg-slate-800 transition-all shadow-xl shadow-slate-200 active:scale-95"
+        >
           Ajouter un extra
         </Button>
       </div>
 
-      <div className="rounded-[24px] border border-slate-100 bg-white p-8 shadow-sm space-y-6">
+      <div className="rounded-[2.5rem] border border-slate-100 bg-white p-10 shadow-sm space-y-8">
         {submitError && <p className="rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-600 font-medium">{submitError}</p>}
         {submitSuccess && <p className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-600 font-medium">{submitSuccess}</p>}
 
         {settingsQuery.isLoading ? (
-          <div className="h-40 flex items-center justify-center"><Loader2 className="animate-spin text-blue-500" /></div>
+          <div className="h-40 flex flex-col items-center justify-center gap-3">
+             <Loader2 className="animate-spin text-slate-200" size={32} />
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Synchronisation...</p>
+          </div>
         ) : extrasDraft.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center text-sm text-slate-400 font-medium">
             Aucun extra configuré.
@@ -263,35 +270,45 @@ export const ReservationExtrasManagement = () => {
         ) : (
           <div className="overflow-hidden rounded-xl border border-slate-100">
             <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead className="font-bold text-slate-700">Extra</TableHead>
-                  <TableHead className="font-bold text-slate-700">Prix</TableHead>
-                  <TableHead className="font-bold text-slate-700">Facturation</TableHead>
-                  <TableHead className="font-bold text-slate-700">Portée</TableHead>
-                  <TableHead className="font-bold text-slate-700">Statut</TableHead>
-                  <TableHead className="font-bold text-slate-700 text-right">Actions</TableHead>
+              <TableHeader className="bg-slate-50/50">
+                <TableRow className="border-none">
+                  <TableHead className="px-6 h-14 font-black text-[10px] text-slate-400 uppercase tracking-widest">Extra / ID</TableHead>
+                  <TableHead className="px-6 h-14 font-black text-[10px] text-slate-400 uppercase tracking-widest">Prix</TableHead>
+                  <TableHead className="px-6 h-14 font-black text-[10px] text-slate-400 uppercase tracking-widest">Facturation</TableHead>
+                  <TableHead className="px-6 h-14 font-black text-[10px] text-slate-400 uppercase tracking-widest">Portée</TableHead>
+                  <TableHead className="px-6 h-14 font-black text-[10px] text-slate-400 uppercase tracking-widest">Statut</TableHead>
+                  <TableHead className="px-6 h-14 font-black text-[10px] text-slate-400 uppercase tracking-widest text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {extrasDraft.map((extra, index) => (
-                  <TableRow key={`${extra.id}-${index}`} className="hover:bg-slate-50/50 transition-colors">
-                    <TableCell>
-                      <div className="font-bold text-slate-800">{extra.label}</div>
-                      <div className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">{extra.id}</div>
+                  <TableRow key={`${extra.id}-${index}`} className="group hover:bg-slate-50 transition-all duration-300 border-slate-50">
+                    <TableCell className="px-6 py-5">
+                      <div className="font-black text-slate-900 text-base leading-tight">{extra.label}</div>
+                      <div className="text-[10px] uppercase tracking-widest text-slate-300 font-black group-hover:text-slate-400 transition-colors">{extra.id}</div>
                     </TableCell>
-                    <TableCell className="font-bold text-blue-600">{extra.price} MAD</TableCell>
-                    <TableCell className="text-slate-600 font-medium">{extra.billingType === 'PER_DAY' ? 'Par jour' : 'Par location'}</TableCell>
-                    <TableCell className="text-slate-600 font-medium">{extra.scope === 'ALL_CARS' ? 'Toutes voitures' : `${(extra.carIds || []).length} voiture(s)`}</TableCell>
-                    <TableCell>
-                      <span className={cn("inline-flex rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-tight", extra.active ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-100 text-slate-500 border border-slate-200')}>
+                    <TableCell className="px-6 py-5">
+                       <span className="font-black text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 text-sm">{extra.price} MAD</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-5">
+                       <span className="text-xs font-bold text-slate-600">{extra.billingType === 'PER_DAY' ? 'Par jour' : 'Par location'}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-5">
+                       <span className="text-xs font-bold text-slate-600">{extra.scope === 'ALL_CARS' ? 'Toutes voitures' : `${(extra.carIds || []).length} voiture(s)`}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-5">
+                      <span className={cn(
+                        "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tight", 
+                        extra.active ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-slate-50 text-slate-400 border-slate-100'
+                      )}>
+                        <div className={cn("w-1 h-1 rounded-full", extra.active ? "bg-indigo-600" : "bg-slate-400")} />
                         {extra.active ? 'Actif' : 'Inactif'}
                       </span>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => handleOpenEdit(index)} className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"><Settings2 size={16} /></button>
-                        <button onClick={() => handleDelete(index)} disabled={updateMutation.isPending} className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors"><Trash2 size={16} /></button>
+                        <button onClick={() => handleOpenEdit(index)} className="h-10 w-10 flex items-center justify-center hover:bg-slate-900 hover:text-white text-slate-500 rounded-xl transition-all border border-slate-100 hover:border-slate-950"><Settings2 size={16} /></button>
+                        <button onClick={() => handleDelete(index)} disabled={updateMutation.isPending} className="h-10 w-10 flex items-center justify-center hover:bg-rose-50 text-slate-300 hover:text-rose-600 rounded-xl transition-all border border-transparent hover:border-rose-100"><Trash2 size={16} /></button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -302,7 +319,12 @@ export const ReservationExtrasManagement = () => {
         )}
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingIndex === null ? 'Ajouter un extra' : 'Modifier un extra'} contentClassName="max-w-3xl p-0 overflow-hidden rounded-[20px] shadow-2xl">
+      <Modal 
+         isOpen={isModalOpen} 
+         onClose={() => setIsModalOpen(false)} 
+         title={editingIndex === null ? 'Ajouter un extra' : 'Modifier un extra'} 
+         contentClassName="max-w-3xl p-0 overflow-hidden rounded-[2.5rem] shadow-2xl border-none"
+      >
         <div className="flex flex-col bg-white text-left">
           <div className="p-10 space-y-8">
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -316,7 +338,7 @@ export const ReservationExtrasManagement = () => {
               </div>
               <div className="space-y-2">
                 <label className={labelClass}>Prix (MAD)</label>
-                <input type="number" min={0} value={extraForm.price} onChange={(e) => setExtraForm(p => ({ ...p, price: Number(e.target.value) }))} className={cn(inputClass, "w-full font-bold text-blue-600")} />
+                <input type="number" min={0} value={extraForm.price} onChange={(e) => setExtraForm(p => ({ ...p, price: Number(e.target.value) }))} className={cn(inputClass, "w-full font-black text-emerald-600")} />
               </div>
               <div className="space-y-2">
                 <label className={labelClass}>Facturation</label>
@@ -334,11 +356,11 @@ export const ReservationExtrasManagement = () => {
               </div>
               <div className="flex items-center pt-8">
                 <label className="inline-flex items-center gap-3 cursor-pointer group">
-                  <div className={cn("w-5 h-5 rounded border flex items-center justify-center transition-all", extraForm.active ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300 bg-white group-hover:border-blue-400")}>
+                  <div className={cn("w-6 h-6 rounded-lg border flex items-center justify-center transition-all", extraForm.active ? "bg-slate-950 border-slate-950 text-white" : "border-slate-200 bg-slate-50 group-hover:border-slate-400")}>
                     {extraForm.active && <Check size={14} />}
                   </div>
                   <input type="checkbox" checked={extraForm.active} onChange={(e) => setExtraForm(p => ({ ...p, active: e.target.checked }))} className="hidden" />
-                  <span className="text-sm font-semibold text-slate-700">Option active</span>
+                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Option active</span>
                 </label>
               </div>
             </div>
@@ -353,9 +375,9 @@ export const ReservationExtrasManagement = () => {
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-2 scrollbar-hide">
                     {carOptions.map((car) => (
-                      <label key={car.id} className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-lg cursor-pointer hover:border-blue-200 transition-all">
-                        <input type="checkbox" checked={extraForm.carIds.includes(car.id)} onChange={() => toggleCarInForm(car.id)} className="w-4 h-4 rounded border-slate-300 text-blue-600" />
-                        <span className="text-xs font-medium text-slate-700 truncate">{car.label}</span>
+                      <label key={car.id} className="flex items-center gap-3 p-4 bg-white border-2 border-slate-50 rounded-2xl cursor-pointer hover:border-slate-900 transition-all group">
+                        <input type="checkbox" checked={extraForm.carIds.includes(car.id)} onChange={() => toggleCarInForm(car.id)} className="w-5 h-5 rounded-lg border-slate-200 text-slate-950 focus:ring-0" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight group-hover:text-slate-900 truncate">{car.label}</span>
                       </label>
                     ))}
                   </div>
@@ -364,9 +386,9 @@ export const ReservationExtrasManagement = () => {
             )}
           </div>
 
-          <div className="px-10 py-8 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-            <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-500 text-sm font-semibold hover:text-slate-700 transition-colors">Annuler</button>
-            <Button onClick={handleSubmitModal} disabled={updateMutation.isPending} className="bg-blue-600 text-white hover:bg-blue-700 h-12 px-10 rounded-xl font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all">
+          <div className="px-10 py-10 border-t border-slate-50 bg-slate-50/50 flex items-center justify-between">
+            <button type="button" onClick={() => setIsModalOpen(false)} className="text-slate-400 text-[10px] font-black uppercase tracking-widest hover:text-slate-900 transition-colors">Annuler</button>
+            <Button onClick={handleSubmitModal} disabled={updateMutation.isPending} className="bg-slate-950 text-white hover:bg-slate-800 h-14 px-12 rounded-2xl font-black shadow-xl shadow-slate-200 active:scale-95 transition-all">
               {updateMutation.isPending ? <Loader2 size={18} className="animate-spin" /> : editingIndex === null ? 'Ajouter l\'extra' : 'Enregistrer les modifications'}
             </Button>
           </div>

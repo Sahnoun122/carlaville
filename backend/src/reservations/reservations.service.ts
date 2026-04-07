@@ -214,7 +214,14 @@ export class ReservationsService {
       settings.extras = normalizedExtras;
     }
 
-    Object.assign(settings, updatableFields);
+    const updatePayload: any = {};
+    for (const key of Object.keys(updatableFields)) {
+      if (updatableFields[key] !== undefined) {
+        updatePayload[key] = updatableFields[key];
+      }
+    }
+
+    Object.assign(settings, updatePayload);
     return settings.save();
   }
 

@@ -146,6 +146,13 @@ export class CarsService {
       : -1;
 
     if (ongoingIndex === -1) {
+      if (car.availabilityStatus === AvailabilityStatus.MAINTENANCE) {
+        car.availabilityStatus =
+          completeMaintenanceDto.nextAvailabilityStatus ||
+          AvailabilityStatus.AVAILABLE;
+        await car.save();
+        return this.findById(id);
+      }
       throw new BadRequestException(
         'No ongoing maintenance found for this car.',
       );
