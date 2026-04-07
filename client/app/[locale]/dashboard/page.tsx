@@ -83,17 +83,17 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-1000 pb-20 px-4">
 
          {/* Dynamic Header */}
-         <div className="relative group mt-12">
-            <div className="absolute -inset-1 blur-2xl opacity-10 group-hover:opacity-20 transition-opacity bg-gradient-to-r from-red-600 to-amber-500 rounded-[3rem]"></div>
-            <div className="relative bg-white p-10 md:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] overflow-hidden">
+         <div className="relative group mt-6 md:mt-12">
+            <div className="absolute -inset-1 blur-2xl opacity-10 group-hover:opacity-20 transition-opacity bg-gradient-to-r from-red-600 to-amber-500 rounded-[2rem] md:rounded-[3rem]"></div>
+            <div className="relative bg-white p-6 md:p-14 rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] overflow-hidden">
                <div className="absolute top-0 right-0 w-64 h-64 bg-red-50/50 rounded-full blur-[80px] -mr-32 -mt-32"></div>
-               <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+               <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-10">
                   <div>
                      <div className="flex items-center gap-3 mb-4">
                         <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
                         <span className="text-[10px] font-black text-neutral-400 uppercase tracking-[0.3em]">Command Center v2.0</span>
                      </div>
-                     <h1 className="text-4xl md:text-5xl font-black text-neutral-900 tracking-tighter leading-none mb-4">
+                     <h1 className="text-3xl md:text-5xl font-black text-neutral-900 tracking-tighter leading-none mb-4">
                         Bonjour, <span className="text-red-600 italic">{user?.firstName}</span>
                      </h1>
                      <p className="text-gray-400 font-bold text-sm leading-relaxed max-w-lg italic">
@@ -147,8 +147,8 @@ export default function DashboardPage() {
 
                {activeReservation ? (
                   <div className="space-y-6">
-                     <div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.03)] group hover:shadow-xl hover:shadow-gray-200/20 transition-all duration-700">
-                        <div className="flex flex-col md:flex-row gap-12 items-start md:items-center">
+                     <div className="bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[3rem] border border-gray-100 shadow-[0_20px_40px_-20px_rgba(0,0,0,0.03)] group hover:shadow-xl hover:shadow-gray-200/20 transition-all duration-700">
+                        <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start md:items-center">
                            <div className="relative shrink-0 w-full md:w-56 overflow-hidden flex items-center justify-center pt-5">
                               <div className="absolute inset-0 bg-gray-50 rounded-3xl -rotate-1 group-hover:rotate-1 transition-transform"></div>
                               {(activeReservation.carId?.images?.[0] || activeReservation.carId?.imageUrl) ? (
@@ -172,10 +172,12 @@ export default function DashboardPage() {
                                  </div>
                               </div>
 
-                              <div className="grid grid-cols-2 md:grid-cols-3 gap-8 py-6 border-y border-gray-50">
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 py-6 border-y border-gray-50">
                                  <DetailItem label="Lieu Retrait" value={activeReservation.pickupLocation} icon={<MapPin className="w-3.5 h-3.5" />} />
                                  <DetailItem label="Période" value={`${new Date(activeReservation.pickupDate).toLocaleDateString()} - ${new Date(activeReservation.returnDate).toLocaleDateString()}`} icon={<Calendar className="w-3.5 h-3.5" />} />
-                                 <DetailItem label="Total Brute" value={`${(activeReservation.pricingBreakdown?.total || 0).toLocaleString()} MAD`} icon={<CircleDollarSign className="w-3.5 h-3.5 text-red-600" />} />
+                                 <div className="col-span-2 md:col-span-1">
+                                    <DetailItem label="Total Brute" value={`${(activeReservation.pricingBreakdown?.total || 0).toLocaleString()} MAD`} icon={<CircleDollarSign className="w-3.5 h-3.5 text-red-600" />} />
+                                 </div>
                               </div>
 
                               {/* Visual Timeline (Premium Stepper) */}
@@ -217,8 +219,8 @@ export default function DashboardPage() {
             </div>
 
             {/* Strategic Support (Right) */}
-            <div className="lg:col-span-4 space-y-10">
-               <div className="bg-neutral-900 p-10 rounded-[3rem] text-white shadow-2xl shadow-neutral-900/40 relative overflow-hidden group">
+            <div className="lg:col-span-4 space-y-8 md:space-y-10">
+               <div className="bg-neutral-900 p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] text-white shadow-2xl shadow-neutral-900/40 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/20 rounded-full blur-[60px] -mr-16 -mt-16 transition-transform group-hover:scale-150 duration-700"></div>
                   <div className="relative z-10 space-y-8">
                      <div className="flex items-center gap-3">

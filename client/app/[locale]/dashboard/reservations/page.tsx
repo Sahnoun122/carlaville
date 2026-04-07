@@ -71,12 +71,12 @@ export default function ReservationsPage() {
     <div className="max-w-6xl mx-auto py-12 px-4 animate-fade-in">
 
       {/* Simple Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-12">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mes réservations</h1>
-          <p className="text-gray-500 mt-1">Gérez vos locations en cours et à venir.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Mes réservations</h1>
+          <p className="text-gray-500 mt-1 text-sm">Gérez vos locations en cours et à venir.</p>
         </div>
-        <Link href="/cars" className="btn-premium flex items-center gap-2 text-sm">
+        <Link href="/cars" className="btn-premium flex items-center gap-2 text-[11px] uppercase tracking-widest px-6 py-4 w-full md:w-auto justify-center">
           <Plus className="w-4 h-4" /> Nouvelle réservation
         </Link>
       </div>
@@ -119,11 +119,11 @@ export default function ReservationsPage() {
       ) : (
         <div className="space-y-6">
           {filteredReservations.map((res: any) => (
-            <div key={res._id} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-primary/20 transition-all">
-              <div className="p-6 flex flex-col lg:flex-row gap-6 lg:items-center">
+            <div key={res._id} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-red-100 transition-all">
+              <div className="p-5 md:p-6 flex flex-col lg:flex-row gap-6 lg:items-center">
 
                 {/* Car Image Small */}
-                <div className="w-full lg:w-40 h-28 bg-gray-50 rounded-xl flex items-center justify-center p-4 border border-gray-50 shrink-0">
+                <div className="w-full lg:w-40 h-32 lg:h-28 bg-white rounded-xl flex items-center justify-center p-4 border border-gray-100 shrink-0 shadow-sm">
                   {(res.carId?.images?.[0] || res.carId?.imageUrl) ? (
                     <img src={res.carId?.images?.[0] || res.carId?.imageUrl} className="max-w-full max-h-full object-contain" alt="" />
                   ) : <Car className="w-8 h-8 text-gray-200" />}
@@ -133,8 +133,8 @@ export default function ReservationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-2">
                     <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${['pending', 'rejected', 'cancelled'].includes(res.status) ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                        ['confirmed', 'active-rental', 'completed', 'delivered', 'returned', 'ready-for-delivery', 'in-delivery'].includes(res.status) ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                          'bg-gray-50 text-gray-500 border-gray-200'
+                      ['confirmed', 'active-rental', 'completed', 'delivered', 'returned', 'ready-for-delivery', 'in-delivery'].includes(res.status) ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                        'bg-gray-50 text-gray-500 border-gray-200'
                       }`}>
                       {res.status}
                     </span>
@@ -144,7 +144,7 @@ export default function ReservationsPage() {
                     {res.carId?.brand} {res.carId?.model}
                   </h3>
 
-                  <div className="flex flex-wrap gap-x-8 gap-y-2 mt-4">
+                  <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4">
                     <InfoItem icon={<MapPin className="w-3.5 h-3.5" />} text={res.pickupLocation} />
                     <InfoItem icon={<Calendar className="w-3.5 h-3.5" />} text={new Date(res.pickupDate).toLocaleDateString()} />
                     <InfoItem icon={<Clock className="w-3.5 h-3.5" />} text={res.pickupTime} />

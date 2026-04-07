@@ -10,7 +10,9 @@ import {
   History,
   LayoutDashboard,
   User as UserIcon,
-  ChevronRight
+  ChevronRight,
+  Menu,
+  X
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('carlaville_token');
@@ -65,9 +68,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-[#fafafa] flex flex-col md:flex-row font-sans text-neutral-900 selection:bg-red-100 italic selection:text-red-900">
+      {/* Mobile Header */}
+      <div className="md:hidden flex items-center justify-between p-6 bg-white border-b border-gray-100 sticky top-0 z-[60]">
+        <Link href="/" className="group">
+          <span className="text-2xl font-black tracking-tighter text-neutral-900">Carlaville<span className="text-red-600">.</span></span>
+        </Link>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-3 bg-neutral-900 text-white rounded-2xl shadow-lg shadow-neutral-900/20 active:scale-90 transition-all"
+        >
+          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
+      </div>
+
+      {/* Overlay for mobile sidebar */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-neutral-900/40 backdrop-blur-md z-[45] md:hidden animate-in fade-in duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
       {/* Sidebar */}
-      <aside className="w-full md:w-80 bg-gray-50 border-r border-gray-100 shrink-0 flex flex-col shadow-[20px_0_60px_rgba(0,0,0,0.02)] z-50">
+      <aside className={`
+        fixed inset-y-0 right-0 w-[300px] bg-gray-50 border-l border-gray-100 shrink-0 flex flex-col shadow-2xl z-50
+        transition-transform duration-500 ease-out md:relative md:translate-x-0 md:w-80 md:shadow-[20px_0_60px_rgba(0,0,0,0.02)]
+        ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+      `}>
 
         {/* Brand Area */}
         <div className="p-10 border-b border-gray-50 flex flex-col items-center md:items-start">
@@ -96,11 +123,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="flex-1 p-6 space-y-3">
           <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mb-4 ml-4">Pilotage</p>
           <NavLink href="/dashboard" icon={LayoutDashboard} label="Tableau de bord" />
-          <NavLink href="/dashboard/reservations" icon={Calendar} label="Mes Réservations" />
-          <NavLink href="/dashboard/history" icon={History} label="Historique" />
+          <div onClick={() => setIsMobileMenuOpen(false)}>
+            <NavLink href="/dashboard/reservations" icon={Calendar} label="Mes Réservations" />
+          </div>
+          <div onClick={() => setIsMobileMenuOpen(false)}>
+            <NavLink href="/dashboard/history" icon={History} label="Historique" />
+          </div>
 
           <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mt-10 mb-4 ml-4">Services</p>
-          <NavLink href="/cars" icon={Car} label="Catalogue Flotte" />
+          <div onClick={() => setIsMobileMenuOpen(false)}>
+            <NavLink href="/cars" icon={Car} label="Catalogue Flotte" />
+          </div>
         </nav>
 
         {/* Footer actions */}
@@ -119,7 +152,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto bg-[#fafafa]">
-        <div className="p-6 md:p-12 lg:p-16">
+        <div className="p-4 sm:p-6 md:p-10 lg:p-12">
           {children}
         </div>
       </main>
