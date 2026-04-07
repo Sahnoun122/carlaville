@@ -97,8 +97,27 @@ export const BlogManagement = () => {
   };
 
   const handleSubmit = () => {
-    if (!formValues.title || !formValues.content) return toast.error('Veuillez remplir les champs obligatoires');
-    if (selectedBlog) return updateMutation.mutate({ id: resolveBlogId(selectedBlog), ...formValues });
+    // Basic presence validation
+    if (!formValues.title || !formValues.content || !formValues.excerpt) {
+      return toast.error('Veuillez remplir tous les champs (Titre, Résumé, Contenu)');
+    }
+    
+    // Length validation to match backend DTOs
+    if (formValues.title.trim().length < 5) {
+      return toast.error('Le titre doit contenir au moins 5 caractères (Premium Standard)');
+    }
+    
+    if (formValues.content.trim().length < 30) {
+      return toast.error('Le contenu est trop court (min. 30 caractères requis)');
+    }
+
+    if (formValues.excerpt.trim().length > 300) {
+      return toast.error('Le résumé est trop long (max. 300 caractères)');
+    }
+
+    if (selectedBlog) {
+      return updateMutation.mutate({ id: resolveBlogId(selectedBlog), ...formValues });
+    }
     createMutation.mutate(formValues);
   };
 
