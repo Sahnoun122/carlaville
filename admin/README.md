@@ -1,12 +1,12 @@
 # Carlaville Admin (Next.js)
 
-Interface d'administration connectée au backend local.
+Interface d'administration connectée au backend Carlaville déployé.
 
 ## Prérequis
 
 - Node.js 20+
 - npm 10+
-- Backend Carlaville démarré sur `http://localhost:3009/api`
+- Backend Carlaville disponible sur `https://carlaville-ykc8.vercel.app`
 
 ## 1) Configuration environnement
 
@@ -18,7 +18,9 @@ Copy-Item .env.local.example .env.local
 
 Valeur attendue:
 
-- `NEXT_PUBLIC_API_URL=http://localhost:3009/api`
+- `NEXT_PUBLIC_API_URL=https://carlaville-ykc8.vercel.app`
+
+Le code ajoute automatiquement `/api` à cette base, donc il n'est pas nécessaire de le mettre dans la variable d'environnement.
 
 ## 2) Installation et lancement
 
@@ -32,4 +34,4 @@ Application disponible sur `http://localhost:3000`.
 ## Notes
 
 - Cette app ne dépend pas de Docker pour MongoDB.
-- Le backend doit être lancé avant de tester l'auth et les modules métiers.
+- Le backend doit être accessible via l'URL configurée dans `NEXT_PUBLIC_API_URL` avant de tester l'auth et les modules métiers.

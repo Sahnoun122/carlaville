@@ -1,6 +1,6 @@
 import { post, get, patch } from '@/lib/api';
 import { User } from '@/types/user';
-import { LoginDto, LoginResponseDto } from '@/types/dto/auth.dto';
+import { LoginDto, LoginResponseDto, RegisterDto } from '@/types/dto/auth.dto';
 
 const BASE_URL = '/auth';
 
@@ -20,6 +20,9 @@ export const authService = {
    */
   login: (credentials: LoginDto): Promise<LoginResponseDto> =>
     post<LoginResponseDto>(`${BASE_URL}/login`, credentials),
+
+  register: (payload: RegisterDto): Promise<LoginResponseDto> =>
+    post<LoginResponseDto>(`${BASE_URL}/register`, payload),
 
   /**
    * Fetches the currently authenticated user's profile.

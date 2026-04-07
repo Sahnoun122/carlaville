@@ -1,9 +1,14 @@
 import api from '@/lib/api';
-import { LoginDto, LoginResponseDto } from '@/types/dto/auth.dto';
+import { LoginDto, LoginResponseDto, RegisterDto } from '@/types/dto/auth.dto';
 import { User } from '@/types/user';
 
 export const login = async (credentials: LoginDto): Promise<LoginResponseDto> => {
   const response = await api.post('/auth/login', credentials);
+  return response.data;
+};
+
+export const register = async (payload: RegisterDto): Promise<LoginResponseDto> => {
+  const response = await api.post('/auth/register', payload);
   return response.data;
 };
 
