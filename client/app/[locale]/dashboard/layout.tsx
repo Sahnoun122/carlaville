@@ -9,10 +9,8 @@ import {
   Car,
   History,
   LayoutDashboard,
-  Settings,
   User as UserIcon,
-  ChevronRight,
-  Bell
+  ChevronRight
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -94,14 +92,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
 
-        {/* Global Search / Info Placeholder */}
-        <div className="px-8 py-6">
-          <div className="bg-gray-50 p-4 rounded-2xl flex items-center justify-between text-gray-400">
-            <span className="text-[9px] font-black uppercase tracking-widest">Notification</span>
-            <Bell className="w-4 h-4" />
-          </div>
-        </div>
-
         {/* Navigation */}
         <nav className="flex-1 p-6 space-y-3">
           <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mb-4 ml-4">Pilotage</p>
@@ -111,7 +101,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           <p className="text-[9px] font-black text-gray-300 uppercase tracking-[0.4em] mt-10 mb-4 ml-4">Services</p>
           <NavLink href="/cars" icon={Car} label="Catalogue Flotte" />
-          <NavLink href="/dashboard/settings" icon={Settings} label="Paramètres" />
         </nav>
 
         {/* Footer actions */}
