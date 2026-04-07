@@ -17,11 +17,7 @@ export const uploadImages = async (files: File[]) => {
     formData.append('files', file);
   });
 
-  const response = await api.post<UploadResponse>('/admin/uploads/images', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
+  const response = await api.post<UploadResponse>('/admin/uploads/images', formData);
 
   return response.data.files;
 };
