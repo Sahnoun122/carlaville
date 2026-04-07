@@ -1,13 +1,13 @@
 import { Blog, BlogResponse } from '@/types/blog';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3009/api';
+import { API_BASE_URL } from '@/lib/api-config';
 
 /**
  * Récupère la liste des blogs (limité aux blogs publiés par le backend public)
  */
 export async function getBlogs(limit = 30): Promise<BlogResponse> {
   try {
-    const res = await fetch(`${API_URL}/blogs?limit=${limit}`, {
+    const res = await fetch(`${API_BASE_URL}/blogs?limit=${limit}`, {
       cache: 'no-store',
     });
 
@@ -29,7 +29,7 @@ export async function getBlogs(limit = 30): Promise<BlogResponse> {
  */
 export async function getBlogBySlug(slug: string): Promise<Blog | null> {
   try {
-    const res = await fetch(`${API_URL}/blogs/${slug}`, {
+    const res = await fetch(`${API_BASE_URL}/blogs/${slug}`, {
       cache: 'no-store',
     });
 

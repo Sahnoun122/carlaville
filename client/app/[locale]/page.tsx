@@ -8,7 +8,7 @@ import { getTranslations } from 'next-intl/server';
 
 async function getCars() {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
     const res = await fetch(`${API_URL}/api/cars?limit=6`, { next: { revalidate: 60 } });
     if (!res.ok) return { cars: [] };
     const data = await res.json();
@@ -20,7 +20,7 @@ async function getCars() {
 
 async function getBlogs() {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
     const res = await fetch(`${API_URL}/api/blogs?limit=3`, {
       next: { revalidate: 60 },
     });

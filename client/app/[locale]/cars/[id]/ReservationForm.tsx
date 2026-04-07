@@ -64,7 +64,8 @@ export default function ReservationForm({ car }: { car: any }) {
     setIsClient(true);
     const loadSettings = async () => {
       try {
-        const res = await fetch('http://localhost:3009/api/reservations/settings/day-control', { cache: 'no-store' });
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
+        const res = await fetch(`${API_URL}/api/reservations/settings/day-control`, { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
         setSettings({
@@ -140,7 +141,8 @@ export default function ReservationForm({ car }: { car: any }) {
     };
 
     try {
-      const res = await fetch('http://localhost:3009/api/client/reservations', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
+      const res = await fetch(`${API_URL}/api/client/reservations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)

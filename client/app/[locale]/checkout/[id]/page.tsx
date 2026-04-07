@@ -38,7 +38,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     async function fetchReservation() {
       const token = localStorage.getItem('carlaville_token');
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
         const res = await fetch(`${API_URL}/api/client/reservations/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -58,7 +58,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     setLoading(true);
     setError("");
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
       const res = await fetch(`${API_URL}/api/payments/confirm-pickup/${id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

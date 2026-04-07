@@ -86,7 +86,7 @@ export default function HomeSearchWidget() {
   useEffect(() => {
     const loadDayControlSettings = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
         const res = await fetch(`${API_URL}/api/reservations/settings/day-control`, {
           cache: 'no-store',
         });

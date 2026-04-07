@@ -28,7 +28,7 @@ function LoginForm() {
     const password = formData.get('password');
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -15,8 +15,7 @@ export default function BlogCard({ blog, readMoreText }: BlogCardProps) {
   const previewImage = useMemo(() => {
     const rawImg = blog.coverImage || blog.images?.[0];
     if (typeof rawImg !== 'string' || rawImg.trim().length === 0) return null;
-    
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
     const backendHost = new URL(API_URL).host;
     
     // If the image URL points to a local address, replace it with the current backend host
