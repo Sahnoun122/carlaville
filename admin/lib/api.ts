@@ -1,19 +1,15 @@
 import axios, { AxiosError, AxiosHeaders, AxiosRequestConfig } from 'axios';
 import { getAuthToken, logout } from './auth';
 
-const normalizeApiBaseUrl = (value?: string) => {
-  if (!value) {
-    throw new Error(
-      'NEXT_PUBLIC_API_URL is not defined. Set it to https://carlaville-ykc8.vercel.app in your environment.',
-    );
-  }
+const DEFAULT_API_ORIGIN = 'https://carlaville-ykc8.vercel.app';
 
+const normalizeApiBaseUrl = (value: string) => {
   const trimmedValue = value.trim().replace(/\/+$/, '');
   return trimmedValue.endsWith('/api') ? trimmedValue : `${trimmedValue}/api`;
 };
 
 export const API_BASE_URL = normalizeApiBaseUrl(
-  process.env.NEXT_PUBLIC_API_URL,
+  process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_ORIGIN,
 );
 
 // Define a custom error shape for consistent error handling
