@@ -50,9 +50,16 @@ const resolveReservationId = (reservation: Reservation) =>
 
 const resolveVehicleLabel = (reservation: Reservation) => {
   if (reservation.carId && typeof reservation.carId === 'object') {
-    return `${reservation.carId.brand} ${reservation.carId.model}`;
+    const brand = reservation.carId.brand || 'Véhicule';
+    const model = reservation.carId.model || 'indisponible';
+    return `${brand} ${model}`;
   }
   return 'Véhicule inconnu';
+};
+
+const formatDateOrFallback = (value: unknown) => {
+  const date = new Date(String(value || ''));
+  return Number.isNaN(date.getTime()) ? 'Date invalide' : date.toLocaleDateString();
 };
 
 const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
@@ -365,20 +372,20 @@ export const ReservationManagement = () => {
                             <User size={18} />
                          </div>
                          <div className="flex flex-col">
-                            <span className="font-bold text-slate-900 text-sm leading-tight">{reservation.customerName}</span>
-                            <span className="text-[10px] font-bold text-slate-400">{reservation.customerPhone}</span>
+                           <span className="font-bold text-slate-900 text-sm leading-tight">{reservation.customerName || 'Client inconnu'}</span>
+                           <span className="text-[10px] font-bold text-slate-400">{reservation.customerPhone || 'Téléphone non renseigné'}</span>
                          </div>
                       </div>
                     </td>
                     <td className="px-4 py-4 sm:px-6 sm:py-5">
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                           <span className="text-slate-900">{new Date(reservation.pickupDate).toLocaleDateString()}</span>
+                          <span className="text-slate-900">{formatDateOrFallback(reservation.pickupDate)}</span>
                            <ChevronRight className="w-3 h-3 text-slate-300" />
-                           <span className="text-slate-500">{new Date(reservation.returnDate).toLocaleDateString()}</span>
+                          <span className="text-slate-500">{formatDateOrFallback(reservation.returnDate)}</span>
                         </div>
                         <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded-full border border-red-100 self-start shadow-sm shadow-red-100/50">
-                           {reservation.rentalDays} JOURS
+                          {reservation.rentalDays || 0} JOURS
                         </span>
                       </div>
                     </td>

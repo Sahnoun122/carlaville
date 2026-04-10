@@ -64,6 +64,16 @@ const formatAmount = (value: unknown) => {
    return Number.isFinite(amount) ? amount.toLocaleString() : '0';
 };
 
+const formatDateOrFallback = (value: unknown, fallback = 'Date indisponible') => {
+   const date = new Date(String(value || ''));
+   return Number.isNaN(date.getTime()) ? fallback : date.toLocaleDateString();
+};
+
+const formatTextOrFallback = (value: unknown, fallback = 'Non renseigné') => {
+   if (typeof value === 'string' && value.trim().length > 0) return value;
+   return fallback;
+};
+
 const resolveReservationError = async (res: Response) => {
    try {
       const data = await res.json();
@@ -145,6 +155,22 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     );
   }
 
+   if (!reservation) {
+      return (
+         <div className="min-h-screen bg-white pt-28 pb-20 mt-12">
+            <div className="container mx-auto px-4 max-w-3xl">
+               <div className="rounded-3xl border border-rose-100 bg-rose-50/60 p-8 text-center">
+                  <p className="text-sm font-black uppercase tracking-wider text-rose-700">Réservation inaccessible</p>
+                  <p className="mt-3 text-sm font-medium text-rose-600">{error || 'Cette réservation est introuvable ou vous n\'avez pas les droits.'}</p>
+                  <Link href="/dashboard" className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-6 text-xs font-black uppercase tracking-wider text-white hover:bg-slate-800">
+                     Retour au tableau de bord
+                  </Link>
+               </div>
+            </div>
+         </div>
+      );
+   }
+
   if (confirmed) {
     return (
       <div className="min-h-screen bg-white pt-32 pb-20 animate-in fade-in zoom-in duration-700">
@@ -208,12 +234,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     <div className="w-full md:w-56 shrink-0 pt-4">
                        <img 
                          src={reservation?.carId?.images?.[0] || reservation?.carId?.imageUrl} 
-                         alt={reservation?.carId?.brand} 
+                                     alt={formatTextOrFallback(reservation?.carId?.brand, 'Véhicule')} 
                          className="w-full h-auto object-contain transform group-hover:scale-110 transition-transform duration-700"
                        />
                     </div>
                     <div className="space-y-4 flex-1">
-                       <h2 className="text-2xl font-black text-gray-900 tracking-tight">{reservation?.carId?.brand} {reservation?.carId?.model}</h2>
+                                  <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                                     {formatTextOrFallback(reservation?.carId?.brand)} {formatTextOrFallback(reservation?.carId?.model, '')}
+                                  </h2>
                        <div className="grid grid-cols-2 gap-4">
                           <CarFeature icon={<Settings className="w-3.5 h-3.5" />} text={reservation?.carId?.transmission} />
                           <CarFeature icon={<Fuel className="w-3.5 h-3.5" />} text={reservation?.carId?.fuelType} />
@@ -225,8 +253,8 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <SummaryItem label="Prise en charge" value={reservation?.pickupLocation} date={new Date(reservation?.pickupDate).toLocaleDateString()} time={reservation?.pickupTime} />
-                 <SummaryItem label="Restitution" value={reservation?.returnLocation} date={new Date(reservation?.returnDate).toLocaleDateString()} time={reservation?.returnTime} />
+                 <SummaryItem label="Prise en charge" value={formatTextOrFallback(reservation?.pickupLocation)} date={formatDateOrFallback(reservation?.pickupDate)} time={formatTextOrFallback(reservation?.pickupTime)} />
+                 <SummaryItem label="Restitution" value={formatTextOrFallback(reservation?.returnLocation)} date={formatDateOrFallback(reservation?.returnDate)} time={formatTextOrFallback(reservation?.returnTime)} />
               </div>
            </div>
 
