@@ -79,20 +79,24 @@ export class UploadsService {
         await this.minioClient.makeBucket(this.bucketName, 'us-east-1');
       }
 
-      await this.minioClient.setBucketPolicy(
-        this.bucketName,
-        JSON.stringify({
-          Version: '2012-10-17',
-          Statement: [
-            {
-              Effect: 'Allow',
-              Principal: { AWS: ['*'] },
-              Action: ['s3:GetObject'],
-              Resource: [`arn:aws:s3:::${this.bucketName}/*`],
-            },
-          ],
-        }),
-      );
+      try {
+        await this.minioClient.setBucketPolicy(
+          this.bucketName,
+          JSON.stringify({
+            Version: '2012-10-17',
+            Statement: [
+              {
+                Effect: 'Allow',
+                Principal: { AWS: ['*'] },
+                Action: ['s3:GetObject'],
+                Resource: [`arn:aws:s3:::${this.bucketName}/*`],
+              },
+            ],
+          }),
+        );
+      } catch (error) {
+        console.warn(`Unable to update bucket policy for ${this.bucketName}. Upload will continue.`, error);
+      }
     } catch (error) {
       throw new InternalServerErrorException('Unable to access MinIO bucket.');
     }

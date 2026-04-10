@@ -30,8 +30,17 @@ const optionalNumberSchema = z
     return Number.isFinite(parsed) ? parsed : undefined;
   }, z.number().optional());
 
+const resolveAgencyId = (value: unknown) => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object') {
+    const agency = value as { id?: string; _id?: string };
+    return agency.id || agency._id || '';
+  }
+  return '';
+};
+
 const formSchema = z.object({
-  agencyId: z.string().optional(),
+  agencyId: z.string().min(1, 'Agence requise'),
   brand: z.string().min(1, 'Requis'),
   model: z.string().min(1, 'Requis'),
   year: z.coerce.number().int().min(1990).max(2100),
@@ -64,7 +73,7 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as never,
     defaultValues: {
-      agencyId: car?.agencyId || '',
+      agencyId: resolveAgencyId(car?.agencyId),
       brand: car?.brand || '',
       model: car?.model || '',
       year: car?.year || new Date().getFullYear(),
@@ -85,7 +94,13 @@ export const CarForm = ({ car, agencies, onSubmit, isLoading }: CarFormProps) =>
   });
 
   useEffect(() => {
-    if (car) form.reset({ ...car, agencyId: car.agencyId || '', description: car.description || '' } as any);
+    if (car) {
+      form.reset({
+        ...car,
+        agencyId: resolveAgencyId(car.agencyId),
+        description: car.description || '',
+      } as any);
+    }
   }, [car, form]);
 
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {

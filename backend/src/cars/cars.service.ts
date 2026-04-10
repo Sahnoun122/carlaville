@@ -24,11 +24,23 @@ export class CarsService {
   constructor(@InjectModel(Car.name) private carModel: Model<CarDocument>) {}
 
   async create(createCarDto: CreateCarDto): Promise<Car> {
-    const createdCar = new this.carModel({
-      ...createCarDto,
-      images: normalizeMediaUrls(createCarDto.images, getMediaBaseUrl()),
-    });
-    return createdCar.save();
+    if (!createCarDto.agencyId) {
+      throw new BadRequestException('agencyId is required to create a vehicle.');
+    }
+
+    try {
+      const createdCar = new this.carModel({
+        ...createCarDto,
+        images: normalizeMediaUrls(createCarDto.images, getMediaBaseUrl()),
+      });
+      return normalizeCarForDisplay(await createdCar.save()) as Car;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ValidationError') {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
+    }
   }
 
   async findAll(filterDto: FilterCarDto, page: number, limit: number) {
@@ -81,22 +93,30 @@ export class CarsService {
   }
 
   async update(id: string, updateCarDto: UpdateCarDto): Promise<Car> {
-    const updatedCar = await this.carModel
-      .findByIdAndUpdate(
-        id,
-        {
-          ...updateCarDto,
-          images: updateCarDto.images
-            ? normalizeMediaUrls(updateCarDto.images, getMediaBaseUrl())
-            : updateCarDto.images,
-        },
-        { new: true },
-      )
-      .exec();
-    if (!updatedCar) {
-      throw new NotFoundException(`Car with id ${id} not found`);
+    try {
+      const updatedCar = await this.carModel
+        .findByIdAndUpdate(
+          id,
+          {
+            ...updateCarDto,
+            images: updateCarDto.images
+              ? normalizeMediaUrls(updateCarDto.images, getMediaBaseUrl())
+              : updateCarDto.images,
+          },
+          { new: true, runValidators: true },
+        )
+        .exec();
+      if (!updatedCar) {
+        throw new NotFoundException(`Car with id ${id} not found`);
+      }
+      return normalizeCarForDisplay(updatedCar) as Car;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ValidationError') {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
     }
-    return normalizeCarForDisplay(updatedCar) as Car;
   }
 
   async archive(id: string): Promise<Car> {
