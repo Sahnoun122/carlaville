@@ -9,6 +9,8 @@ import { FilterReservationDto } from './dto/filter-reservation.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/interfaces/authenticated-user.interface';
 
+const normalizeEmail = (value?: string) => value?.trim().toLowerCase() || '';
+
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.CLIENT, Role.ADMIN)
 @Controller('client/reservations')
@@ -17,7 +19,7 @@ export class ClientReservationsController {
 
   @Post()
   create(@Body() createDto: CreateReservationDto, @CurrentUser() user: AuthenticatedUser) {
-    createDto.customerEmail = user.email;
+    createDto.customerEmail = normalizeEmail(user.email);
     if (!createDto.customerName) {
       createDto.customerName = user.name || 'Client';
     }
@@ -47,7 +49,10 @@ export class ClientReservationsController {
   @Get(':id')
   async findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     const reservation = await this.reservationsService.findById(id);
-    if (user.role !== Role.ADMIN && reservation.customerEmail !== user.email) {
+    const reservationEmail = normalizeEmail((reservation as any).customerEmail);
+    const userEmail = normalizeEmail(user.email);
+
+    if (user.role !== Role.ADMIN && reservationEmail !== userEmail) {
       throw new ForbiddenException('Accès refusé');
     }
 

@@ -24,6 +24,46 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/auth-provider';
 
+const getRentalDays = (reservation: any) => {
+   if (typeof reservation?.rentalDays === 'number' && Number.isFinite(reservation.rentalDays)) {
+      return reservation.rentalDays;
+   }
+
+   const pickup = new Date(reservation?.pickupDate);
+   const returnDate = new Date(reservation?.returnDate);
+
+   if (Number.isNaN(pickup.getTime()) || Number.isNaN(returnDate.getTime())) {
+      return 1;
+   }
+
+   const diff = returnDate.getTime() - pickup.getTime();
+   return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};
+
+const getBasePrice = (reservation: any, rentalDays: number) => {
+   const daily = Number(reservation?.pricingBreakdown?.daily ?? reservation?.carId?.dailyPrice ?? 0);
+   const explicitBase = Number(reservation?.pricingBreakdown?.basePrice);
+   if (Number.isFinite(explicitBase)) return explicitBase;
+   return daily * rentalDays;
+};
+
+const getExtrasTotal = (reservation: any) => {
+   const explicitTotal = Number(reservation?.pricingBreakdown?.extrasTotal);
+   if (Number.isFinite(explicitTotal)) return explicitTotal;
+
+   const extras = reservation?.pricingBreakdown?.extras;
+   if (Array.isArray(extras)) {
+      return extras.reduce((sum: number, value: unknown) => sum + (Number(value) || 0), 0);
+   }
+
+   return 0;
+};
+
+const formatAmount = (value: unknown) => {
+   const amount = Number(value);
+   return Number.isFinite(amount) ? amount.toLocaleString() : '0';
+};
+
 const resolveReservationError = async (res: Response) => {
    try {
       const data = await res.json();
@@ -46,6 +86,12 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
   const [fetching, setFetching] = useState(true);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState("");
+   const rentalDays = getRentalDays(reservation);
+   const basePrice = getBasePrice(reservation, rentalDays);
+   const extrasTotal = getExtrasTotal(reservation);
+   const totalPrice = Number.isFinite(Number(reservation?.pricingBreakdown?.total))
+      ? Number(reservation.pricingBreakdown.total)
+      : basePrice + extrasTotal;
 
   useEffect(() => {
     async function fetchReservation() {
@@ -192,7 +238,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                  </h3>
 
                  <div className="space-y-6 mb-10 pb-8 border-b border-gray-50">
-                    <PriceRow label={`Location (${reservation?.rentalDays} jours)`} value={reservation?.pricingBreakdown?.total - (reservation?.pricingBreakdown?.extraPrices?.reduce((a: any, b: any) => a + b, 0) || 0)} />
+                    <PriceRow label={`Location (${rentalDays} jours)`} value={basePrice} />
                     {reservation?.selectedExtras?.length > 0 && (
                        <div className="space-y-3">
                           <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Extras & Services</p>
@@ -204,7 +250,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                     <div className="pt-4 flex justify-between items-end">
                        <p className="text-[10px] font-black text-gray-900 uppercase tracking-widest leading-none">Total à régler sur place</p>
                        <p className="text-3xl font-black text-primary tracking-tighter leading-none">
-                          {reservation?.pricingBreakdown?.total?.toLocaleString()} <span className="text-xs uppercase ml-1">MAD</span>
+                          {formatAmount(totalPrice)} <span className="text-xs uppercase ml-1">MAD</span>
                        </p>
                     </div>
                  </div>
