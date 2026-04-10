@@ -42,33 +42,52 @@ export class UploadsService {
       throw new BadRequestException('No files received for upload.');
     }
 
-    await this.ensureBucketExists();
-
     const uploaded = await Promise.all(
       files.map(async (file) => {
         if (!file.mimetype.startsWith('image/')) {
           throw new BadRequestException('Only image files are allowed.');
         }
 
-        const extension = this.resolveExtension(file.originalname, file.mimetype);
-        const objectName = `uploads/${new Date().getFullYear()}/${randomUUID()}.${extension}`;
+        try {
+          await this.ensureBucketExists();
 
-        await this.minioClient.putObject(this.bucketName, objectName, file.buffer, file.size, {
-          'Content-Type': file.mimetype,
-        });
+          const extension = this.resolveExtension(file.originalname, file.mimetype);
+          const objectName = `uploads/${new Date().getFullYear()}/${randomUUID()}.${extension}`;
 
-        return {
-          key: objectName,
-          url: `${this.publicBaseUrl}/${this.bucketName}/${objectName}`,
-          mimeType: file.mimetype,
-          size: file.size,
-          originalName: file.originalname,
-        };
+          await this.minioClient.putObject(this.bucketName, objectName, file.buffer, file.size, {
+            'Content-Type': file.mimetype,
+          });
+
+          return {
+            key: objectName,
+            url: `${this.publicBaseUrl}/${this.bucketName}/${objectName}`,
+            mimeType: file.mimetype,
+            size: file.size,
+            originalName: file.originalname,
+          };
+        } catch (error) {
+          console.warn(
+            `Image storage backend unavailable, falling back to inline data URL for ${file.originalname}.`,
+            error,
+          );
+
+          return this.buildInlineImageResult(file);
+        }
       }),
     );
 
     return {
       files: uploaded,
+    };
+  }
+
+  private buildInlineImageResult(file: Express.Multer.File) {
+    return {
+      key: `inline/${randomUUID()}`,
+      url: `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+      mimeType: file.mimetype,
+      size: file.size,
+      originalName: file.originalname,
     };
   }
 
