@@ -46,6 +46,15 @@ const addDaysToDateString = (dateString: string, days: number) => {
 
 const resolveCarId = (car: any) => car?.id || car?._id || '';
 
+const getStoredUser = () => {
+  try {
+    const rawUser = localStorage.getItem('carlaville_user');
+    return rawUser ? JSON.parse(rawUser) : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function ReservationForm({ car }: { car: any }) {
   const t = useTranslations('reservation');
   const router = useRouter();
@@ -134,6 +143,14 @@ export default function ReservationForm({ car }: { car: any }) {
       return;
     }
 
+    const storedUser = getStoredUser();
+    const customerPhone = String(storedUser?.phone || '').trim();
+    if (!customerPhone) {
+      setError('Veuillez compléter votre numéro de téléphone dans votre profil avant de réserver.');
+      setLoading(false);
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
     const payload = {
       carId,
@@ -143,7 +160,7 @@ export default function ReservationForm({ car }: { car: any }) {
       returnTime: formData.get('returnTime'),
       pickupLocation: formData.get('pickupLocation'),
       returnLocation: formData.get('returnLocation'),
-      customerPhone: JSON.parse(localStorage.getItem('carlaville_user') || '{}').phone,
+      customerPhone,
       selectedExtras: applicableExtras.filter(e => selectedExtras[e.id]).map(e => e.id),
       pricingBreakdown: { daily: car.dailyPrice, days, basePrice, extrasTotal: extrasPrice, total: totalPrice }
     };

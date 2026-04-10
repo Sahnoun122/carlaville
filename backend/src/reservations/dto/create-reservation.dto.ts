@@ -9,12 +9,12 @@ import {
 } from 'class-validator';
 
 export class CreateReservationDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   customerName: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   customerEmail: string;
 
   @IsString()
