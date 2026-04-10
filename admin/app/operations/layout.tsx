@@ -1,6 +1,4 @@
-import { Sidebar } from '@/components/shared/sidebar';
-import { Header } from '@/components/shared/header';
-import { AuthProvider } from '@/providers/auth-provider';
+import { AdminShell } from '@/components/shared/admin-shell';
 
 export default function OperationsLayout({
   children,
@@ -8,16 +6,6 @@ export default function OperationsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <div className="flex h-screen bg-gray-50 text-gray-900">
-        <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <Header />
-          <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 lg:p-8">
-            <div className="w-full">{children}</div>
-          </main>
-        </div>
-      </div>
-    </AuthProvider>
+    <AdminShell>{children}</AdminShell>
   );
 }

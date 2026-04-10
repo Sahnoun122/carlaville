@@ -3,6 +3,7 @@
 import React from 'react';
 import { Button } from './button';
 import { formStyles } from './form-styles';
+import { cn } from '@/lib/utils';
 
 interface FormFooterAction {
   label: string;
@@ -44,14 +45,14 @@ export const FormFooter = ({
         <button
           onClick={leftAction.onClick}
           disabled={leftAction.disabled}
-          className={formStyles.button.ghost}
+          className={cn(formStyles.button.ghost, 'w-full justify-center sm:w-auto')}
         >
           {leftAction.label}
         </button>
       )}
 
       {/* Right Actions */}
-      <div className="flex gap-4">
+      <div className="flex w-full flex-col-reverse gap-3 sm:w-auto sm:flex-row sm:gap-4">
         {actions.map((action, index) => {
           const isLoading = action.loading;
           const buttonClass =
@@ -67,7 +68,7 @@ export const FormFooter = ({
               type={action.label === 'Save' || action.label === 'Submit' ? 'submit' : 'button'}
               onClick={action.onClick}
               disabled={action.disabled || isLoading}
-              className={buttonClass}
+              className={cn(buttonClass, 'w-full justify-center sm:w-auto')}
             >
               {isLoading && <span className="animate-spin mr-2">⏳</span>}
               <span className="flex items-center gap-2">
