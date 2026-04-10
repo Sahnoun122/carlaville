@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Body, Get, Query, Param, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get, Query, Param, DefaultValuePipe, ParseIntPipe, ForbiddenException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
@@ -47,13 +47,8 @@ export class ClientReservationsController {
   @Get(':id')
   async findOne(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
     const reservation = await this.reservationsService.findById(id);
-    if (!reservation) {
-      throw new Error('Réservation non trouvée');
-    }
-    
-    // Check if the reservation belongs to the user
-    if (reservation.customerEmail !== user.email) {
-      throw new Error('Accès refusé');
+    if (user.role !== Role.ADMIN && reservation.customerEmail !== user.email) {
+      throw new ForbiddenException('Accès refusé');
     }
 
     return reservation;

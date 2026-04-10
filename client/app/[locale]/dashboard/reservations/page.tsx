@@ -16,6 +16,8 @@ import Link from 'next/link';
 import ReservationDetailModal from '@/components/ReservationDetailModal';
 import { API_BASE_URL } from '@/lib/api-config';
 
+const resolveReservationId = (reservation: { id?: string; _id?: string }) => reservation.id || reservation._id || '';
+
 export default function ReservationsPage() {
   const [reservations, setReservations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +121,7 @@ export default function ReservationsPage() {
       ) : (
         <div className="space-y-6">
           {filteredReservations.map((res: any) => (
-            <div key={res._id} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-red-100 transition-all">
+            <div key={resolveReservationId(res)} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-red-100 transition-all">
               <div className="p-5 md:p-6 flex flex-col lg:flex-row gap-6 lg:items-center">
 
                 {/* Car Image Small */}
@@ -158,7 +160,7 @@ export default function ReservationsPage() {
                     <p className="text-xl font-bold text-gray-900">{(res.pricingBreakdown?.total || (res.pricingBreakdown?.daily * res.rentalDays) || 0).toLocaleString()} MAD</p>
                   </div>
                   {['pending', 'unpaid'].includes(res.status) ? (
-                    <Link href={`/checkout/${res._id}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">
+                    <Link href={`/checkout/${resolveReservationId(res)}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">
                       Finaliser <ChevronRight className="w-4 h-4" />
                     </Link>
                   ) : (

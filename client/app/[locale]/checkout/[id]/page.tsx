@@ -24,6 +24,19 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/auth-provider';
 
+const resolveReservationError = async (res: Response) => {
+   try {
+      const data = await res.json();
+      if (typeof data?.message === 'string') {
+         return data.message;
+      }
+   } catch {}
+
+   if (res.status === 403) return 'Accès refusé à cette réservation.';
+   if (res.status === 404) return 'Réservation non trouvée.';
+   return 'Une erreur est survenue lors du chargement de la réservation.';
+};
+
 export default function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -42,7 +55,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
         const res = await fetch(`${API_URL}/api/client/reservations/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error('Réservation non trouvée.');
+            if (!res.ok) throw new Error(await resolveReservationError(res));
         const data = await res.json();
         setReservation(data);
       } catch (err: any) {
