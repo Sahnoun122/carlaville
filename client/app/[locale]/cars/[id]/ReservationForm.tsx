@@ -96,11 +96,17 @@ export default function ReservationForm({ car }: { car: any }) {
   useEffect(() => {
     const todayStr = formatDate(new Date());
     const minPickup = settings?.allowSameDayBooking ? todayStr : addDaysToDateString(todayStr, 1);
-    if (!pickupDate || pickupDate < minPickup) {
-      setPickupDate(minPickup);
-      setReturnDate(addDaysToDateString(minPickup, effectiveMinRentalDays));
+    const nextPickupDate = !pickupDate || pickupDate < minPickup ? minPickup : pickupDate;
+    const minReturn = addDaysToDateString(nextPickupDate, effectiveMinRentalDays);
+
+    if (nextPickupDate !== pickupDate) {
+      setPickupDate(nextPickupDate);
     }
-  }, [settings, effectiveMinRentalDays]);
+
+    if (!returnDate || returnDate < minReturn) {
+      setReturnDate(minReturn);
+    }
+  }, [settings, effectiveMinRentalDays, pickupDate, returnDate]);
 
   const pickupMinDate = settings?.allowSameDayBooking ? formatDate(new Date()) : addDaysToDateString(formatDate(new Date()), 1);
   const returnMinDate = pickupDate ? addDaysToDateString(pickupDate, effectiveMinRentalDays) : pickupMinDate;
@@ -172,7 +178,19 @@ export default function ReservationForm({ car }: { car: any }) {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error(t('error.network'));
+      if (!res.ok) {
+        try {
+          const data = await res.json();
+          const apiMessage = typeof data?.message === 'string'
+            ? data.message
+            : Array.isArray(data?.message)
+              ? data.message.join(', ')
+              : '';
+          throw new Error(apiMessage || t('error.network'));
+        } catch {
+          throw new Error(t('error.network'));
+        }
+      }
       const data = await res.json();
       setSuccess(true);
       setTimeout(() => router.push(`/checkout/${data._id || data.id}`), 800);
