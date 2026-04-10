@@ -20,8 +20,8 @@ import { Plus, Search, Car as CarIcon, RefreshCcw, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AdminCarCard } from './car-card';
 
-const resolveCarId = (car: Car) =>
-  car.id || (car as any)._id || '';
+const resolveCarId = (car: Car | null | undefined) =>
+  car?.id || (car as any)?._id || (car as any)?.carId || '';
 
 const resolveAgencyId = (car: Car) => {
   const rawAgencyId = (car as unknown as { agencyId?: unknown }).agencyId;
@@ -116,7 +116,13 @@ export const CarManagement = () => {
 
   const handleSubmit = (values: CarFormValues) => {
     if (selectedCar) {
-      updateMutation.mutate({ id: resolveCarId(selectedCar), ...values });
+      const carId = resolveCarId(selectedCar);
+      if (!carId) {
+        toast.error('Impossible de modifier ce véhicule: identifiant introuvable.');
+        return;
+      }
+
+      updateMutation.mutate({ id: carId, ...values });
       return;
     }
     createMutation.mutate(values);

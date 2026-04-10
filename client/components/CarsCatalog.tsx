@@ -4,6 +4,8 @@ import { Search, Filter, SortAsc, SortDesc, ChevronRight } from 'lucide-react';
 import VehicleCard from './VehicleCard';
 import { useTranslations } from 'next-intl';
 
+const resolveCarId = (car: { id?: string; _id?: string }) => car.id || car._id || '';
+
 export default function CarsCatalog({
   initialCars,
   initialSearch = '',
@@ -129,7 +131,7 @@ export default function CarsCatalog({
         {filteredCars.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in">
             {filteredCars.map(car => (
-              <VehicleCard key={car._id} car={car} />
+              <VehicleCard key={resolveCarId(car)} car={car} />
             ))}
           </div>
         ) : (

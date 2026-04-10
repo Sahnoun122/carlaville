@@ -5,7 +5,8 @@ import { Users, Fuel, Settings, MapPin, ArrowUpRight } from 'lucide-react';
 
 interface VehicleCardProps {
   car: {
-    _id: string;
+    id?: string;
+    _id?: string;
     brand: string;
     model: string;
     dailyPrice: number;
@@ -19,7 +20,10 @@ interface VehicleCardProps {
   };
 }
 
+const resolveCarId = (car: VehicleCardProps['car']) => car.id || car._id || '';
+
 export default function VehicleCard({ car }: VehicleCardProps) {
+  const carId = resolveCarId(car);
   const images = car.images || [];
   const rawImage = images.length > 0 ? images[0] : car.imageUrl;
   
@@ -98,7 +102,7 @@ export default function VehicleCard({ car }: VehicleCardProps) {
         
         <div className="relative group/btn">
           <Link 
-            href={`/cars/${car._id}`} 
+            href={carId ? `/cars/${carId}` : '/cars'} 
             className="w-full h-14 bg-black text-white flex items-center justify-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 hover:bg-neutral-800 shadow-xl shadow-black/5 active:scale-[0.98] overflow-hidden"
           >
             <span>Réserver maintenant</span>

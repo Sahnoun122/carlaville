@@ -14,10 +14,34 @@ import { CompleteMaintenanceDto } from './dto/complete-maintenance.dto';
 import { AvailabilityStatus } from '../common/enums/car.enum';
 import { getMediaBaseUrl, normalizeMediaUrls } from '../common/utils/media-url';
 
-const normalizeCarForDisplay = <T extends { images?: string[] }>(car: T) => ({
-  ...car,
-  images: normalizeMediaUrls(car.images, getMediaBaseUrl()),
-});
+const resolveRecordId = (record: { id?: unknown; _id?: unknown }) => {
+  const rawId = record.id ?? record._id;
+  if (typeof rawId === 'string') {
+    return rawId;
+  }
+
+  if (rawId && typeof rawId === 'object' && 'toString' in rawId) {
+    return rawId.toString();
+  }
+
+  return '';
+};
+
+const normalizeCarForDisplay = <T extends { images?: string[] }>(car: T) => {
+  const plainCar =
+    typeof (car as { toObject?: () => Record<string, unknown> }).toObject ===
+    'function'
+      ? (car as { toObject: () => Record<string, unknown> }).toObject()
+      : { ...car };
+  const id = resolveRecordId(plainCar as { id?: unknown; _id?: unknown });
+
+  return {
+    ...plainCar,
+    id,
+    _id: (plainCar as { _id?: unknown })._id ?? id,
+    images: normalizeMediaUrls(car.images, getMediaBaseUrl()),
+  };
+};
 
 @Injectable()
 export class CarsService {

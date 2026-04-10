@@ -6,6 +6,8 @@ import BlogCard from '../../components/BlogCard';
 import HomeSearchWidget from '../../components/HomeSearchWidget';
 import { getTranslations } from 'next-intl/server';
 
+const resolveCarId = (car: { id?: string; _id?: string }) => car.id || car._id || '';
+
 async function getCars() {
   try {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
@@ -144,7 +146,7 @@ export default async function Home() {
           {cars && cars.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {cars.map((car: any) => (
-                <VehicleCard key={car._id} car={car} />
+                <VehicleCard key={resolveCarId(car)} car={car} />
               ))}
             </div>
           ) : (

@@ -44,6 +44,8 @@ const addDaysToDateString = (dateString: string, days: number) => {
   return formatDate(date);
 };
 
+const resolveCarId = (car: any) => car?.id || car?._id || '';
+
 export default function ReservationForm({ car }: { car: any }) {
   const t = useTranslations('reservation');
   const router = useRouter();
@@ -57,7 +59,7 @@ export default function ReservationForm({ car }: { car: any }) {
   const [returnDate, setReturnDate] = useState<string>('');
   const [selectedExtras, setSelectedExtras] = useState<Record<string, boolean>>({});
 
-  const carId = String(car?._id || car?.id || '');
+  const carId = resolveCarId(car);
   const effectiveMinRentalDays = toPositiveInt(car?.minRentalDays) ?? Math.max(1, settings?.minRentalDays ?? 1);
 
   useEffect(() => {
@@ -120,6 +122,12 @@ export default function ReservationForm({ car }: { car: any }) {
     setLoading(true);
     setError('');
 
+    if (!carId) {
+      setError(t('not_found'));
+      setLoading(false);
+      return;
+    }
+
     const token = localStorage.getItem('carlaville_token');
     if (!token) {
       router.push('/auth/login?redirect=' + encodeURIComponent(window.location.pathname));
@@ -128,7 +136,7 @@ export default function ReservationForm({ car }: { car: any }) {
 
     const formData = new FormData(e.currentTarget);
     const payload = {
-      carId: car._id,
+      carId,
       agencyId: car.agencyId?._id || car.agencyId,
       pickupDate, returnDate,
       pickupTime: formData.get('pickupTime'),
