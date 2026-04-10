@@ -12,13 +12,22 @@ import { FilterCarDto } from './dto/filter-car.dto';
 import { StartMaintenanceDto } from './dto/start-maintenance.dto';
 import { CompleteMaintenanceDto } from './dto/complete-maintenance.dto';
 import { AvailabilityStatus } from '../common/enums/car.enum';
+import { getMediaBaseUrl, normalizeMediaUrls } from '../common/utils/media-url';
+
+const normalizeCarForDisplay = <T extends { images?: string[] }>(car: T) => ({
+  ...car,
+  images: normalizeMediaUrls(car.images, getMediaBaseUrl()),
+});
 
 @Injectable()
 export class CarsService {
   constructor(@InjectModel(Car.name) private carModel: Model<CarDocument>) {}
 
   async create(createCarDto: CreateCarDto): Promise<Car> {
-    const createdCar = new this.carModel(createCarDto);
+    const createdCar = new this.carModel({
+      ...createCarDto,
+      images: normalizeMediaUrls(createCarDto.images, getMediaBaseUrl()),
+    });
     return createdCar.save();
   }
 
@@ -57,7 +66,7 @@ export class CarsService {
       .exec();
 
     const count = await this.carModel.countDocuments(query);
-    return { cars, count };
+    return { cars: cars.map((car) => normalizeCarForDisplay(car)), count };
   }
 
   async findById(id: string): Promise<Car> {
@@ -68,17 +77,26 @@ export class CarsService {
     if (!car) {
       throw new NotFoundException(`Car with id ${id} not found`);
     }
-    return car;
+    return normalizeCarForDisplay(car) as Car;
   }
 
   async update(id: string, updateCarDto: UpdateCarDto): Promise<Car> {
     const updatedCar = await this.carModel
-      .findByIdAndUpdate(id, updateCarDto, { new: true })
+      .findByIdAndUpdate(
+        id,
+        {
+          ...updateCarDto,
+          images: updateCarDto.images
+            ? normalizeMediaUrls(updateCarDto.images, getMediaBaseUrl())
+            : updateCarDto.images,
+        },
+        { new: true },
+      )
       .exec();
     if (!updatedCar) {
       throw new NotFoundException(`Car with id ${id} not found`);
     }
-    return updatedCar;
+    return normalizeCarForDisplay(updatedCar) as Car;
   }
 
   async archive(id: string): Promise<Car> {
@@ -88,7 +106,7 @@ export class CarsService {
     if (!archivedCar) {
       throw new NotFoundException(`Car with id ${id} not found`);
     }
-    return archivedCar;
+    return normalizeCarForDisplay(archivedCar) as Car;
   }
 
   async startMaintenance(

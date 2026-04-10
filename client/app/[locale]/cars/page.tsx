@@ -1,12 +1,12 @@
 import VehicleCard from '@/components/VehicleCard';
 import CarsCatalog from '@/components/CarsCatalog';
+import { API_BASE_URL } from '@/lib/api-config';
 import { getTranslations } from 'next-intl/server';
 
 
 async function getCars() {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
-    const res = await fetch(`${API_URL}/api/cars?limit=100`, { cache: 'no-store' });
+    const res = await fetch(`${API_BASE_URL}/cars?limit=100`, { cache: 'no-store' });
     if (!res.ok) return { cars: [] };
     const data = await res.json();
     return data;

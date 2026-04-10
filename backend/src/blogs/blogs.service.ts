@@ -9,6 +9,7 @@ import { Blog, BlogDocument } from './schemas/blog.schema';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { FilterBlogDto } from './dto/filter-blog.dto';
+import { getMediaBaseUrl, normalizeMediaUrl, normalizeMediaUrls } from '../common/utils/media-url';
 
 const slugify = (input: string) =>
   input
@@ -22,10 +23,10 @@ const normalizeCoverImage = (coverImage: string | undefined, fallback?: string) 
   const trimmed = coverImage?.trim();
 
   if (trimmed && /^(https?:\/\/|\/)/i.test(trimmed)) {
-    return trimmed;
+    return normalizeMediaUrl(trimmed);
   }
 
-  return fallback;
+  return normalizeMediaUrl(fallback);
 };
 
 const mapBlogForDisplay = <T extends { coverImage?: string; images?: string[] }>(
@@ -33,6 +34,7 @@ const mapBlogForDisplay = <T extends { coverImage?: string; images?: string[] }>
 ) => ({
   ...blog,
   coverImage: normalizeCoverImage(blog.coverImage, blog.images?.[0]),
+  images: normalizeMediaUrls(blog.images, getMediaBaseUrl()),
 });
 
 @Injectable()
@@ -53,9 +55,7 @@ export class BlogsService {
       throw new BadRequestException('A blog with this slug already exists.');
     }
 
-    const normalizedImages = (createBlogDto.images || [])
-      .map((image) => image.trim())
-      .filter((image) => image.length > 0);
+    const normalizedImages = normalizeMediaUrls(createBlogDto.images, getMediaBaseUrl());
 
     const createdBlog = await this.blogModel.create({
       ...createBlogDto,
@@ -68,7 +68,7 @@ export class BlogsService {
       images: normalizedImages,
     });
 
-    return createdBlog;
+    return mapBlogForDisplay(createdBlog) as Blog;
   }
 
   async findAll(filterDto: FilterBlogDto, page: number, limit: number) {
@@ -149,9 +149,7 @@ export class BlogsService {
     }
 
     const normalizedImages = updateBlogDto.images
-      ? updateBlogDto.images
-          .map((image) => image.trim())
-          .filter((image) => image.length > 0)
+      ? normalizeMediaUrls(updateBlogDto.images, getMediaBaseUrl())
       : undefined;
 
     const normalizedCoverImage =
@@ -178,7 +176,7 @@ export class BlogsService {
       throw new NotFoundException(`Blog with id ${id} not found`);
     }
 
-    return updated;
+    return mapBlogForDisplay(updated) as Blog;
   }
 
   async remove(id: string): Promise<{ message: string }> {

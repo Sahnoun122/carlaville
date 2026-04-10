@@ -6,6 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { Client } from 'minio';
+import { getMediaBaseUrl } from '../common/utils/media-url';
 
 @Injectable()
 export class UploadsService {
@@ -25,7 +26,7 @@ export class UploadsService {
     this.publicBaseUrl = this.configService.get<string>(
       'storage.publicBaseUrl',
       defaultPublicBaseUrl,
-    );
+    ).replace(/\/+$/, '') || getMediaBaseUrl();
 
     this.minioClient = new Client({
       endPoint,

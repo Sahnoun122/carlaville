@@ -1,13 +1,13 @@
 import { Users, Fuel, Settings, MapPin, Check, ChevronLeft, ShieldCheck } from 'lucide-react';
 import ReservationForm from './ReservationForm';
 import { Link } from '@/i18n/routing';
+import { API_BASE_URL } from '@/lib/api-config';
 import { getTranslations } from 'next-intl/server';
 
 
 async function getCar(id: string) {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3009';
-    const res = await fetch(`${API_URL}/api/cars/${id}`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE_URL}/cars/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {

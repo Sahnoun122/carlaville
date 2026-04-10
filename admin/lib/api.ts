@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosHeaders, AxiosRequestConfig } from 'axios';
 import { getAuthToken, logout } from './auth';
 
 const DEFAULT_API_ORIGIN = 'https://carlaville-ykc8.vercel.app';
+const FALLBACK_API_ORIGIN = process.env.NODE_ENV === 'production' ? DEFAULT_API_ORIGIN : 'http://localhost:3009';
 
 const normalizeApiBaseUrl = (value: string) => {
   const trimmedValue = value.trim().replace(/\/+$/, '');
@@ -9,7 +10,7 @@ const normalizeApiBaseUrl = (value: string) => {
 };
 
 export const API_BASE_URL = normalizeApiBaseUrl(
-  process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_ORIGIN,
+  process.env.NEXT_PUBLIC_API_URL || FALLBACK_API_ORIGIN,
 );
 
 // Define a custom error shape for consistent error handling
@@ -22,9 +23,6 @@ export interface ApiError {
 // Create an axios instance with a base URL
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 export const setApiAuthToken = (token?: string) => {

@@ -23,6 +23,26 @@ import { Car, CarDocument } from '../cars/schemas/car.schema';
 import { RevenueService } from '../revenue/revenue.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { PaymentStatus } from '../common/enums/payment-status.enum';
+import { getMediaBaseUrl, normalizeMediaUrls } from '../common/utils/media-url';
+
+const normalizeReservationForDisplay = <T extends { carId?: unknown }>(reservation: T) => {
+  const car = reservation.carId;
+
+  if (!car || typeof car !== 'object') {
+    return reservation;
+  }
+
+  const carRecord = car as { images?: string[]; imageUrl?: string };
+
+  return {
+    ...reservation,
+    carId: {
+      ...(car as Record<string, unknown>),
+      images: normalizeMediaUrls(carRecord.images, getMediaBaseUrl()),
+      imageUrl: carRecord.imageUrl ? normalizeMediaUrls([carRecord.imageUrl], getMediaBaseUrl())[0] : carRecord.imageUrl,
+    },
+  };
+};
 
 @Injectable()
 export class ReservationsService {
@@ -252,7 +272,10 @@ export class ReservationsService {
       .exec();
 
     const count = await this.reservationModel.countDocuments(query);
-    return { reservations, count };
+    return {
+      reservations: reservations.map((reservation) => normalizeReservationForDisplay(reservation)),
+      count,
+    };
   }
 
   async findById(id: string): Promise<Reservation> {
@@ -265,7 +288,7 @@ export class ReservationsService {
     if (!reservation) {
       throw new NotFoundException(`Reservation with id ${id} not found`);
     }
-    return reservation;
+    return normalizeReservationForDisplay(reservation) as Reservation;
   }
 
   async confirm(id: string): Promise<Reservation> {
