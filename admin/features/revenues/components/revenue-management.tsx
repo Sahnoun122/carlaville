@@ -47,10 +47,10 @@ export const RevenueManagement = () => {
   ] as const;
 
   return (
-    <div className="w-full space-y-8 pb-12 animate-in fade-in duration-700">
+    <div className="w-full space-y-10 pb-12 animate-in fade-in duration-700">
       {/* Page Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-1">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
               <DollarSign size={24} />
@@ -64,16 +64,16 @@ export const RevenueManagement = () => {
           </p>
         </div>
         
-        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 font-bold text-xs uppercase tracking-widest shadow-sm">
+        <div className="flex items-center gap-2 px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl border border-indigo-100 font-bold text-xs uppercase tracking-widest shadow-sm self-start">
           <ShieldCheck size={16} />
           Données Certifiées
         </div>
       </div>
 
       {/* Financial Split Banner */}
-      <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-200 mb-8">
+      <div className="bg-slate-900 rounded-[2.5rem] p-6 sm:p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-200 mb-8">
          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800 rounded-full -mr-32 -mt-32 opacity-50"></div>
-         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+         <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div className="space-y-3">
                <div className="flex items-center gap-3">
                   <div className="p-2 bg-indigo-500 rounded-lg">
@@ -85,12 +85,12 @@ export const RevenueManagement = () => {
                   Répartition automatique des revenus : <span className="text-white font-black underline decoration-indigo-500 decoration-2 underline-offset-4">85%</span> pour l'agence partenaire et <span className="text-white font-black underline decoration-amber-500 decoration-2 underline-offset-4">15%</span> de commission plateforme Carlaville.
                </p>
             </div>
-            <div className="flex gap-4">
-               <div className="bg-slate-800/50 backdrop-blur-md border border-slate-700 p-4 rounded-3xl text-center min-w-[120px]">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="bg-slate-800/50 backdrop-blur-md border border-slate-700 p-4 rounded-3xl text-center min-w-0">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Part Agence</p>
                   <p className="text-xl font-black text-indigo-400 italic">Variable</p>
                </div>
-               <div className="bg-amber-500 p-4 rounded-3xl text-center min-w-[120px] text-amber-950 shadow-xl shadow-amber-500/20">
+               <div className="bg-amber-500 p-4 rounded-3xl text-center min-w-0 text-amber-950 shadow-xl shadow-amber-500/20">
                   <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">Plateforme</p>
                   <p className="text-xl font-black italic">Dynamique</p>
                </div>
@@ -99,7 +99,8 @@ export const RevenueManagement = () => {
       </div>
 
       {/* Modern Tab Navigation */}
-      <div className="flex p-1.5 bg-slate-100/80 backdrop-blur-sm rounded-2xl border border-slate-200 w-fit">
+      <div className="w-full overflow-x-auto pb-1">
+        <div className="flex min-w-max p-1.5 bg-slate-100/80 backdrop-blur-sm rounded-2xl border border-slate-200">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -108,7 +109,7 @@ export const RevenueManagement = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-2.5 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300",
+                "flex items-center gap-2.5 px-5 sm:px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap",
                 isActive 
                   ? "bg-white text-indigo-600 shadow-md ring-1 ring-slate-200" 
                   : "text-slate-500 hover:text-slate-900 hover:bg-white/50"
@@ -119,6 +120,7 @@ export const RevenueManagement = () => {
             </button>
           );
         })}
+        </div>
       </div>
 
       <div className="mt-8 transition-all duration-500">
@@ -161,7 +163,7 @@ export const RevenueManagement = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                     <DollarSign size={20} />
@@ -173,7 +175,7 @@ export const RevenueManagement = () => {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading || isRefetching} className="h-10 w-10 rounded-xl p-0">
+                <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading || isRefetching} className="h-10 w-10 self-start rounded-xl p-0 sm:self-auto">
                   <RefreshCcw size={16} className={cn(isRefetching && "animate-spin")} />
                 </Button>
               </div>

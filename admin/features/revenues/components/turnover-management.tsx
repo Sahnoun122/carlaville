@@ -39,7 +39,7 @@ export const TurnoverManagement = () => {
     <div className="w-full space-y-8 animate-in fade-in duration-700">
       
       {/* Search Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm">
+      <div className="flex flex-col gap-4 p-4 sm:p-6 bg-white rounded-3xl border border-slate-100 shadow-sm lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3 text-slate-900">
           <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
              <LayoutDashboard size={20} />
@@ -50,7 +50,7 @@ export const TurnoverManagement = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-1 max-w-md">
+        <div className="flex w-full items-center gap-2 lg:max-w-md">
            <div className="relative w-full group">
              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
              <input 
@@ -61,7 +61,7 @@ export const TurnoverManagement = () => {
                onChange={(e) => setSearchTerm(e.target.value)}
              />
            </div>
-           <Button variant="outline" size="sm" onClick={() => refetch()} className="h-12 w-12 rounded-2xl border-slate-100 p-0 text-slate-400 hover:text-indigo-600">
+           <Button variant="outline" size="sm" onClick={() => refetch()} className="h-12 w-12 shrink-0 rounded-2xl border-slate-100 p-0 text-slate-400 hover:text-indigo-600">
              <RefreshCcw size={18} className={cn(isRefetching && "animate-spin")} />
            </Button>
         </div>
@@ -102,12 +102,12 @@ export const TurnoverManagement = () => {
                   <div className="relative z-10 flex flex-col gap-6">
                     
                     {/* Top Row: Agency Info & Button */}
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-4 min-w-0">
                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/20">
                           <Building2 size={26} />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <h2 className="text-2xl font-black text-slate-900 leading-tight tracking-tight">{agency.agencyName}</h2>
                           <div className="flex items-center gap-2 mt-1.5 font-bold text-blue-600 uppercase tracking-widest text-[10px]">
                             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
@@ -117,7 +117,7 @@ export const TurnoverManagement = () => {
                       </div>
 
                       <Link href={`/admin/revenues/agency/${agency._id}`}>
-                        <Button className="h-10 px-5 rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-slate-200 transition-all active:scale-95 group">
+                        <Button className="h-10 w-full px-5 rounded-2xl bg-slate-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest flex items-center gap-2 shadow-lg shadow-slate-200 transition-all active:scale-95 group sm:w-auto">
                           <Eye size={16} className="group-hover:scale-110 transition-transform" />
                           Détails
                         </Button>
@@ -125,7 +125,7 @@ export const TurnoverManagement = () => {
                     </div>
 
                     {/* Bottom Row: Financial Stats under the name */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="bg-slate-50/80 px-5 py-4 rounded-3xl border border-slate-100/50 flex flex-col justify-center">
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Chiffre d'Affaire Brut</p>
                         <p className="text-xl font-black text-slate-800 leading-none">{formatCurrency(totalGross)}</p>

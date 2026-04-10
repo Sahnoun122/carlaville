@@ -5,20 +5,20 @@
 
 export const formStyles = {
   // Labels
-  label: "text-sm font-semibold text-[#1E293B] mb-2 block",
-  labelRequired: "text-sm font-semibold text-[#1E293B] mb-2 block after:content-['*'] after:ml-1 after:text-red-500",
+  label: "text-sm font-semibold text-[#1E293B] mb-2 block sm:text-[0.9375rem]",
+  labelRequired: "text-sm font-semibold text-[#1E293B] mb-2 block after:content-['*'] after:ml-1 after:text-red-500 sm:text-[0.9375rem]",
   
   // Inputs
-  input: "h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 py-2.5 font-medium text-base text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+  input: "h-11 sm:h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-3 sm:px-4 py-3 sm:py-3.5 font-medium text-sm sm:text-base text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
   inputSmall: "h-10 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[8px] px-3 py-2 font-medium text-sm text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
-  inputWithIcon: "h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 py-2.5 pl-12 font-medium text-base text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+  inputWithIcon: "h-11 sm:h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-3 sm:px-4 py-3 sm:py-3.5 pl-11 sm:pl-12 font-medium text-sm sm:text-base text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
   
   // Selects
-  select: "h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 py-2.5 font-medium text-base text-slate-800 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
-  selectTrigger: "h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 py-2.5 font-medium text-base text-slate-800 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+  select: "h-11 sm:h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-3 sm:px-4 py-3 sm:py-3.5 font-medium text-sm sm:text-base text-slate-800 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
+  selectTrigger: "h-11 sm:h-12 w-full bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-3 sm:px-4 py-3 sm:py-3.5 font-medium text-sm sm:text-base text-slate-800 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
   
   // Textareas
-  textarea: "w-full min-h-[120px] bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 py-3 font-medium text-base text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none",
+  textarea: "w-full min-h-[110px] sm:min-h-[120px] bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-3 sm:px-4 py-3 sm:py-3.5 font-medium text-sm sm:text-base text-slate-800 placeholder:text-slate-400 transition-all focus:bg-white focus:border-red-500 focus:ring-2 focus:ring-red-100 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed resize-none",
   
   // Icons
   icon: {
@@ -54,8 +54,8 @@ export const formStyles = {
   
   // Buttons
   button: {
-    primary: "bg-red-700 text-white h-12 px-12 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
-    secondary: "border-red-600 text-red-600 hover:bg-red-50 h-12 px-8 rounded-lg font-bold border transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+    primary: "bg-red-700 text-white h-11 sm:h-12 px-6 sm:px-12 rounded-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+    secondary: "border-red-600 text-red-600 hover:bg-red-50 h-11 sm:h-12 px-5 sm:px-8 rounded-lg font-bold border transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
     ghost: "text-slate-500 text-sm font-semibold hover:text-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
   },
 } as const;

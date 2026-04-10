@@ -335,12 +335,12 @@ export const ReservationManagement = () => {
           <table className="min-w-full divide-y divide-slate-100">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Référence / Véhicule</th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Client</th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Dates & Durée</th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Paiement</th>
-                <th className="px-6 py-5 text-left text-xs font-bold text-slate-900 uppercase tracking-wider">Statut</th>
-                <th className="px-6 py-5 text-right text-xs font-bold text-slate-900 uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-4 sm:px-6 sm:py-5 text-left text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Référence / Véhicule</th>
+                <th className="px-4 py-4 sm:px-6 sm:py-5 text-left text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Client</th>
+                <th className="px-4 py-4 sm:px-6 sm:py-5 text-left text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Dates & Durée</th>
+                <th className="px-4 py-4 sm:px-6 sm:py-5 text-left text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Paiement</th>
+                <th className="px-4 py-4 sm:px-6 sm:py-5 text-left text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Statut</th>
+                <th className="px-4 py-4 sm:px-6 sm:py-5 text-right text-[10px] sm:text-xs font-bold text-slate-900 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -351,7 +351,7 @@ export const ReservationManagement = () => {
 
                 return (
                   <tr key={rid} className="group transition-colors hover:bg-slate-50/50">
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-4 sm:px-6 sm:py-5">
                       <div className="flex flex-col gap-1">
                         <span className="font-mono text-[10px] font-black text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 self-start">
                           {reservation.bookingReference}
@@ -359,7 +359,7 @@ export const ReservationManagement = () => {
                         <span className="text-xs font-bold text-slate-900">{resolveVehicleLabel(reservation)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-4 sm:px-6 sm:py-5">
                       <div className="flex items-center gap-3">
                          <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 ring-2 ring-white transition-all group-hover:bg-red-50 group-hover:text-red-700">
                             <User size={18} />
@@ -370,7 +370,7 @@ export const ReservationManagement = () => {
                          </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-4 sm:px-6 sm:py-5">
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
                            <span className="text-slate-900">{new Date(reservation.pickupDate).toLocaleDateString()}</span>
@@ -382,7 +382,7 @@ export const ReservationManagement = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-4 sm:px-6 sm:py-5">
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-2">
                           <span className={cn(
@@ -410,7 +410,7 @@ export const ReservationManagement = () => {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-5">
+                    <td className="px-4 py-4 sm:px-6 sm:py-5">
                       <span className={cn(
                         "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tight",
                         status.class
@@ -419,7 +419,7 @@ export const ReservationManagement = () => {
                         {status.label}
                       </span>
                     </td>
-                    <td className="px-6 py-5 text-right">
+                    <td className="px-4 py-4 sm:px-6 sm:py-5 text-right">
                       <div className="flex justify-end gap-2">
                          {canManageReservationStatus && reservation.status === ReservationStatus.PENDING && (
                            <>

@@ -36,9 +36,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-slate-100 px-4 py-8">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-5xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl lg:grid-cols-2">
+    <div className="min-h-screen bg-linear-to-br from-slate-100 via-white to-slate-100 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-5xl items-center justify-center">
+        <div className="grid w-full overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl lg:grid-cols-2">
           <div className="hidden flex-col justify-between bg-primary p-10 text-white lg:flex">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
@@ -59,13 +59,13 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="p-6 sm:p-10">
+          <div className="p-6 sm:p-8 lg:p-10">
             <div className="mb-8">
-              <h2 className="text-3xl font-black tracking-tight text-slate-900">Connexion</h2>
+              <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">Connexion</h2>
               <p className="mt-2 text-sm text-slate-500">Entrez vos identifiants administrateur.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               <div>
                 <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
                   Email
@@ -102,7 +102,7 @@ export default function LoginPage() {
                 </p>
               ) : null}
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full min-h-12" disabled={isSubmitting}>
                 {isSubmitting ? 'Connexion...' : 'Se connecter'}
               </Button>
             </form>

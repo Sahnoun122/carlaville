@@ -9,7 +9,7 @@ export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[42vh] min-h-[320px] sm:h-[50vh] sm:min-h-[400px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
             src="/contact-hero.png"
@@ -20,35 +20,35 @@ export default function ContactPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/80"></div>
         </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-16 animate-fade-in">
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-12 sm:pt-16 animate-fade-in">
           <div className="inline-block px-4 py-1.5 rounded-full bg-primary/20 backdrop-blur-md border border-primary/30 text-white text-sm font-semibold tracking-wide uppercase mb-6 shadow-xl">
             Assistance experte 24/7
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-6 drop-shadow-xl tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-white mb-4 sm:mb-6 drop-shadow-xl tracking-tight">
             Contactez-<span className="text-primary">Nous</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl mx-auto drop-shadow-lg">
+          <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light leading-relaxed max-w-2xl mx-auto drop-shadow-lg">
             Notre équipe est à votre entière disposition pour vous accompagner dans la préparation de votre voyage au Maroc.
           </p>
         </div>
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-20 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-14 sm:py-20 sm:px-6 lg:px-8">
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
           
           {/* Informations de contact */}
-          <div className="space-y-12 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <div className="space-y-10 sm:space-y-12 animate-fade-in" style={{ animationDelay: '100ms' }}>
             <div>
-              <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 mb-6 tracking-tight">Nos Coordonnées</h2>
-              <p className="text-lg text-gray-600 mb-10 leading-relaxed">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-4 sm:mb-6 tracking-tight">Nos Coordonnées</h2>
+              <p className="text-base sm:text-lg text-gray-600 mb-8 sm:mb-10 leading-relaxed">
                 N'hésitez pas à nous contacter pour toute question, demande de devis sur-mesure ou pour finaliser la réservation de votre véhicule dès aujourd'hui.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 soft-shadow group hover:-translate-y-1 transition-all duration-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="bg-gray-50 p-6 sm:p-8 rounded-[2rem] border border-gray-100 soft-shadow group hover:-translate-y-1 transition-all duration-300">
                 <div className="w-14 h-14 bg-gray-50 rounded-xl shadow-sm flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                 </div>
@@ -57,7 +57,7 @@ export default function ContactPage() {
                 <p className="text-sm text-gray-500 mt-2">Assistance 24/7</p>
               </div>
 
-              <div className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 soft-shadow group hover:-translate-y-1 transition-all duration-300">
+              <div className="bg-gray-50 p-6 sm:p-8 rounded-[2rem] border border-gray-100 soft-shadow group hover:-translate-y-1 transition-all duration-300">
                 <div className="w-14 h-14 bg-gray-50 rounded-xl shadow-sm flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300">
                   <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 </div>
@@ -66,7 +66,7 @@ export default function ContactPage() {
                 <p className="text-sm text-gray-500 mt-2">Réponse sous 24h</p>
               </div>
 
-              <div className="bg-gray-50 p-8 rounded-[2rem] border border-gray-100 soft-shadow group hover:-translate-y-1 transition-all duration-300 sm:col-span-2 relative overflow-hidden">
+              <div className="bg-gray-50 p-6 sm:p-8 rounded-[2rem] border border-gray-100 soft-shadow group hover:-translate-y-1 transition-all duration-300 sm:col-span-2 relative overflow-hidden">
                 <div className="absolute right-0 bottom-0 opacity-5 w-32 h-32 transform translate-x-10 translate-y-10">
                   <svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 010-5 2.5 2.5 0 010 5z"></path></svg>
                 </div>
@@ -83,8 +83,8 @@ export default function ContactPage() {
 
             {/* Social Media Links */}
             <div className="pt-8 border-t border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-6">Suivez notre actualité</h3>
-              <div className="flex gap-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-4 sm:mb-6">Suivez notre actualité</h3>
+              <div className="flex flex-wrap gap-4">
                 <a href="#" className="w-12 h-12 bg-gray-50 border border-gray-100 shadow-sm rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:border-primary hover:text-white hover:scale-110 transition-all duration-300">
                    <span className="font-bold text-lg">f</span>
                 </a>
@@ -100,14 +100,14 @@ export default function ContactPage() {
 
           {/* Formulaire de contact */}
           <div className="animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="bg-gray-50 rounded-[2.5rem] p-8 md:p-12 border border-gray-100 soft-shadow relative overflow-hidden h-full">
+            <div className="bg-gray-50 rounded-[2.5rem] p-6 sm:p-8 md:p-12 border border-gray-100 soft-shadow relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
               
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-3 relative z-10 tracking-tight">Envoyez-nous un message</h2>
-              <p className="text-gray-600 mb-8 relative z-10 text-lg">Nous vous répondrons dans les plus brefs délais.</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3 relative z-10 tracking-tight">Envoyez-nous un message</h2>
+              <p className="text-gray-600 mb-6 sm:mb-8 relative z-10 text-base sm:text-lg">Nous vous répondrons dans les plus brefs délais.</p>
               
-              <form className="space-y-6 relative z-10">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <form className="space-y-5 sm:space-y-6 relative z-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
                     <label htmlFor="firstName" className="block text-sm font-semibold text-gray-900">Prénom</label>
                     <input type="text" id="firstName" className="input-premium focus:ring-[3px]" placeholder="Prénom" required />
@@ -139,7 +139,7 @@ export default function ContactPage() {
                   <textarea id="message" rows={5} className="input-premium focus:ring-[3px] resize-none" placeholder="Comment pouvons-nous vous aider ?" required></textarea>
                 </div>
                 
-                <button type="submit" className="w-full btn-premium flex items-center justify-center gap-2 group mt-8 py-4 text-lg">
+                <button type="submit" className="w-full btn-premium flex items-center justify-center gap-2 group mt-6 sm:mt-8 py-4 text-base sm:text-lg min-h-12">
                   <span>Envoyer le message</span>
                   <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>

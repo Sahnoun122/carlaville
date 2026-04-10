@@ -88,14 +88,14 @@ export const ReservationDatePolicyManagement = () => {
 
   return (
     <div className="max-w-4xl space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="text-lg font-semibold text-slate-800">Règles de dates de réservation</h2>
         <p className="mt-1 text-sm text-slate-500">
           Gérez la durée minimale/maximale, la réservation le jour même et les jours bloqués.
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
         {submitError && <p className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{submitError}</p>}
         {submitSuccess && <p className="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{submitSuccess}</p>}
 
@@ -141,7 +141,7 @@ export const ReservationDatePolicyManagement = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
               <input
                 name="allowSameDayBooking"
                 id="allowSameDayBooking"
@@ -170,7 +170,7 @@ export const ReservationDatePolicyManagement = () => {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-start sm:justify-end">
               <Button className="shadow-sm" type="submit" disabled={updateMutation.isPending}>
                 Enregistrer les règles de dates
               </Button>

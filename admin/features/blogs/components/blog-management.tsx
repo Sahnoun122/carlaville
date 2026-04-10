@@ -127,21 +127,21 @@ export const BlogManagement = () => {
   const inputClass = "h-12 bg-[#F8F9FA] border border-[#EDEFF2] rounded-[10px] px-4 font-medium transition-all focus:bg-white focus:border-red-500 focus:ring-0 outline-none text-slate-800 placeholder:text-slate-400 text-base";
 
   return (
-    <div className="w-full space-y-12 pb-20 text-left">
+    <div className="w-full space-y-10 pb-20 text-left">
       {/* Editorial Header Card */}
-      <div className="bg-white p-12 rounded-[24px] border border-slate-100 shadow-sm flex flex-col sm:flex-row items-center justify-between">
+      <div className="bg-white p-6 sm:p-8 lg:p-12 rounded-[24px] border border-slate-100 shadow-sm flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-[#1E293B] tracking-tight">Espace Editorial</h1>
           <p className="text-slate-400 text-sm italic">Gérez vos articles, actulités et récits de voyage.</p>
         </div>
-        <Button onClick={openCreateModal} className="mt-8 sm:mt-0 h-14 bg-red-600 text-white px-10 rounded-xl font-bold hover:bg-red-700 transition-colors">
+        <Button onClick={openCreateModal} className="h-14 w-full bg-red-600 text-white px-10 rounded-xl font-bold hover:bg-red-700 transition-colors sm:w-auto">
           <Plus size={20} className="mr-2" /> Créer un Article
         </Button>
       </div>
 
       {/* Modern Expense-style Control Bar */}
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 md:col-span-8 relative">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
+        <div className="relative lg:col-span-8">
            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
            <input 
              type="text" 
@@ -151,7 +151,7 @@ export const BlogManagement = () => {
              className={cn(inputClass, "w-full pl-12 h-12 shadow-sm")} 
            />
         </div>
-        <div className="col-span-12 md:col-span-3 relative">
+        <div className="relative lg:col-span-3">
            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
            <select 
              value={statusFilter} 
@@ -163,7 +163,7 @@ export const BlogManagement = () => {
              <option value="false">En brouillon</option>
            </select>
         </div>
-        <div className="col-span-12 md:col-span-1">
+        <div className="lg:col-span-1">
           <Button variant="outline" onClick={() => blogsQuery.refetch()} className="w-full h-12 border-[#EDEFF2] rounded-lg hover:bg-slate-50 transition-colors">
             <RefreshCcw size={16} className={cn(blogsQuery.isRefetching && "animate-spin")} />
           </Button>
@@ -184,7 +184,7 @@ export const BlogManagement = () => {
       {/* Simplified Modal (Expense Claim Style) */}
       <Modal isOpen={isModalOpen} onClose={closeModal} title={selectedBlog ? 'Mettre à jour Article' : 'Nouveau Récit'} contentClassName="max-w-4xl p-0 overflow-hidden rounded-[20px] shadow-2xl border border-slate-100">
         <div className="flex flex-col h-full max-h-[88vh] bg-white text-left">
-          <div className="flex-1 overflow-y-auto p-10 md:p-14 space-y-12 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto p-6 sm:p-8 md:p-14 space-y-10 sm:space-y-12 scrollbar-hide">
             
             <div className="space-y-4">
               <div className="w-14 h-14 bg-red-50 rounded-[14px] flex items-center justify-center text-red-600 shadow-sm border border-red-100">
@@ -202,7 +202,7 @@ export const BlogManagement = () => {
                  <h3 className={labelClass}>Gestion des visuels</h3>
                  <span className="text-slate-400 text-xs italic font-medium uppercase tracking-wider">Asset Manager</span>
                </div>
-               <div className="grid grid-cols-2 sm:grid-cols-5 gap-6">
+               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 sm:gap-6">
                  <label className="aspect-square bg-[#F8F9FA] border border-[#EDEFF2] rounded-[16px] flex flex-col items-center justify-center cursor-pointer hover:bg-red-50 hover:border-red-200 transition-all group">
                    <input type="file" multiple accept="image/*" onChange={handleUpload} disabled={isUploading} className="hidden" />
                    <ImageIcon size={24} className="text-slate-300 group-hover:text-red-500 transition-colors" />
@@ -224,7 +224,7 @@ export const BlogManagement = () => {
             {/* Params Section */}
             <div className="space-y-8 pt-10 border-t border-slate-100">
                <h3 className={labelClass}>Configuration Editorial</h3>
-               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
                  <div className="space-y-1.5"><p className={labelClass}>Titre de l'article</p><input value={formValues.title} onChange={e => setFormValues(p => ({ ...p, title: e.target.value }))} className={cn(inputClass, "w-full")} placeholder="For example: Client meeting lunch" /></div>
                  <div className="space-y-1.5"><p className={labelClass}>Slug (URL permaliens)</p><input value={formValues.slug} onChange={e => setFormValues(p => ({ ...p, slug: e.target.value }))} className={cn(inputClass, "w-full text-red-700")} placeholder="ex: mon-bel-article" /></div>
                  <div className="space-y-1.5"><p className={labelClass}>Statut de publication</p><select value={formValues.published ? 'true' : 'false'} onChange={e => setFormValues(p => ({ ...p, published: e.target.value === 'true' }))} className={cn(inputClass, "w-full appearance-none")}>
@@ -238,21 +238,21 @@ export const BlogManagement = () => {
             {/* Full Editor Section */}
             <div className="space-y-6 pt-10 border-t border-slate-100 pb-10">
                <h3 className={labelClass}>Corps de l'histoire</h3>
-               <textarea 
+              <textarea 
                  value={formValues.content} 
                  onChange={e => setFormValues(p => ({ ...p, content: e.target.value }))} 
-                 className="w-full min-h-[450px] border border-[#EDEFF2] bg-[#F8F9FA] rounded-[18px] p-10 outline-none text-lg leading-relaxed font-medium focus:bg-white focus:border-red-500 transition-all duration-300 placeholder:text-slate-300" 
+                className="w-full min-h-[320px] sm:min-h-[380px] lg:min-h-[450px] border border-[#EDEFF2] bg-[#F8F9FA] rounded-[18px] p-6 sm:p-8 lg:p-10 outline-none text-lg leading-relaxed font-medium focus:bg-white focus:border-red-500 transition-all duration-300 placeholder:text-slate-300" 
                  placeholder="Rédigez votre histoire ici (compatible Markdown)..." 
                />
             </div>
           </div>
 
           {/* Triple Action Footer (Expense Claim Style) */}
-          <div className="px-10 py-8 border-t border-slate-100 bg-white flex items-center justify-between">
-             <button type="button" onClick={closeModal} className="text-slate-500 text-sm font-semibold hover:text-slate-700 transition-colors">Annuler</button>
-             <div className="flex gap-4">
+           <div className="flex flex-col gap-4 border-t border-slate-100 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-8">
+             <button type="button" onClick={closeModal} className="text-slate-500 text-sm font-semibold hover:text-slate-700 transition-colors self-start">Annuler</button>
+             <div className="flex w-full gap-4 sm:w-auto">
 
-                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending || isUploading} className="bg-red-600 text-white hover:bg-red-700 h-13 px-12 rounded-lg font-bold transition-colors flex items-center gap-2">
+               <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending || isUploading} className="bg-red-600 text-white hover:bg-red-700 h-13 w-full px-12 rounded-lg font-bold transition-colors flex items-center gap-2 sm:w-auto">
                   {createMutation.isPending || updateMutation.isPending ? <Loader2 className="animate-spin" /> : <>Soumettre <Check size={18} /></>}
                 </Button>
              </div>

@@ -255,14 +255,14 @@ export const AdminDeliveriesManagement = () => {
             ) : deliveriesQuery.isError ? (
               <div className="p-20 text-center text-rose-600 font-bold bg-rose-50/50">Erreur de chargement.</div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
                 <table className="min-w-full divide-y divide-slate-100">
                   <thead>
                     <tr className="bg-slate-50/50 text-left">
-                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Opération / Réf</th>
-                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Intervenant</th>
-                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Date & Heure</th>
-                      <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Statut</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Opération / Réf</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Intervenant</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Date & Heure</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Statut</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -270,7 +270,7 @@ export const AdminDeliveriesManagement = () => {
                       const status = statusConfig[delivery.status] || { label: delivery.status, class: 'bg-slate-100 text-slate-600' };
                       return (
                         <tr key={resolveDeliveryId(delivery)} className="group hover:bg-slate-50/50 transition-all duration-300">
-                          <td className="px-6 py-5">
+                          <td className="px-4 py-4 sm:px-6 sm:py-5">
                             <div className="flex items-center gap-3">
                                <div className={cn(
                                  "h-10 w-10 flex items-center justify-center rounded-xl ring-2 ring-white shadow-sm shrink-0 transition-all group-hover:scale-110",
@@ -286,19 +286,19 @@ export const AdminDeliveriesManagement = () => {
                                </div>
                             </div>
                           </td>
-                          <td className="px-6 py-5">
+                          <td className="px-4 py-4 sm:px-6 sm:py-5">
                             <div className="flex items-center gap-2">
                                <User size={14} className="text-slate-300" />
                                <span className="text-xs font-bold text-slate-700">{resolveAgentLabel(delivery)}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-5 text-center">
+                          <td className="px-4 py-4 sm:px-6 sm:py-5 text-center">
                             <div className="flex flex-col items-center">
                                <span className="text-xs font-black text-slate-900">{new Date(delivery.scheduledDate).toLocaleDateString()}</span>
                                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 rounded-full mt-1 border border-red-100">{delivery.scheduledTime}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-5 text-right">
+                          <td className="px-4 py-4 sm:px-6 sm:py-5 text-right">
                              <span className={cn(
                                "inline-flex px-2.5 py-1 rounded-full border text-[10px] font-black uppercase tracking-tight",
                                status.class

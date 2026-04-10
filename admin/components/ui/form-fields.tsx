@@ -89,7 +89,7 @@ export const FormInputField = <
           <FormControl>
             <div className="relative">
               {icon && (
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400">
                   {React.cloneElement(icon as React.ReactElement<any>, {
                     size: iconSize,
                   })}
@@ -99,7 +99,7 @@ export const FormInputField = <
                 {...field}
                 type={type}
                 placeholder={placeholder}
-                className={cn(formStyles.input, icon && formStyles.inputWithIcon.split('px-4')[0], className)}
+                className={cn(formStyles.input, icon && formStyles.inputWithIcon, className)}
                 {...inputProps}
               />
             </div>
@@ -236,7 +236,7 @@ export const FormSelectField = <
           <FormControl>
             <div className="relative">
               {icon && (
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                   {React.cloneElement(icon as React.ReactElement<any>, {
                     size: iconSize,
                   })}
@@ -245,9 +245,9 @@ export const FormSelectField = <
               <select
                 {...field}
                 className={cn(
-                  formStyles.input,
+                  formStyles.select,
                   'appearance-none', // Native select look removal
-                  icon && formStyles.inputWithIcon.split('px-4')[0],
+                  icon && formStyles.inputWithIcon,
                   field.value === '' && 'text-slate-500',
                   className
                 )}
@@ -261,7 +261,7 @@ export const FormSelectField = <
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+              <div className="pointer-events-none absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"

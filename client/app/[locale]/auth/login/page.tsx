@@ -49,22 +49,22 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#f9fafb]">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden bg-[#f9fafb]">
       {/* Background Decorations */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50/50 rounded-full blur-[120px] -mr-48 -mt-48 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-50/30 rounded-full blur-[100px] -ml-24 -mb-24"></div>
       
       <div className="max-w-md w-full relative z-10 animate-in fade-in zoom-in-95 duration-700">
-        <div className="bg-gray-50 p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
-          <div className="text-center mb-12">
+        <div className="bg-gray-50 p-6 sm:p-8 lg:p-14 rounded-[2.5rem] sm:rounded-[3rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
+          <div className="text-center mb-8 sm:mb-12">
             <Link href="/" className="inline-flex w-16 h-16 bg-red-600 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-red-600/20 hover:scale-110 transition-transform">
               <Car className="w-8 h-8" />
             </Link>
-            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">{t('title')}</h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-neutral-900 tracking-tighter mb-3">{t('title')}</h2>
             <p className="text-gray-400 font-medium text-sm">{t('subtitle')}</p>
           </div>
           
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center border border-red-100 animate-in shake-x duration-500">
                 {error}
@@ -83,7 +83,7 @@ function LoginForm() {
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between items-center ml-2">
+                <div className="flex flex-wrap gap-2 justify-between items-center ml-2">
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t('password_label')}</label>
                   <Link href="/auth/forgot" className="text-[10px] font-black text-red-600 uppercase tracking-[0.1em] hover:underline">{t('forgot_password')}</Link>
                 </div>
@@ -100,7 +100,7 @@ function LoginForm() {
             <button 
               type="submit" 
               disabled={loading} 
-              className="btn-premium w-full group relative overflow-hidden"
+              className="btn-premium w-full group relative overflow-hidden min-h-12"
             >
               <div className="absolute inset-0 bg-gray-50/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="relative z-10 flex items-center justify-center gap-3">
@@ -110,7 +110,7 @@ function LoginForm() {
               </span>
             </button>
             
-            <div className="text-center pt-8 border-t border-gray-50">
+            <div className="text-center pt-6 sm:pt-8 border-t border-gray-50">
               <p className="text-sm font-medium text-gray-400">
                 {t('new_here')}{' '}
                 <Link 
@@ -124,7 +124,7 @@ function LoginForm() {
           </form>
         </div>
         
-        <p className="mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
+        <p className="mt-8 sm:mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
           {tf('footer')}
         </p>
       </div>

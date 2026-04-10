@@ -45,7 +45,7 @@ export const RevenueAnalytics = () => {
     queryFn: getRevenueAnalytics,
   });
 
-  if (isLoading) return <div className="h-96 flex items-center justify-center bg-white rounded-[3rem] animate-pulse border border-gray-100 shadow-sm font-black text-gray-300 uppercase tracking-widest text-xs">Chargement de l'analyse...</div>;
+  if (isLoading) return <div className="h-96 flex items-center justify-center bg-white rounded-[3rem] animate-pulse border border-gray-100 shadow-sm font-black text-gray-300 uppercase tracking-widest text-xs px-6 text-center">Chargement de l'analyse...</div>;
   if (!data) return null;
 
   const chartData = period === 'monthly' ? data.monthly : data.weekly;
@@ -112,7 +112,7 @@ export const RevenueAnalytics = () => {
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
         <KPICard 
           title="Revenu Total" 
           value={`${data.summary.totalRevenue.toLocaleString()} MAD`} 
@@ -142,38 +142,38 @@ export const RevenueAnalytics = () => {
       </div>
 
       {/* Main Chart Section */}
-      <div className="bg-white p-10 lg:p-14 rounded-[4rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+      <div className="bg-white p-6 sm:p-8 lg:p-14 rounded-[4rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.05)] relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-50/30 rounded-full blur-[100px] -mr-64 -mt-64 transition-all duration-1000 group-hover:bg-red-50/50"></div>
         
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-16 relative z-10">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-10 lg:mb-16 relative z-10">
           <div>
             <div className="flex items-center gap-3 mb-3">
               <span className="w-2.5 h-2.5 rounded-full bg-red-600 shadow-[0_0_12px_rgba(220,38,38,0.5)]"></span>
               <h3 className="text-[11px] font-black text-red-600 uppercase tracking-[0.4em]">Analyse Financière</h3>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter leading-tight">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-neutral-900 tracking-tighter leading-tight">
               Évolution des <span className="text-red-600">Revenus</span>
             </h2>
           </div>
           
-          <div className="flex items-center gap-6">
+          <div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center sm:gap-6">
             <button 
               onClick={() => refetch()}
-              className="p-3 text-gray-300 hover:text-red-600 transition-colors"
+              className="self-start p-3 text-gray-300 hover:text-red-600 transition-colors"
               title="Actualiser"
             >
               <RefreshCw className="w-5 h-5" />
             </button>
-            <div className="flex bg-neutral-50 p-1.5 rounded-2xl border border-neutral-100">
+            <div className="flex w-full bg-neutral-50 p-1.5 rounded-2xl border border-neutral-100 sm:w-auto">
               <button 
                 onClick={() => setPeriod('weekly')}
-                className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${period === 'weekly' ? 'bg-white text-red-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex-1 sm:flex-none px-5 sm:px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${period === 'weekly' ? 'bg-white text-red-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 Semaine
               </button>
               <button 
                 onClick={() => setPeriod('monthly')}
-                className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${period === 'monthly' ? 'bg-white text-red-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex-1 sm:flex-none px-5 sm:px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${period === 'monthly' ? 'bg-white text-red-600 shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
               >
                 Mois
               </button>
@@ -181,7 +181,7 @@ export const RevenueAnalytics = () => {
           </div>
         </div>
 
-        <div className="h-[450px] w-full relative z-10">
+        <div className="h-[320px] sm:h-[380px] lg:h-[450px] w-full relative z-10">
           <Line data={lineData} options={chartOptions} />
         </div>
       </div>
@@ -198,10 +198,10 @@ const KPICard = ({ title, value, icon, trend, color, isTrendOnly }: any) => {
   };
 
   return (
-    <div className="bg-white p-8 lg:p-10 rounded-[3rem] border border-gray-100 shadow-sm group hover:-translate-y-2 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+    <div className="bg-white p-6 sm:p-8 lg:p-10 rounded-[3rem] border border-gray-100 shadow-sm group hover:-translate-y-2 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-24 h-24 bg-gray-50/50 rounded-full blur-2xl -mr-12 -mt-12 transition-all duration-500 group-hover:scale-150"></div>
       
-      <div className="flex flex-col gap-8 relative z-10">
+      <div className="flex flex-col gap-6 sm:gap-8 relative z-10">
         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${colors[color as keyof typeof colors]}`}>
           {icon}
         </div>

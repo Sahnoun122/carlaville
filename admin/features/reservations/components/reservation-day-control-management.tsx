@@ -210,14 +210,14 @@ export const ReservationDayControlManagement = () => {
 
   return (
     <div className="max-w-4xl space-y-5">
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <h2 className="text-lg font-semibold text-slate-800">Règles globales de dates de réservation</h2>
         <p className="mt-1 text-sm text-slate-500">
           Définissez la politique globale de dates, utilisée par défaut lorsqu'aucune n\'est spécifiée.
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
       <p className="text-sm text-slate-600">
         Définissez les règles générales sur la durée et les jours de réservation.
       </p>
@@ -236,7 +236,7 @@ export const ReservationDayControlManagement = () => {
           className="mt-5 space-y-5"
           onSubmit={handleSubmit}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
               <label className="block mb-1 text-sm font-medium text-slate-700">Minimum de jours de location</label>
               <input
@@ -271,7 +271,7 @@ export const ReservationDayControlManagement = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
             <input
               name="allowSameDayBooking"
               id="allowSameDayBooking"
@@ -426,7 +426,7 @@ export const ReservationDayControlManagement = () => {
             )}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-start sm:justify-end">
             <Button className="shadow-sm" type="submit" disabled={updateMutation.isPending}>
               Sauvegarder les règles de dates
             </Button>

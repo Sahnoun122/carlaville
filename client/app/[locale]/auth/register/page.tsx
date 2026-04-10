@@ -53,29 +53,29 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-[#f9fafb]">
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden bg-[#f9fafb]">
       {/* Background Decorations */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-50/50 rounded-full blur-[120px] -mr-48 -mt-48 animate-pulse"></div>
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-50/30 rounded-full blur-[100px] -ml-24 -mb-24"></div>
       
       <div className="max-w-xl w-full relative z-10 animate-in fade-in zoom-in-95 duration-700">
-        <div className="bg-gray-50 p-10 lg:p-14 rounded-[3.5rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
-          <div className="text-center mb-12">
+        <div className="bg-gray-50 p-6 sm:p-8 lg:p-14 rounded-[2.5rem] sm:rounded-[3rem] border border-gray-100 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.08)]">
+          <div className="text-center mb-8 sm:mb-12">
             <div className="inline-flex w-16 h-16 bg-neutral-900 rounded-2xl items-center justify-center text-white mb-8 shadow-lg shadow-neutral-900/20 hover:scale-110 transition-transform">
               <UserPlus className="w-8 h-8" />
             </div>
-            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter mb-3">{t('title')}</h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-neutral-900 tracking-tighter mb-3">{t('title')}</h2>
             <p className="text-gray-400 font-medium text-sm">{t('subtitle')}</p>
           </div>
           
-          <form className="space-y-8" onSubmit={handleSubmit}>
+          <form className="space-y-6 sm:space-y-8" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 text-red-600 p-4 rounded-2xl text-[11px] font-black uppercase tracking-widest text-center border border-red-100 animate-in shake-x duration-500">
                 {error}
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] ml-2">{t('first_name')}</label>
                 <input name="firstName" type="text" required className="input-premium" placeholder="Jean" />
@@ -98,7 +98,7 @@ function RegisterForm() {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-premium w-full group relative overflow-hidden">
+            <button type="submit" disabled={loading} className="btn-premium w-full group relative overflow-hidden min-h-12">
               <div className="absolute inset-0 bg-gray-50/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="relative z-10 flex items-center justify-center gap-3">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
@@ -107,7 +107,7 @@ function RegisterForm() {
               </span>
             </button>
             
-            <div className="text-center pt-8 border-t border-gray-50">
+            <div className="text-center pt-6 sm:pt-8 border-t border-gray-50">
               <p className="text-sm font-medium text-gray-400">
                 {t('already_member')}{' '}
                 <Link href="/auth/login" className="font-black text-red-600 hover:text-neutral-900 transition-colors">{t('login_link')}</Link>
@@ -116,7 +116,7 @@ function RegisterForm() {
           </form>
         </div>
         
-        <p className="mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
+        <p className="mt-8 sm:mt-10 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.3em]">
           {t('footer')}
         </p>
       </div>

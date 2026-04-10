@@ -103,19 +103,19 @@ export const AgencyManagement = () => {
   };
 
   return (
-    <div className="w-full space-y-8 pb-12">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
+    <div className="w-full space-y-10 pb-12">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
             Gestion des Agences
           </h1>
-          <p className="mt-2 text-slate-500">
+          <p className="text-slate-500">
             Créez et gérez vos agences partenaires pour la flotte de véhicules.
           </p>
         </div>
         <Button
           onClick={handleCreate}
-          className="h-12 gap-2 bg-slate-900 px-6 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95"
+          className="h-12 w-full gap-2 bg-slate-900 px-6 font-bold text-white transition-all hover:bg-slate-800 hover:shadow-lg active:scale-95 sm:w-auto"
         >
           <Plus size={20} />
           Ajouter une agence
@@ -138,7 +138,7 @@ export const AgencyManagement = () => {
         </div>
 
         {/* Stats / Quick Info */}
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600">
               <Building2 size={20} />
@@ -153,7 +153,7 @@ export const AgencyManagement = () => {
             size="sm"
             onClick={() => refetch()}
             disabled={isLoading || isRefetching}
-            className="h-10 w-10 rounded-xl p-0 hover:bg-slate-50"
+            className="h-10 w-10 self-start rounded-xl p-0 hover:bg-slate-50 sm:self-auto"
           >
             <RefreshCcw size={16} className={cn(isRefetching && "animate-spin")} />
           </Button>

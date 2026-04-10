@@ -158,8 +158,8 @@ export default function ReservationForm({ car }: { car: any }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 soft-shadow p-6 lg:p-8 animate-fade-in">
-      <h3 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b">{t('title')}</h3>
+    <div className="bg-white rounded-2xl border border-gray-100 soft-shadow p-5 sm:p-6 lg:p-8 animate-fade-in">
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-5 sm:mb-6 pb-4 border-b">{t('title')}</h3>
       
       {success ? (
          <div className="py-10 text-center flex flex-col items-center">
@@ -168,11 +168,11 @@ export default function ReservationForm({ car }: { car: any }) {
             <p className="text-xs text-gray-400 mt-2">{t('success.subtitle')}</p>
          </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg text-xs font-bold text-center border border-red-100">{error}</div>}
           
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.pickup_date')}</label>
                 <input required name="pickupDate" type="date" min={pickupMinDate} value={pickupDate} onChange={e => handlePickupChange(e.target.value)} className="input-premium py-2 text-sm" />
@@ -183,7 +183,7 @@ export default function ReservationForm({ car }: { car: any }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{t('fields.return_date')}</label>
                 <input required name="returnDate" type="date" min={returnMinDate} value={returnDate} onChange={e => setReturnDate(e.target.value)} className="input-premium py-2 text-sm" />
@@ -223,12 +223,12 @@ export default function ReservationForm({ car }: { car: any }) {
             </div>
           )}
 
-          <div className="pt-6 border-t border-gray-100 space-y-3">
-             <div className="flex justify-between items-center text-sm font-bold text-gray-900">
+           <div className="pt-6 border-t border-gray-100 space-y-3">
+             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between text-sm font-bold text-gray-900">
                 <span className="text-gray-400 font-medium">{t('total_price', { days })}</span>
                 <span className="text-2xl font-black text-primary">{totalPrice} MAD</span>
              </div>
-             <button type="submit" disabled={loading} className="btn-premium w-full flex items-center justify-center gap-2">
+             <button type="submit" disabled={loading} className="btn-premium w-full flex items-center justify-center gap-2 min-h-12">
                 {loading ? '...' : t('submit', { price: totalPrice })}
              </button>
           </div>

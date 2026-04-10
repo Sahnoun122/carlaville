@@ -179,8 +179,8 @@ export const AdminOverviewDashboard = () => {
 
   return (
     <div className="w-full space-y-10 pb-20 animate-in fade-in duration-700">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Système en ligne</span>
@@ -188,19 +188,19 @@ export const AdminOverviewDashboard = () => {
           <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
             Tableau de <span className="text-red-600">Bord</span>
           </h1>
-          <p className="mt-2 font-bold text-slate-400">Suivez la performance globale de Carla Ville en temps réel.</p>
+          <p className="font-bold text-slate-400">Suivez la performance globale de Carla Ville en temps réel.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
            <Button
              variant="outline"
              onClick={() => refetch()}
              disabled={isLoading || isRefetching}
-             className="h-14 w-14 rounded-2xl p-0 border-slate-200 hover:bg-slate-50 transition-all shadow-sm"
+             className="h-14 w-full rounded-2xl p-0 border-slate-200 hover:bg-slate-50 transition-all shadow-sm sm:w-14"
            >
              <RefreshCcw size={20} className={cn(isRefetching && "animate-spin", "text-slate-500")} />
            </Button>
            <Link href="/admin/reservations">
-             <Button className="h-14 px-8 rounded-2xl bg-slate-900 font-black text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
+             <Button className="h-14 w-full px-8 rounded-2xl bg-slate-900 font-black text-white hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 sm:w-auto">
                Nouvelle Réservation
              </Button>
            </Link>
@@ -256,14 +256,14 @@ export const AdminOverviewDashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
              {/* Revenue Trend Chart */}
-             <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm overflow-hidden relative group transition-all hover:shadow-md">
+             <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-sm overflow-hidden relative group transition-all hover:shadow-md">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-50/50 rounded-full blur-[80px] -mr-32 -mt-32"></div>
-                <div className="flex items-center justify-between mb-8 relative z-10">
-                   <div>
+               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8 relative z-10">
+                 <div>
                       <h3 className="text-xl font-black text-slate-900 leading-tight">Flux Financier</h3>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Revenus nets par période</p>
                    </div>
-                   <Link href="/admin/revenue" className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all">
+                 <Link href="/admin/revenue" className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all self-start sm:self-auto">
                       <ArrowUpRight size={18} />
                    </Link>
                 </div>
@@ -273,7 +273,7 @@ export const AdminOverviewDashboard = () => {
              </div>
 
              {/* Distribution Chart */}
-             <div className="bg-white rounded-[3rem] border border-slate-200 p-10 shadow-sm transition-all hover:shadow-md">
+             <div className="bg-white rounded-[3rem] border border-slate-200 p-6 sm:p-8 lg:p-10 shadow-sm transition-all hover:shadow-md">
                 <div className="mb-8">
                    <h3 className="text-xl font-black text-slate-900 leading-tight">État Flotte</h3>
                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Répartition des Réservations</p>
@@ -309,17 +309,17 @@ export const AdminOverviewDashboard = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
              {/* Recent Reservations stylized table */}
-             <div className="bg-white rounded-[3.5rem] p-10 border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden relative">
-                <div className="flex items-center justify-between mb-8">
-                   <div>
+             <div className="bg-white rounded-[3.5rem] p-6 sm:p-8 lg:p-10 border border-slate-200 shadow-sm transition-all hover:shadow-md overflow-hidden relative">
+               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+                 <div>
                       <h3 className="text-xl font-black text-slate-900 leading-tight">Activités Récentes</h3>
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">5 dernières réservations</p>
                    </div>
-                <Link href="/admin/reservations">
+               <Link href="/admin/reservations" className="w-full sm:w-auto">
                       <Button variant="outline" className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:bg-red-50 hover:text-red-700 h-10 px-4 rounded-xl border-none">Voir tout</Button>
                    </Link>
                 </div>
-                <div className="-mx-4">
+               <div className="-mx-4 overflow-x-auto px-4">
                   <Table className="border-none shadow-none">
                     <TableBody>
                       {data.recentReservations.map((res) => (
@@ -364,7 +364,7 @@ export const AdminOverviewDashboard = () => {
              </div>
 
              {/* Dynamic Operations View */}
-             <div className="rounded-[3.5rem] bg-neutral-900 border border-neutral-800 p-12 shadow-2xl relative overflow-hidden group">
+             <div className="rounded-[3.5rem] bg-neutral-900 border border-neutral-800 p-6 sm:p-8 lg:p-12 shadow-2xl relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-red-600/10 rounded-full blur-[100px] -mr-48 -mt-48 transition-all duration-1000 group-hover:bg-red-600/20"></div>
                 <div className="relative z-10 flex flex-col justify-between h-full">
                    <div>
@@ -374,7 +374,7 @@ export const AdminOverviewDashboard = () => {
                       </div>
                       <h3 className="text-3xl font-black text-white tracking-tighter mb-6 leading-tight">Vue d'ensemble <br/><span className="text-red-600">Stratégique</span></h3>
                       
-                      <div className="grid grid-cols-2 gap-6 my-10">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 my-10">
                          <div className="p-6 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all cursor-default">
                             <span className="text-[9px] font-black text-white/30 uppercase tracking-widest block mb-1">Pickups attendus</span>
                             <span className="text-3xl font-black text-white">{data.reservations.todayPickups}</span>
@@ -390,7 +390,7 @@ export const AdminOverviewDashboard = () => {
                       </p>
                    </div>
                    <div className="mt-12 flex items-center gap-6">
-                      <Link href="/admin/deliveries" className="group/btn h-14 pr-8 pl-6 rounded-2xl bg-white flex items-center justify-center font-black text-neutral-900 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/20">
+                     <Link href="/admin/deliveries" className="group/btn h-14 w-full sm:w-auto pr-8 pl-6 rounded-2xl bg-white flex items-center justify-center font-black text-neutral-900 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/20">
                          Gestion Logistique
                          <ArrowRight size={18} className="ml-3 transition-transform group-hover/btn:translate-x-1" />
                       </Link>
@@ -405,7 +405,7 @@ export const AdminOverviewDashboard = () => {
                <div className="h-px flex-1 bg-slate-100" />
             </div>
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
               {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
@@ -450,12 +450,12 @@ const KPICard = ({ label, value, icon, hint, color, trend, subValue, isWarning }
    };
 
    return (
-     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-xl group relative overflow-hidden flex flex-col justify-between h-56">
+    <div className="bg-white rounded-[2.5rem] p-6 sm:p-8 border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-xl group relative overflow-hidden flex flex-col justify-between min-h-[14rem] sm:h-56">
         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50/50 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-1000 group-hover:scale-150"></div>
         
-        <div className="flex items-center justify-between relative z-10">
+        <div className="flex items-start justify-between gap-3 relative z-10">
            <div className={cn(
-             "h-14 w-14 rounded-2xl flex items-center justify-center bg-gradient-to-br border transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
+             "h-12 w-12 sm:h-14 sm:w-14 rounded-2xl flex items-center justify-center bg-gradient-to-br border transition-all duration-500 group-hover:scale-110 group-hover:rotate-6",
              colors[color as keyof typeof colors]
            )}>
              {icon}

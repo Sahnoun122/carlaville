@@ -96,7 +96,7 @@ export const FormSelectField = <
             <FormControl>
               <div className="relative">
                 {icon && (
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10">
+                  <div className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10">
                     {React.cloneElement(icon as React.ReactElement<any>, {
                       size: iconSize,
                     })}
@@ -104,12 +104,10 @@ export const FormSelectField = <
                 )}
 
                 <SelectTrigger
-
                   className={cn(
                     formStyles.selectTrigger,
-                    icon && 'pl-12',
-                    className
-                    
+                    icon && 'pl-11 sm:pl-12',
+                    className,
                   )}
                 >
                   <SelectValue placeholder={placeholder} />

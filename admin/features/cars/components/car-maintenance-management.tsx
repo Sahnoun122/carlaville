@@ -243,14 +243,14 @@ export const CarMaintenanceManagement = ({
              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Synchronisation...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+              <div className="overflow-x-auto [-webkit-overflow-scrolling:touch]">
             <table className="min-w-full divide-y divide-slate-100">
               <thead>
                 <tr className="bg-slate-50/50 text-left">
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Véhicule / Localisation</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Agence</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Statut Flotte</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Véhicule / Localisation</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Agence</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Statut Flotte</th>
+                      <th className="px-4 py-4 sm:px-6 sm:py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -271,7 +271,7 @@ export const CarMaintenanceManagement = ({
                   const status = statusConfig[car.availabilityStatus] || { label: car.availabilityStatus, class: 'bg-slate-100 text-slate-600', icon: AlertCircle };
                   return (
                     <tr key={carId} className="group hover:bg-slate-50/50 transition-all duration-300">
-                      <td className="px-6 py-5">
+                      <td className="px-4 py-4 sm:px-6 sm:py-5">
                          <div className="flex items-center gap-3">
                            <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-100 text-slate-600 shrink-0 transition-all group-hover:bg-red-50 group-hover:text-red-600">
                               <CarIcon size={18} />
@@ -282,13 +282,13 @@ export const CarMaintenanceManagement = ({
                            </div>
                          </div>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-4 py-4 sm:px-6 sm:py-5">
                          <div className="flex items-center gap-2">
                             <Building size={14} className="text-slate-300" />
                             <span className="text-xs font-bold text-slate-700">{resolveAgencyName(car)}</span>
                          </div>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-4 py-4 sm:px-6 sm:py-5">
                          <span className={cn(
                            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-tight",
                            status.class
@@ -297,7 +297,7 @@ export const CarMaintenanceManagement = ({
                             {status.label}
                          </span>
                       </td>
-                      <td className="px-6 py-5 text-right">
+                      <td className="px-4 py-4 sm:px-6 sm:py-5 text-right">
                          <div className="flex justify-end gap-2">
                             {!readOnly && (
                               car.availabilityStatus === AvailabilityStatus.MAINTENANCE ? (
