@@ -17,7 +17,7 @@ import {
   Navigation,
   Circle,
 } from 'lucide-react';
-import type { ComponentType, SVGProps } from 'react';
+import { useMemo, useRef, type ComponentType, type SVGProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
@@ -96,6 +96,22 @@ const nextTransitionMap: Partial<Record<ReservationStatus, { next: ReservationSt
   },
 };
 
+const manualTransitionMap: Partial<Record<ReservationStatus, ReservationStatus[]>> = {
+  [ReservationStatus.PENDING]: [ReservationStatus.CONFIRMED, ReservationStatus.REJECTED],
+  [ReservationStatus.CONFIRMED]: [
+    ReservationStatus.PENDING,
+    ReservationStatus.REJECTED,
+    ReservationStatus.READY_FOR_DELIVERY,
+  ],
+  [ReservationStatus.REJECTED]: [ReservationStatus.PENDING],
+  [ReservationStatus.READY_FOR_DELIVERY]: [ReservationStatus.IN_DELIVERY],
+  [ReservationStatus.IN_DELIVERY]: [ReservationStatus.DELIVERED],
+  [ReservationStatus.DELIVERED]: [ReservationStatus.ACTIVE_RENTAL],
+  [ReservationStatus.ACTIVE_RENTAL]: [ReservationStatus.RETURN_SCHEDULED],
+  [ReservationStatus.RETURN_SCHEDULED]: [ReservationStatus.RETURNED],
+  [ReservationStatus.RETURNED]: [ReservationStatus.COMPLETED],
+};
+
 interface DetailItemProps {
   icon: IconComponent;
   label: string;
@@ -124,6 +140,7 @@ export const ReservationDetailsModal = ({
   isActionPending,
 }: ReservationDetailsModalProps) => {
   const queryClient = useQueryClient();
+  const manualStatusRef = useRef<HTMLSelectElement>(null);
 
   const confirmPaymentMutation = useMutation({
     mutationFn: (data: { paymentMethod: string; amountCollected: number }) => 
@@ -137,6 +154,12 @@ export const ReservationDetailsModal = ({
       toast.error('Erreur lors de la confirmation du paiement');
     }
   });
+
+  const manualOptions = useMemo(() => {
+    if (!reservation) return [] as ReservationStatus[];
+    const transitions = manualTransitionMap[reservation.status] || [];
+    return [reservation.status, ...transitions];
+  }, [reservation]);
 
   if (!reservation) return null;
 
@@ -162,6 +185,50 @@ export const ReservationDetailsModal = ({
   const canAdvanceWorkflow =
     Boolean(nextTransition) &&
     !(vehicleBlocked && nextStepNeedsOperationalVehicle);
+
+  const handleApplyStatusChange = () => {
+    const manualTargetStatus =
+      (manualStatusRef.current?.value as ReservationStatus | undefined) ||
+      reservation.status;
+
+    if (!manualTargetStatus || manualTargetStatus === reservation.status) {
+      toast.info('Choisissez un statut different avant de valider.');
+      return;
+    }
+
+    if (!manualOptions.includes(manualTargetStatus)) {
+      toast.error('Transition non autorisee depuis le statut actuel.');
+      return;
+    }
+
+    const targetNeedsOperationalVehicle =
+      manualTargetStatus === ReservationStatus.READY_FOR_DELIVERY ||
+      manualTargetStatus === ReservationStatus.IN_DELIVERY ||
+      manualTargetStatus === ReservationStatus.DELIVERED ||
+      manualTargetStatus === ReservationStatus.ACTIVE_RENTAL;
+
+    if (vehicleBlocked && targetNeedsOperationalVehicle) {
+      toast.error(`Impossible: le vehicule est en ${availabilityLabel.toLowerCase()}.`);
+      return;
+    }
+
+    if (manualTargetStatus === ReservationStatus.CONFIRMED) {
+      onConfirm?.(rid);
+      return;
+    }
+
+    if (manualTargetStatus === ReservationStatus.REJECTED) {
+      onReject?.(rid);
+      return;
+    }
+
+    if (manualTargetStatus === ReservationStatus.PENDING) {
+      onSuspend?.(rid);
+      return;
+    }
+
+    onProgress?.(rid, manualTargetStatus);
+  };
 
   const availabilityLabel =
     car?.availabilityStatus === AvailabilityStatus.AVAILABLE
@@ -378,6 +445,41 @@ export const ReservationDetailsModal = ({
                 Impossible d&apos;avancer: le véhicule est en {availabilityLabel.toLowerCase()}.
               </div>
             )}
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:p-5">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Changement manuel</p>
+                  <p className="text-xs font-semibold text-slate-600">
+                    Modifiez le statut directement depuis cette fenetre.
+                  </p>
+                </div>
+
+                <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center">
+                  <select
+                    ref={manualStatusRef}
+                    key={`${rid}-${reservation.status}`}
+                    defaultValue={reservation.status}
+                    className="h-10 min-w-[220px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-100"
+                    disabled={isActionPending}
+                  >
+                    {manualOptions.map((optionStatus) => (
+                      <option key={optionStatus} value={optionStatus}>
+                        {statusConfig[optionStatus]?.label || optionStatus}
+                      </option>
+                    ))}
+                  </select>
+
+                  <Button
+                    onClick={handleApplyStatusChange}
+                    disabled={isActionPending}
+                    className="h-10 rounded-xl bg-slate-900 px-5 text-xs font-black uppercase tracking-wider text-white hover:bg-slate-800"
+                  >
+                    Appliquer
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <hr className="border-slate-100" />
