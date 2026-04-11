@@ -522,14 +522,12 @@ export class ReservationsService {
     
     const reservation = await this.findById(id);
     console.log('Current Status:', reservation.status);
-    // Only allow payment on relevant statuses
+    // Cash collection is allowed only after vehicle handoff/rental starts.
     const allowedStatuses = [
-      ReservationStatus.CONFIRMED,
-      ReservationStatus.READY_FOR_DELIVERY,
-      ReservationStatus.IN_DELIVERY,
       ReservationStatus.DELIVERED,
       ReservationStatus.ACTIVE_RENTAL,
       ReservationStatus.RETURN_SCHEDULED,
+      ReservationStatus.RETURNED,
       ReservationStatus.COMPLETED,
     ];
 

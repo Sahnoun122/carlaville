@@ -271,7 +271,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
 
    const canConfirmReservation = useMemo(() => {
       if (!reservation) return false;
-      return reservation.status === 'pending' || reservation.paymentStatus === 'unpaid';
+      return reservation.status === 'pending';
    }, [reservation]);
 
   const handleConfirmReservation = async () => {

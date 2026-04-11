@@ -186,6 +186,19 @@ export const ReservationDetailsModal = ({
     Boolean(nextTransition) &&
     !(vehicleBlocked && nextStepNeedsOperationalVehicle);
 
+  const canCollectCash =
+    reservation.paymentStatus === 'unpaid' &&
+    [
+      ReservationStatus.DELIVERED,
+      ReservationStatus.ACTIVE_RENTAL,
+      ReservationStatus.RETURN_SCHEDULED,
+      ReservationStatus.RETURNED,
+      ReservationStatus.COMPLETED,
+    ].includes(reservation.status);
+
+  const waitingForHandoffBeforeCash =
+    reservation.paymentStatus === 'unpaid' && !canCollectCash;
+
   const handleApplyStatusChange = () => {
     const manualTargetStatus =
       (manualStatusRef.current?.value as ReservationStatus | undefined) ||
@@ -519,7 +532,13 @@ export const ReservationDetailsModal = ({
             </div>
 
             {/* Payment Collection Action Card */}
-            {reservation.paymentStatus === 'unpaid' && (
+            {waitingForHandoffBeforeCash && (
+              <div className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-800">
+                Encaissement cash disponible apres remise du vehicule au client.
+              </div>
+            )}
+
+            {canCollectCash && (
               <div className="mt-6 p-8 rounded-[2rem] border-2 border-dashed border-emerald-200 bg-emerald-50/30 flex flex-col md:flex-row items-center justify-between gap-6 transition-all hover:bg-emerald-50/50">
                 <div className="space-y-1">
                   <h4 className="text-lg font-black text-emerald-900">Encaissement au Client</h4>

@@ -91,11 +91,13 @@ export default function ReservationsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
-    async function fetchReservations() {
+    async function fetchReservations(isInitial = false) {
+      if (isInitial) setLoading(true);
       const token = localStorage.getItem('carlaville_token');
       try {
         const res = await fetch(`${API_BASE_URL}/client/reservations?limit=100`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store',
         });
         if (res.ok) {
           const data = await res.json();
@@ -104,10 +106,27 @@ export default function ReservationsPage() {
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
+        if (isInitial) setLoading(false);
       }
     }
-    fetchReservations();
+
+    fetchReservations(true);
+
+    const intervalId = window.setInterval(() => {
+      fetchReservations(false);
+    }, 15000);
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchReservations(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
   }, []);
 
   const filteredReservations = useMemo(() => {

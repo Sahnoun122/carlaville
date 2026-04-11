@@ -79,12 +79,14 @@ export default function DashboardPage() {
    const [loading, setLoading] = useState(true);
 
    useEffect(() => {
-      async function fetchReservations() {
+         async function fetchReservations(isInitial = false) {
+            if (isInitial) setLoading(true);
          const token = localStorage.getItem('carlaville_token');
          try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://carlaville-ykc8.vercel.app';
             const res = await fetch(`${API_URL}/api/client/reservations?limit=100`, {
-               headers: { 'Authorization': `Bearer ${token}` }
+                  headers: { 'Authorization': `Bearer ${token}` },
+                  cache: 'no-store',
             });
             if (res.ok) {
                const data = await res.json();
@@ -93,10 +95,28 @@ export default function DashboardPage() {
          } catch (err) {
             console.error(err);
          } finally {
-            setLoading(false);
+               if (isInitial) setLoading(false);
          }
       }
-      fetchReservations();
+
+         fetchReservations(true);
+
+         const intervalId = window.setInterval(() => {
+            fetchReservations(false);
+         }, 15000);
+
+         const onVisible = () => {
+            if (document.visibilityState === 'visible') {
+               fetchReservations(false);
+            }
+         };
+
+         document.addEventListener('visibilitychange', onVisible);
+
+         return () => {
+            window.clearInterval(intervalId);
+            document.removeEventListener('visibilitychange', onVisible);
+         };
    }, []);
 
    const stats = useMemo(() => {
