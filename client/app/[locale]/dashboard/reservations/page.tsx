@@ -17,6 +17,21 @@ import { API_BASE_URL } from '@/lib/api-config';
 
 const resolveReservationId = (reservation: { id?: string; _id?: string }) => reservation.id || reservation._id || '';
 
+const formatDate = (value?: string) => {
+  const date = new Date(String(value ?? ''));
+  return Number.isNaN(date.getTime()) ? 'Date indisponible' : date.toLocaleDateString();
+};
+
+const reservationTotal = (reservation: ReservationListItem) => {
+  if (typeof reservation.pricingBreakdown?.total === 'number' && Number.isFinite(reservation.pricingBreakdown.total)) {
+    return reservation.pricingBreakdown.total;
+  }
+
+  const daily = Number(reservation.pricingBreakdown?.daily || 0);
+  const days = Number(reservation.rentalDays || 0);
+  return daily * days;
+};
+
 const statusLabels: Record<string, string> = {
   pending: 'En attente',
   confirmed: 'Confirmée',
@@ -205,7 +220,7 @@ export default function ReservationsPage() {
 
                   <div className="flex flex-wrap gap-x-6 gap-y-3 mt-4">
                     <InfoItem icon={<MapPin className="w-3.5 h-3.5" />} text={res.pickupLocation} />
-                    <InfoItem icon={<Calendar className="w-3.5 h-3.5" />} text={new Date(res.pickupDate).toLocaleDateString()} />
+                    <InfoItem icon={<Calendar className="w-3.5 h-3.5" />} text={formatDate(res.pickupDate)} />
                     <InfoItem icon={<Clock className="w-3.5 h-3.5" />} text={res.pickupTime} />
                   </div>
                 </div>
@@ -214,7 +229,7 @@ export default function ReservationsPage() {
                 <div className="lg:text-right flex lg:flex-col justify-between items-center lg:items-end gap-2 border-t lg:border-t-0 pt-4 lg:pt-0 border-gray-50">
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Montant total</p>
-                    <p className="text-xl font-bold text-gray-900">{(res.pricingBreakdown?.total || (res.pricingBreakdown?.daily * res.rentalDays) || 0).toLocaleString()} MAD</p>
+                    <p className="text-xl font-bold text-gray-900">{reservationTotal(res).toLocaleString()} MAD</p>
                   </div>
                   {res.status === 'pending' || res.paymentStatus === 'unpaid' ? (
                     <Link href={`/checkout/${resolveReservationId(res)}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">

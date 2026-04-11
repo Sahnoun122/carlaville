@@ -24,6 +24,11 @@ import { useAuth } from '@/providers/auth-provider';
 
 const resolveReservationId = (reservation: { id?: string; _id?: string }) => reservation.id || reservation._id || '';
 
+const formatDate = (value?: string) => {
+   const date = new Date(String(value ?? ''));
+   return Number.isNaN(date.getTime()) ? 'Date indisponible' : date.toLocaleDateString();
+};
+
 const activeWorkflowStatuses = [
    'confirmed',
    'ready-for-delivery',
@@ -211,7 +216,7 @@ export default function DashboardPage() {
 
                               <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 py-6 border-y border-gray-50">
                                  <DetailItem label="Lieu Retrait" value={activeReservation.pickupLocation} icon={<MapPin className="w-3.5 h-3.5" />} />
-                                 <DetailItem label="Période" value={`${new Date(activeReservation.pickupDate).toLocaleDateString()} - ${new Date(activeReservation.returnDate).toLocaleDateString()}`} icon={<Calendar className="w-3.5 h-3.5" />} />
+                                 <DetailItem label="Période" value={`${formatDate(activeReservation.pickupDate)} - ${formatDate(activeReservation.returnDate)}`} icon={<Calendar className="w-3.5 h-3.5" />} />
                                  <div className="col-span-2 md:col-span-1">
                                     <DetailItem label="Total Brute" value={`${(activeReservation.pricingBreakdown?.total || 0).toLocaleString()} MAD`} icon={<CircleDollarSign className="w-3.5 h-3.5 text-red-600" />} />
                                  </div>

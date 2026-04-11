@@ -42,6 +42,7 @@ interface ReservationCar {
    brand?: string;
    model?: string;
    category?: string;
+   dailyPrice?: number;
    transmission?: string;
    fuelType?: string;
    seats?: number;
@@ -160,8 +161,8 @@ const getRentalDays = (reservation: ReservationDetails | null) => {
       return reservation.rentalDays;
    }
 
-   const pickup = new Date(reservation?.pickupDate);
-   const returnDate = new Date(reservation?.returnDate);
+   const pickup = new Date(String(reservation?.pickupDate ?? ''));
+   const returnDate = new Date(String(reservation?.returnDate ?? ''));
 
    if (Number.isNaN(pickup.getTime()) || Number.isNaN(returnDate.getTime())) {
       return 1;
