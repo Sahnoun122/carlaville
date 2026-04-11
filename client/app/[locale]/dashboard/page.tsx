@@ -21,7 +21,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/providers/auth-provider';
-import ReservationDetailModal from '@/components/ReservationDetailModal';
+
+const resolveReservationId = (reservation: { id?: string; _id?: string }) => reservation.id || reservation._id || '';
 
 const activeWorkflowStatuses = [
    'confirmed',
@@ -49,6 +50,8 @@ const statusLabels: Record<string, string> = {
 const resolveStatusLabel = (status?: string) => statusLabels[status || ''] || status || 'Inconnu';
 
 interface DashboardReservation {
+   id?: string;
+   _id?: string;
    status: string;
    bookingReference?: string;
    pickupLocation?: string;
@@ -69,8 +72,6 @@ export default function DashboardPage() {
    const { user } = useAuth();
    const [reservations, setReservations] = useState<DashboardReservation[]>([]);
    const [loading, setLoading] = useState(true);
-   const [selectedReservation, setSelectedReservation] = useState<DashboardReservation | null>(null);
-   const [isModalOpen, setIsModalOpen] = useState(false);
 
    useEffect(() => {
       async function fetchReservations() {
@@ -231,12 +232,12 @@ export default function DashboardPage() {
                               </div>
 
                               <div className="pt-6">
-                                 <button
-                                    onClick={() => { setSelectedReservation(activeReservation); setIsModalOpen(true); }}
+                                 <Link
+                                    href={`/checkout/${resolveReservationId(activeReservation)}`}
                                     className="w-full md:w-auto px-10 py-3.5 bg-neutral-900 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-xl hover:bg-neutral-800 transition-all flex items-center justify-center gap-3 group"
                                  >
                                     Consulter le suivi <ChevronRight className="w-4 h-4 text-red-600 group-hover:translate-x-1 transition-transform" />
-                                 </button>
+                                 </Link>
                               </div>
                            </div>
                         </div>
@@ -309,11 +310,6 @@ export default function DashboardPage() {
             </div>
          </div>
 
-         <ReservationDetailModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            reservation={selectedReservation}
-         />
       </div>
    );
 }

@@ -13,7 +13,6 @@ import {
   Plus
 } from 'lucide-react';
 import Link from 'next/link';
-import ReservationDetailModal from '@/components/ReservationDetailModal';
 import { API_BASE_URL } from '@/lib/api-config';
 
 const resolveReservationId = (reservation: { id?: string; _id?: string }) => reservation.id || reservation._id || '';
@@ -75,8 +74,6 @@ export default function ReservationsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedReservation, setSelectedReservation] = useState<ReservationListItem | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchReservations() {
@@ -224,12 +221,12 @@ export default function ReservationsPage() {
                       Finaliser <ChevronRight className="w-4 h-4" />
                     </Link>
                   ) : (
-                    <button
-                      onClick={() => { setSelectedReservation(res); setIsModalOpen(true); }}
+                    <Link
+                      href={`/checkout/${resolveReservationId(res)}`}
                       className="text-xs font-black text-neutral-900 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg flex items-center gap-1 uppercase tracking-wider transition-all"
                     >
                       Suivi <ChevronRight className="w-4 h-4 text-red-600" />
-                    </button>
+                    </Link>
                   )}
                 </div>
               </div>
@@ -237,12 +234,6 @@ export default function ReservationsPage() {
           ))}
         </div>
       )}
-
-      <ReservationDetailModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        reservation={selectedReservation}
-      />
     </div>
   );
 }
