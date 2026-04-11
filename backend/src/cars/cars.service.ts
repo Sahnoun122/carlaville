@@ -27,19 +27,26 @@ const resolveRecordId = (record: { id?: unknown; _id?: unknown }) => {
   return '';
 };
 
+const toPlainObject = <T>(value: T): T => {
+  if (value && typeof value === 'object' && 'toObject' in (value as object)) {
+    const maybeDocument = value as { toObject?: () => T };
+    if (typeof maybeDocument.toObject === 'function') {
+      return maybeDocument.toObject();
+    }
+  }
+
+  return value;
+};
+
 const normalizeCarForDisplay = <T extends { images?: string[] }>(car: T) => {
-  const plainCar =
-    typeof (car as { toObject?: () => Record<string, unknown> }).toObject ===
-    'function'
-      ? (car as { toObject: () => Record<string, unknown> }).toObject()
-      : { ...car };
-  const id = resolveRecordId(plainCar as { id?: unknown; _id?: unknown });
+  const plainCar = toPlainObject(car) as T & { id?: unknown; _id?: unknown };
+  const id = resolveRecordId(plainCar);
 
   return {
     ...plainCar,
     id,
-    _id: (plainCar as { _id?: unknown })._id ?? id,
-    images: normalizeMediaUrls(car.images, getMediaBaseUrl()),
+    _id: plainCar._id ?? id,
+    images: normalizeMediaUrls(plainCar.images, getMediaBaseUrl()),
   };
 };
 

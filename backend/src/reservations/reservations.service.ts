@@ -25,21 +25,35 @@ import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { PaymentStatus } from '../common/enums/payment-status.enum';
 import { getMediaBaseUrl, normalizeMediaUrls } from '../common/utils/media-url';
 
-const normalizeReservationForDisplay = <T extends { carId?: unknown }>(reservation: T) => {
-  const car = reservation.carId;
-
-  if (!car || typeof car !== 'object') {
-    return reservation;
+const toPlainObject = <T>(value: T): T => {
+  if (value && typeof value === 'object' && 'toObject' in (value as object)) {
+    const maybeDocument = value as { toObject?: () => T };
+    if (typeof maybeDocument.toObject === 'function') {
+      return maybeDocument.toObject();
+    }
   }
 
-  const carRecord = car as { images?: string[]; imageUrl?: string };
+  return value;
+};
+
+const normalizeReservationForDisplay = <T extends { carId?: unknown }>(reservation: T) => {
+  const reservationObject = toPlainObject(reservation) as T;
+  const car = reservationObject.carId;
+
+  if (!car || typeof car !== 'object') {
+    return reservationObject;
+  }
+
+  const carRecord = toPlainObject(car as { images?: string[]; imageUrl?: string });
 
   return {
-    ...reservation,
+    ...reservationObject,
     carId: {
-      ...(car as Record<string, unknown>),
+      ...(carRecord as Record<string, unknown>),
       images: normalizeMediaUrls(carRecord.images, getMediaBaseUrl()),
-      imageUrl: carRecord.imageUrl ? normalizeMediaUrls([carRecord.imageUrl], getMediaBaseUrl())[0] : carRecord.imageUrl,
+      imageUrl: carRecord.imageUrl
+        ? normalizeMediaUrls([carRecord.imageUrl], getMediaBaseUrl())[0]
+        : carRecord.imageUrl,
     },
   };
 };
