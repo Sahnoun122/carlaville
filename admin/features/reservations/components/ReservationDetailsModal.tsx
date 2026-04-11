@@ -44,8 +44,8 @@ const statusConfig: Record<string, { label: string; class: string; icon: IconCom
   [ReservationStatus.CONFIRMED]: { label: 'Confirmée', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: Check },
   [ReservationStatus.REJECTED]: { label: 'Rejetée', class: 'border-rose-200 bg-rose-50 text-rose-700', icon: X },
   [ReservationStatus.READY_FOR_DELIVERY]: { label: 'Prête livraison', class: 'border-sky-200 bg-sky-50 text-sky-700', icon: Navigation },
-  [ReservationStatus.IN_DELIVERY]: { label: 'En livraison', class: 'border-indigo-200 bg-indigo-50 text-indigo-700', icon: Navigation },
-  [ReservationStatus.DELIVERED]: { label: 'Livrée', class: 'border-violet-200 bg-violet-50 text-violet-700', icon: Check },
+  [ReservationStatus.IN_DELIVERY]: { label: 'En route', class: 'border-indigo-200 bg-indigo-50 text-indigo-700', icon: Navigation },
+  [ReservationStatus.DELIVERED]: { label: 'Arrivée', class: 'border-violet-200 bg-violet-50 text-violet-700', icon: Check },
   [ReservationStatus.ACTIVE_RENTAL]: { label: 'Location active', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: Check },
   [ReservationStatus.RETURN_SCHEDULED]: { label: 'Retour programmé', class: 'border-amber-200 bg-amber-50 text-amber-700', icon: CalendarIcon },
   [ReservationStatus.RETURNED]: { label: 'Restituée', class: 'border-blue-200 bg-blue-50 text-blue-700', icon: Check },
@@ -54,62 +54,26 @@ const statusConfig: Record<string, { label: string; class: string; icon: IconCom
 };
 
 const workflowSteps: Array<{ status: ReservationStatus; label: string }> = [
-  { status: ReservationStatus.PENDING, label: 'Validation' },
+  { status: ReservationStatus.PENDING, label: 'En attente' },
   { status: ReservationStatus.CONFIRMED, label: 'Confirmée' },
-  { status: ReservationStatus.READY_FOR_DELIVERY, label: 'Préparation' },
-  { status: ReservationStatus.IN_DELIVERY, label: 'Livraison' },
-  { status: ReservationStatus.DELIVERED, label: 'Remise' },
-  { status: ReservationStatus.ACTIVE_RENTAL, label: 'Location' },
-  { status: ReservationStatus.RETURN_SCHEDULED, label: 'Retour prévu' },
-  { status: ReservationStatus.RETURNED, label: 'Restitution' },
-  { status: ReservationStatus.COMPLETED, label: 'Clôturée' },
+  { status: ReservationStatus.READY_FOR_DELIVERY, label: 'Prête livraison' },
+  { status: ReservationStatus.IN_DELIVERY, label: 'En route' },
+  { status: ReservationStatus.DELIVERED, label: 'Arrivée' },
 ];
-
-const nextTransitionMap: Partial<Record<ReservationStatus, { next: ReservationStatus; cta: string }>> = {
-  [ReservationStatus.CONFIRMED]: {
-    next: ReservationStatus.READY_FOR_DELIVERY,
-    cta: 'Préparer livraison',
-  },
-  [ReservationStatus.READY_FOR_DELIVERY]: {
-    next: ReservationStatus.IN_DELIVERY,
-    cta: 'Démarrer livraison',
-  },
-  [ReservationStatus.IN_DELIVERY]: {
-    next: ReservationStatus.DELIVERED,
-    cta: 'Marquer livrée',
-  },
-  [ReservationStatus.DELIVERED]: {
-    next: ReservationStatus.ACTIVE_RENTAL,
-    cta: 'Activer location',
-  },
-  [ReservationStatus.ACTIVE_RENTAL]: {
-    next: ReservationStatus.RETURN_SCHEDULED,
-    cta: 'Programmer retour',
-  },
-  [ReservationStatus.RETURN_SCHEDULED]: {
-    next: ReservationStatus.RETURNED,
-    cta: 'Marquer restituée',
-  },
-  [ReservationStatus.RETURNED]: {
-    next: ReservationStatus.COMPLETED,
-    cta: 'Clôturer dossier',
-  },
-};
 
 const manualTransitionMap: Partial<Record<ReservationStatus, ReservationStatus[]>> = {
   [ReservationStatus.PENDING]: [ReservationStatus.CONFIRMED, ReservationStatus.REJECTED],
-  [ReservationStatus.CONFIRMED]: [
-    ReservationStatus.PENDING,
-    ReservationStatus.REJECTED,
-    ReservationStatus.READY_FOR_DELIVERY,
-  ],
-  [ReservationStatus.REJECTED]: [ReservationStatus.PENDING],
+  [ReservationStatus.CONFIRMED]: [ReservationStatus.READY_FOR_DELIVERY],
   [ReservationStatus.READY_FOR_DELIVERY]: [ReservationStatus.IN_DELIVERY],
   [ReservationStatus.IN_DELIVERY]: [ReservationStatus.DELIVERED],
-  [ReservationStatus.DELIVERED]: [ReservationStatus.ACTIVE_RENTAL],
-  [ReservationStatus.ACTIVE_RENTAL]: [ReservationStatus.RETURN_SCHEDULED],
-  [ReservationStatus.RETURN_SCHEDULED]: [ReservationStatus.RETURNED],
-  [ReservationStatus.RETURNED]: [ReservationStatus.COMPLETED],
+};
+
+const actionLabelMap: Partial<Record<ReservationStatus, string>> = {
+  [ReservationStatus.CONFIRMED]: 'Confirmer',
+  [ReservationStatus.REJECTED]: 'Rejeter',
+  [ReservationStatus.READY_FOR_DELIVERY]: 'Marquer prête livraison',
+  [ReservationStatus.IN_DELIVERY]: 'Mettre en route',
+  [ReservationStatus.DELIVERED]: 'Marquer arrivée',
 };
 
 interface DetailItemProps {
@@ -168,32 +132,30 @@ export const ReservationDetailsModal = ({
   const carRegistration =
     (car as (Car & { registrationNumber?: string }) | null)?.registrationNumber ||
     'NON DÉFINI';
-  const currentStepIndex = workflowSteps.findIndex((step) => step.status === reservation.status);
-  const nextTransition = nextTransitionMap[reservation.status];
+  const currentStepIndex = (() => {
+    const index = workflowSteps.findIndex((step) => step.status === reservation.status);
+    if (index !== -1) return index;
+
+    // Consider later lifecycle states as "Arrivée" reached.
+    if (
+      reservation.status === ReservationStatus.ACTIVE_RENTAL ||
+      reservation.status === ReservationStatus.RETURN_SCHEDULED ||
+      reservation.status === ReservationStatus.RETURNED ||
+      reservation.status === ReservationStatus.COMPLETED
+    ) {
+      return workflowSteps.findIndex((step) => step.status === ReservationStatus.DELIVERED);
+    }
+
+    return -1;
+  })();
 
   const vehicleBlocked =
     car?.availabilityStatus === AvailabilityStatus.MAINTENANCE ||
     car?.availabilityStatus === AvailabilityStatus.UNAVAILABLE;
 
-  const nextStepNeedsOperationalVehicle =
-    nextTransition?.next === ReservationStatus.READY_FOR_DELIVERY ||
-    nextTransition?.next === ReservationStatus.IN_DELIVERY ||
-    nextTransition?.next === ReservationStatus.DELIVERED ||
-    nextTransition?.next === ReservationStatus.ACTIVE_RENTAL;
-
-  const canAdvanceWorkflow =
-    Boolean(nextTransition) &&
-    !(vehicleBlocked && nextStepNeedsOperationalVehicle);
-
   const canCollectCash =
     reservation.paymentStatus === 'unpaid' &&
-    [
-      ReservationStatus.DELIVERED,
-      ReservationStatus.ACTIVE_RENTAL,
-      ReservationStatus.RETURN_SCHEDULED,
-      ReservationStatus.RETURNED,
-      ReservationStatus.COMPLETED,
-    ].includes(reservation.status);
+    reservation.status === ReservationStatus.DELIVERED;
 
   const waitingForHandoffBeforeCash =
     reservation.paymentStatus === 'unpaid' && !canCollectCash;
@@ -457,9 +419,9 @@ export const ReservationDetailsModal = ({
               </div>
             </div>
 
-            {vehicleBlocked && nextStepNeedsOperationalVehicle && (
+            {vehicleBlocked && (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                Impossible d&apos;avancer: le véhicule est en {availabilityLabel.toLowerCase()}.
+                Attention: certaines étapes livraison sont bloquées car le véhicule est en {availabilityLabel.toLowerCase()}.
               </div>
             )}
 
@@ -488,10 +450,12 @@ export const ReservationDetailsModal = ({
                         variant="outline"
                         className={cn(
                           'h-10 justify-start rounded-xl border-slate-200 bg-white px-3 text-xs font-black uppercase tracking-wider text-slate-700 hover:bg-slate-100',
+                          targetStatus === ReservationStatus.REJECTED && 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
+                          targetStatus === ReservationStatus.CONFIRMED && 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
                           isBlockedTarget && 'opacity-60',
                         )}
                       >
-                        {statusConfig[targetStatus]?.label || targetStatus}
+                        {actionLabelMap[targetStatus] || statusConfig[targetStatus]?.label || targetStatus}
                       </Button>
                     );
                   })}
@@ -539,7 +503,7 @@ export const ReservationDetailsModal = ({
             {/* Payment Collection Action Card */}
             {waitingForHandoffBeforeCash && (
               <div className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-800">
-                Encaissement cash disponible apres remise du vehicule au client.
+                Encaissement cash disponible uniquement apres l&apos;etape Arrivee.
               </div>
             )}
 
@@ -547,7 +511,7 @@ export const ReservationDetailsModal = ({
               <div className="mt-6 p-8 rounded-[2rem] border-2 border-dashed border-emerald-200 bg-emerald-50/30 flex flex-col md:flex-row items-center justify-between gap-6 transition-all hover:bg-emerald-50/50">
                 <div className="space-y-1">
                   <h4 className="text-lg font-black text-emerald-900">Encaissement au Client</h4>
-                  <p className="text-emerald-700/70 text-sm font-medium">Confirmez que vous avez reçu le montant total de la part du client lors de la remise des clés.</p>
+                  <p className="text-emerald-700/70 text-sm font-medium">Le client est marque Arrivee. Confirmez maintenant la reception du cash de maniere officielle.</p>
                 </div>
                 <Button 
                    onClick={() => confirmPaymentMutation.mutate({ 
@@ -565,7 +529,7 @@ export const ReservationDetailsModal = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-8 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+        <div className="p-8 bg-slate-50 border-t border-slate-100 flex items-center justify-start gap-4">
           <Button
             variant="outline"
             onClick={onClose}
@@ -573,56 +537,6 @@ export const ReservationDetailsModal = ({
           >
             Fermer
           </Button>
-
-          <div className="flex items-center gap-3">
-            {reservation.status === ReservationStatus.PENDING ? (
-              <>
-                <Button
-                  onClick={() => onReject?.(rid)}
-                  disabled={isActionPending}
-                  variant="outline"
-                  className="h-12 px-8 rounded-xl border-rose-100 bg-rose-50 text-rose-700 font-bold hover:bg-rose-100 transition-all shadow-sm shadow-rose-100/50"
-                >
-                  <X size={18} className="mr-2" />
-                  Rejeter
-                </Button>
-                <Button
-                  onClick={() => onConfirm?.(rid)}
-                  disabled={isActionPending}
-                  className="h-12 px-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-xl shadow-emerald-200 transition-all"
-                >
-                  <Check size={18} className="mr-2" />
-                  Confirmer
-                </Button>
-              </>
-            ) : (
-              <>
-                {(reservation.status === ReservationStatus.CONFIRMED ||
-                  reservation.status === ReservationStatus.REJECTED) && (
-                  <Button
-                    onClick={() => onSuspend?.(rid)}
-                    disabled={isActionPending}
-                    variant="outline"
-                    className="h-12 px-8 rounded-xl border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all"
-                  >
-                    <Clock size={18} className="mr-2" />
-                    Suspendre
-                  </Button>
-                )}
-
-                {nextTransition && (
-                  <Button
-                    onClick={() => onProgress?.(rid, nextTransition.next)}
-                    disabled={isActionPending || !canAdvanceWorkflow}
-                    className="h-12 px-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black shadow-xl shadow-slate-200 transition-all disabled:opacity-60"
-                  >
-                    <Navigation size={18} className="mr-2" />
-                    {nextTransition.cta}
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
         </div>
       </div>
     </Modal>
