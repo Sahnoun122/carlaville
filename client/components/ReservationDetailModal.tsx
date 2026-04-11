@@ -5,30 +5,117 @@ import {
    MapPin,
    Calendar,
    Clock,
-   ShieldCheck,
    CheckCircle2,
-   CircleDollarSign,
    Info,
-   ChevronRight,
    Navigation,
    Fuel,
    Settings,
-   Users
+   Users,
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 interface ReservationDetailModalProps {
-   reservation: any;
+   reservation: ReservationDetails | null;
    isOpen: boolean;
    onClose: () => void;
 }
 
-export default function ReservationDetailModal({ reservation, isOpen, onClose }: ReservationDetailModalProps) {
-   const [mounted, setMounted] = useState(false);
+interface ReservationCar {
+   brand?: string;
+   model?: string;
+   year?: number;
+   transmission?: string;
+   fuelType?: string;
+   seats?: number;
+   city?: string;
+   imageUrl?: string;
+   images?: string[];
+   availabilityStatus?: 'available' | 'rented' | 'maintenance' | 'unavailable' | string;
+}
 
+interface ReservationDetails {
+   status: string;
+   bookingReference?: string;
+   carId?: ReservationCar;
+   pickupLocation?: string;
+   returnLocation?: string;
+   pickupDate?: string;
+   returnDate?: string;
+   pickupTime?: string;
+   returnTime?: string;
+   rentalDays?: number;
+   pricingBreakdown?: {
+      total?: number;
+      daily?: number;
+   };
+}
+
+const statusLabels: Record<string, string> = {
+   pending: 'En attente',
+   confirmed: 'Confirmée',
+   rejected: 'Rejetée',
+   'ready-for-delivery': 'Prête livraison',
+   'in-delivery': 'En livraison',
+   delivered: 'Livrée',
+   'active-rental': 'Location active',
+   'return-scheduled': 'Retour programmé',
+   returned: 'Restituée',
+   completed: 'Terminée',
+   cancelled: 'Annulée',
+};
+
+const workflowSteps: Array<{ status: string; label: string }> = [
+   { status: 'pending', label: 'Validation' },
+   { status: 'confirmed', label: 'Confirmée' },
+   { status: 'ready-for-delivery', label: 'Préparation' },
+   { status: 'in-delivery', label: 'Livraison' },
+   { status: 'delivered', label: 'Remise' },
+   { status: 'active-rental', label: 'Location' },
+   { status: 'return-scheduled', label: 'Retour prévu' },
+   { status: 'returned', label: 'Restitution' },
+   { status: 'completed', label: 'Clôturée' },
+];
+
+const statusBadgeClass = (status: string) => {
+   if (['rejected', 'cancelled'].includes(status)) return 'bg-rose-50 text-rose-700 border-rose-200';
+   if (['completed', 'returned'].includes(status)) return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+   if (['in-delivery', 'ready-for-delivery', 'delivered', 'active-rental', 'return-scheduled', 'confirmed'].includes(status)) {
+      return 'bg-sky-50 text-sky-700 border-sky-200';
+   }
+   return 'bg-amber-50 text-amber-700 border-amber-200';
+};
+
+const getStepProgress = (status: string) => {
+   const currentIndex = workflowSteps.findIndex((step) => step.status === status);
+   if (currentIndex <= 0) return '0%';
+   const ratio = (currentIndex / (workflowSteps.length - 1)) * 100;
+   return `${ratio}%`;
+};
+
+const formatDate = (value?: string) => {
+   if (!value) return 'Date indisponible';
+   const date = new Date(value);
+   return Number.isNaN(date.getTime()) ? 'Date invalide' : date.toLocaleDateString();
+};
+
+const vehicleStateLabel = (value?: string) => {
+   if (value === 'available') return 'Disponible';
+   if (value === 'rented') return 'Loué';
+   if (value === 'maintenance') return 'Maintenance';
+   if (value === 'unavailable') return 'Indisponible';
+   return 'Non défini';
+};
+
+const vehicleStateClass = (value?: string) => {
+   if (value === 'available') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+   if (value === 'rented') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+   if (value === 'maintenance') return 'bg-amber-50 text-amber-700 border-amber-200';
+   return 'bg-slate-100 text-slate-700 border-slate-200';
+};
+
+export default function ReservationDetailModal({ reservation, isOpen, onClose }: ReservationDetailModalProps) {
    useEffect(() => {
-      setMounted(true);
       if (isOpen) {
          document.body.style.overflow = 'hidden';
       } else {
@@ -39,10 +126,13 @@ export default function ReservationDetailModal({ reservation, isOpen, onClose }:
       };
    }, [isOpen]);
 
-   if (!isOpen || !reservation || !mounted) return null;
+   if (!isOpen || !reservation) return null;
+   if (typeof document === 'undefined') return null;
 
    const car = reservation.carId || {};
    const carImage = car.images?.[0] || car.imageUrl || "";
+   const normalizedStatus = reservation.status || 'pending';
+   const stepIndex = workflowSteps.findIndex((step) => step.status === normalizedStatus);
 
    const modalContent = (
       <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
@@ -85,11 +175,11 @@ export default function ReservationDetailModal({ reservation, isOpen, onClose }:
 
                      <div className="w-full lg:w-1/2 space-y-6">
                         <div>
-                           <span className="text-[10px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-3 py-1 rounded-full border border-red-100 mb-2 inline-block">
-                              {reservation.status}
+                           <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border mb-2 inline-block ${statusBadgeClass(normalizedStatus)}`}>
+                              {statusLabels[normalizedStatus] || normalizedStatus}
                            </span>
                            <h2 className="text-4xl font-black text-neutral-900 tracking-tighter leading-tight italic">
-                              {car.brand} {car.model}
+                              {car.brand || 'Véhicule'} {car.model || 'N/A'}
                            </h2>
                         </div>
 
@@ -97,7 +187,14 @@ export default function ReservationDetailModal({ reservation, isOpen, onClose }:
                            <SpecItem icon={<Settings size={14} />} label="Trans." value={car.transmission || "N/A"} />
                            <SpecItem icon={<Fuel size={14} />} label="Fuel" value={car.fuelType || "N/A"} />
                            <SpecItem icon={<Users size={14} />} label="Seats" value={car.seats || "N/A"} />
-                           <SpecItem icon={<Info size={14} />} label="Ref" value={reservation.bookingReference?.slice(-8).toUpperCase()} />
+                           <SpecItem icon={<Info size={14} />} label="Ref" value={reservation.bookingReference?.slice(-8).toUpperCase() || 'N/A'} />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                           <span className="text-[10px] font-black text-neutral-400 uppercase tracking-widest">État véhicule</span>
+                           <span className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${vehicleStateClass(car.availabilityStatus)}`}>
+                              {vehicleStateLabel(car.availabilityStatus)}
+                           </span>
                         </div>
                      </div>
                   </div>
@@ -110,13 +207,21 @@ export default function ReservationDetailModal({ reservation, isOpen, onClose }:
                         </h3>
                         <div className="relative flex justify-between gap-2 py-4">
                            <div className="absolute top-9 left-0 w-full h-[2px] bg-gray-50"></div>
-                           <div className="absolute top-9 left-0 h-[2px] bg-red-600 transition-all duration-1000 origin-left" style={{ width: getProgressWidth(reservation.status) }}></div>
+                           <div className="absolute top-9 left-0 h-[2px] bg-red-600 transition-all duration-1000 origin-left" style={{ width: getStepProgress(normalizedStatus) }}></div>
 
-                           <Step active={['confirmed', 'ready-for-delivery', 'in-delivery', 'active-rental', 'returned', 'completed'].includes(reservation.status)} label="Validé" />
-                           <Step active={['ready-for-delivery', 'in-delivery', 'active-rental', 'returned', 'completed'].includes(reservation.status)} label="Prête" />
-                           <Step active={['in-delivery', 'active-rental', 'returned', 'completed'].includes(reservation.status)} label="Livraison" />
-                           <Step active={['active-rental', 'returned', 'completed'].includes(reservation.status)} label="En Route" />
+                           {workflowSteps.map((step, index) => (
+                              <Step
+                                 key={step.status}
+                                 active={stepIndex >= index && stepIndex !== -1}
+                                 label={step.label}
+                              />
+                           ))}
                         </div>
+                        {car.availabilityStatus === 'maintenance' || car.availabilityStatus === 'unavailable' ? (
+                           <p className="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                              Le véhicule est actuellement {vehicleStateLabel(car.availabilityStatus).toLowerCase()}. Certaines étapes peuvent être temporairement bloquées.
+                           </p>
+                        ) : null}
                      </div>
 
                      <div className="bg-gray-50 rounded-3xl p-8 border border-gray-100">
@@ -139,13 +244,13 @@ export default function ReservationDetailModal({ reservation, isOpen, onClose }:
                      <LocationBox
                         label="Retrait"
                         value={reservation.pickupLocation}
-                        date={new Date(reservation.pickupDate).toLocaleDateString()}
+                        date={formatDate(reservation.pickupDate)}
                         time={reservation.pickupTime}
                      />
                      <LocationBox
                         label="Restitution"
                         value={reservation.returnLocation}
-                        date={new Date(reservation.returnDate).toLocaleDateString()}
+                        date={formatDate(reservation.returnDate)}
                         time={reservation.returnTime}
                      />
                   </div>
@@ -158,7 +263,7 @@ export default function ReservationDetailModal({ reservation, isOpen, onClose }:
    return createPortal(modalContent, document.body);
 }
 
-const SpecItem = ({ icon, label, value }: any) => (
+const SpecItem = ({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) => (
    <div className="bg-gray-50 border border-gray-100 p-4 rounded-2xl flex items-center gap-3">
       <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-neutral-400 shadow-sm">{icon}</div>
       <div>
@@ -168,7 +273,7 @@ const SpecItem = ({ icon, label, value }: any) => (
    </div>
 );
 
-const PriceRow = ({ label, value }: any) => (
+const PriceRow = ({ label, value }: { label: string; value: string | number }) => (
    <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-wide">
       <span className="text-gray-400">{label}</span>
       <span className="text-neutral-900">{value}</span>
@@ -186,7 +291,7 @@ const Step = ({ active, label }: { active: boolean, label: string }) => (
    </div>
 );
 
-function LocationBox({ label, value, date, time }: any) {
+function LocationBox({ label, value, date, time }: { label: string; value?: string; date: string; time?: string }) {
    return (
       <div className="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm flex items-start gap-4 hover:border-red-100 transition-colors">
          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-red-600">
@@ -202,14 +307,4 @@ function LocationBox({ label, value, date, time }: any) {
          </div>
       </div>
    );
-}
-
-function getProgressWidth(status: string) {
-   switch (status) {
-      case 'confirmed': return '0%';
-      case 'ready-for-delivery': return '33%';
-      case 'in-delivery': return '66%';
-      case 'active-rental': return '100%';
-      default: return '0%';
-   }
 }

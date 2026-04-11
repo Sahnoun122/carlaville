@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
   Calendar,
   MapPin,
   Car,
   Search,
-  Filter,
   Clock,
   ChevronRight,
   Loader2,
@@ -18,12 +18,64 @@ import { API_BASE_URL } from '@/lib/api-config';
 
 const resolveReservationId = (reservation: { id?: string; _id?: string }) => reservation.id || reservation._id || '';
 
+const statusLabels: Record<string, string> = {
+  pending: 'En attente',
+  confirmed: 'Confirmée',
+  rejected: 'Rejetée',
+  'ready-for-delivery': 'Prête livraison',
+  'in-delivery': 'En livraison',
+  delivered: 'Livrée',
+  'active-rental': 'Location active',
+  'return-scheduled': 'Retour programmé',
+  returned: 'Restituée',
+  completed: 'Terminée',
+  cancelled: 'Annulée',
+};
+
+const statusOrder = [
+  'pending',
+  'confirmed',
+  'ready-for-delivery',
+  'in-delivery',
+  'delivered',
+  'active-rental',
+  'return-scheduled',
+  'returned',
+  'completed',
+  'rejected',
+  'cancelled',
+];
+
+const resolveStatusLabel = (status?: string) => statusLabels[status || ''] || status || 'Inconnu';
+
+interface ReservationListItem {
+  id?: string;
+  _id?: string;
+  bookingReference?: string;
+  status: string;
+  paymentStatus?: string;
+  rentalDays?: number;
+  pickupLocation?: string;
+  pickupDate?: string;
+  pickupTime?: string;
+  carId?: {
+    brand?: string;
+    model?: string;
+    imageUrl?: string;
+    images?: string[];
+  };
+  pricingBreakdown?: {
+    total?: number;
+    daily?: number;
+  };
+}
+
 export default function ReservationsPage() {
-  const [reservations, setReservations] = useState<any[]>([]);
+  const [reservations, setReservations] = useState<ReservationListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedReservation, setSelectedReservation] = useState<any>(null);
+  const [selectedReservation, setSelectedReservation] = useState<ReservationListItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -67,7 +119,15 @@ export default function ReservationsPage() {
     </div>
   );
 
-  const statuses = Array.from(new Set(reservations.map(res => res.status)));
+  const statuses = Array.from(new Set(reservations.map((res) => res.status))).sort(
+    (a, b) => {
+      const ai = statusOrder.indexOf(a);
+      const bi = statusOrder.indexOf(b);
+      const safeA = ai === -1 ? Number.MAX_SAFE_INTEGER : ai;
+      const safeB = bi === -1 ? Number.MAX_SAFE_INTEGER : bi;
+      return safeA - safeB;
+    },
+  );
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4 animate-fade-in">
@@ -103,7 +163,7 @@ export default function ReservationsPage() {
           >
             <option value="all">Tous les statuts</option>
             {statuses.map(status => (
-              <option key={status} value={status}>{status.toUpperCase()}</option>
+              <option key={status} value={status}>{resolveStatusLabel(status)}</option>
             ))}
           </select>
         </div>
@@ -116,11 +176,11 @@ export default function ReservationsPage() {
             <Calendar className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">Aucune réservation trouvée</h3>
-          <p className="text-gray-500 text-sm">Essayez d'ajuster vos filtres de recherche.</p>
+          <p className="text-gray-500 text-sm">Essayez d&apos;ajuster vos filtres de recherche.</p>
         </div>
       ) : (
         <div className="space-y-6">
-          {filteredReservations.map((res: any) => (
+          {filteredReservations.map((res) => (
             <div key={resolveReservationId(res)} className="bg-gray-50 rounded-2xl border border-gray-100 soft-shadow overflow-hidden group hover:border-red-100 transition-all">
               <div className="p-5 md:p-6 flex flex-col lg:flex-row gap-6 lg:items-center">
 
@@ -138,7 +198,7 @@ export default function ReservationsPage() {
                       ['confirmed', 'active-rental', 'completed', 'delivered', 'returned', 'ready-for-delivery', 'in-delivery'].includes(res.status) ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                         'bg-gray-50 text-gray-500 border-gray-200'
                       }`}>
-                      {res.status}
+                      {resolveStatusLabel(res.status)}
                     </span>
                     <span className="text-[10px] font-bold text-gray-400 uppercase">Ref: {res.bookingReference}</span>
                   </div>
@@ -159,7 +219,7 @@ export default function ReservationsPage() {
                     <p className="text-[10px] font-bold text-gray-400 uppercase">Montant total</p>
                     <p className="text-xl font-bold text-gray-900">{(res.pricingBreakdown?.total || (res.pricingBreakdown?.daily * res.rentalDays) || 0).toLocaleString()} MAD</p>
                   </div>
-                  {['pending', 'unpaid'].includes(res.status) ? (
+                  {res.status === 'pending' || res.paymentStatus === 'unpaid' ? (
                     <Link href={`/checkout/${resolveReservationId(res)}`} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-wider">
                       Finaliser <ChevronRight className="w-4 h-4" />
                     </Link>
@@ -187,7 +247,7 @@ export default function ReservationsPage() {
   );
 }
 
-const InfoItem = ({ icon, text }: any) => (
+const InfoItem = ({ icon, text }: { icon: ReactNode; text?: string }) => (
   <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
     <div className="text-gray-300">{icon}</div>
     {text}

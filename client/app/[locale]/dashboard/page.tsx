@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import {
-   History as HistoryIcon,
    MapPin,
    Car,
-   Search,
-   Filter,
    Calendar,
    Clock,
    ChevronRight,
-   Loader2,
-   TrendingUp,
    Wallet,
    LogOut,
    ArrowUpRight,
@@ -21,21 +17,59 @@ import {
    Zap,
    CircleDollarSign,
    Compass,
-   ArrowRight,
    CheckCircle2,
-   Info
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/auth-provider';
 import ReservationDetailModal from '@/components/ReservationDetailModal';
 
+const activeWorkflowStatuses = [
+   'confirmed',
+   'ready-for-delivery',
+   'in-delivery',
+   'delivered',
+   'active-rental',
+   'return-scheduled',
+];
+
+const statusLabels: Record<string, string> = {
+   pending: 'En attente',
+   confirmed: 'Confirmée',
+   rejected: 'Rejetée',
+   'ready-for-delivery': 'Prête livraison',
+   'in-delivery': 'En livraison',
+   delivered: 'Livrée',
+   'active-rental': 'Location active',
+   'return-scheduled': 'Retour programmé',
+   returned: 'Restituée',
+   completed: 'Terminée',
+   cancelled: 'Annulée',
+};
+
+const resolveStatusLabel = (status?: string) => statusLabels[status || ''] || status || 'Inconnu';
+
+interface DashboardReservation {
+   status: string;
+   bookingReference?: string;
+   pickupLocation?: string;
+   pickupDate?: string;
+   returnDate?: string;
+   pricingBreakdown?: {
+      total?: number;
+   };
+   carId?: {
+      brand?: string;
+      model?: string;
+      imageUrl?: string;
+      images?: string[];
+   };
+}
+
 export default function DashboardPage() {
-   const router = useRouter();
    const { user } = useAuth();
-   const [reservations, setReservations] = useState<any[]>([]);
+   const [reservations, setReservations] = useState<DashboardReservation[]>([]);
    const [loading, setLoading] = useState(true);
-   const [selectedReservation, setSelectedReservation] = useState<any>(null);
+   const [selectedReservation, setSelectedReservation] = useState<DashboardReservation | null>(null);
    const [isModalOpen, setIsModalOpen] = useState(false);
 
    useEffect(() => {
@@ -61,7 +95,7 @@ export default function DashboardPage() {
 
    const stats = useMemo(() => {
       const totalSpent = reservations.reduce((acc, res) => acc + (res.pricingBreakdown?.total || 0), 0);
-      const active = reservations.filter(res => ['confirmed', 'active-rental', 'in-delivery', 'ready-for-delivery'].includes(res.status)).length;
+      const active = reservations.filter((res) => activeWorkflowStatuses.includes(res.status)).length;
       return {
          total: reservations.length,
          active,
@@ -77,7 +111,7 @@ export default function DashboardPage() {
       </div>
    );
 
-   const activeReservation = reservations.find(r => ['confirmed', 'active-rental', 'in-delivery', 'ready-for-delivery'].includes(r.status)) || reservations[0];
+   const activeReservation = reservations.find((r) => activeWorkflowStatuses.includes(r.status)) || reservations[0];
 
    return (
       <div className="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-1000 pb-20 px-4">
@@ -163,7 +197,9 @@ export default function DashboardPage() {
                            <div className="flex-1 space-y-6 w-full">
                               <div className="flex justify-between items-start">
                                  <div className="space-y-1">
-                                    <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] bg-red-50 px-2.5 py-1 rounded-lg border border-red-100">{activeReservation.status}</span>
+                                    <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.3em] bg-red-50 px-2.5 py-1 rounded-lg border border-red-100">
+                                       {resolveStatusLabel(activeReservation.status)}
+                                    </span>
                                     <h4 className="text-2xl font-black text-neutral-900 tracking-tighter">{activeReservation.carId?.brand} {activeReservation.carId?.model}</h4>
                                  </div>
                                  <div className="text-right">
@@ -187,9 +223,9 @@ export default function DashboardPage() {
                                     <div className="absolute top-4 left-0 w-full h-[2px] bg-gray-50"></div>
                                     <div className="absolute top-4 left-0 h-[2px] bg-red-600 transition-all duration-1000 origin-left" style={{ width: getProgressWidth(activeReservation.status) }}></div>
 
-                                    <StepNode label="Validé" active={['confirmed', 'active-rental', 'in-delivery', 'ready-for-delivery'].includes(activeReservation.status)} />
-                                    <StepNode label="Livraison" active={['active-rental', 'in-delivery', 'ready-for-delivery'].includes(activeReservation.status)} />
-                                    <StepNode label="Active" active={['active-rental'].includes(activeReservation.status)} />
+                                    <StepNode label="Validé" active={['confirmed', 'ready-for-delivery', 'in-delivery', 'delivered', 'active-rental', 'return-scheduled', 'returned', 'completed'].includes(activeReservation.status)} />
+                                    <StepNode label="Livraison" active={['ready-for-delivery', 'in-delivery', 'delivered', 'active-rental', 'return-scheduled', 'returned', 'completed'].includes(activeReservation.status)} />
+                                    <StepNode label="Active" active={['active-rental', 'return-scheduled', 'returned', 'completed'].includes(activeReservation.status)} />
                                     <StepNode label="Finalisation" active={['returned', 'completed'].includes(activeReservation.status)} />
                                  </div>
                               </div>
@@ -282,7 +318,19 @@ export default function DashboardPage() {
    );
 }
 
-const StatsCard = ({ icon, label, value, trend, gradient }: any) => (
+const StatsCard = ({
+   icon,
+   label,
+   value,
+   trend,
+   gradient,
+}: {
+   icon: ReactNode;
+   label: string;
+   value: string;
+   trend: string;
+   gradient: string;
+}) => (
    <div className={`relative p-8 rounded-[2.5rem] border border-gray-100 bg-white shadow-[0_15px_40px_-15px_rgba(0,0,0,0.02)] overflow-hidden group hover:-translate-y-1 transition-all duration-500`}>
       <div className={`absolute inset-0 bg-gradient-to-r ${gradient} opacity-0 group-hover:opacity-100 transition-opacity`}></div>
       <div className="relative z-10">
@@ -296,7 +344,15 @@ const StatsCard = ({ icon, label, value, trend, gradient }: any) => (
    </div>
 );
 
-const DetailItem = ({ label, value, icon }: any) => (
+const DetailItem = ({
+   label,
+   value,
+   icon,
+}: {
+   label: string;
+   value?: string;
+   icon: ReactNode;
+}) => (
    <div className="flex items-start gap-3 group">
       <div className="w-8 h-8 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
          {icon}
@@ -319,7 +375,7 @@ const StepNode = ({ label, active }: { label: string, active: boolean }) => (
    </div>
 );
 
-const InsightCard = ({ icon, text }: any) => (
+const InsightCard = ({ icon, text }: { icon: ReactNode; text: string }) => (
    <div className="flex items-start gap-4 text-xs font-bold leading-relaxed text-gray-400 italic">
       <div className="shrink-0">{icon}</div>
       <p>{text}</p>
@@ -328,10 +384,12 @@ const InsightCard = ({ icon, text }: any) => (
 
 function getProgressWidth(status: string) {
    switch (status) {
-      case 'confirmed': return '33%';
+      case 'confirmed': return '25%';
       case 'ready-for-delivery':
-      case 'in-delivery': return '66%';
-      case 'active-rental': return '100.1%';
+      case 'in-delivery':
+      case 'delivered': return '55%';
+      case 'active-rental':
+      case 'return-scheduled': return '78%';
       case 'returned':
       case 'completed': return '100.1%';
       default: return '0%';

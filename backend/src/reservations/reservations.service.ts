@@ -279,7 +279,7 @@ export class ReservationsService {
     const reservations = await this.reservationModel
       .find(query)
       .populate('agencyId', 'name')
-      .populate('carId', 'brand model images')
+      .populate('carId', 'brand model year transmission fuelType seats city images imageUrl availabilityStatus')
       .populate('assignedDeliveryAgentId', 'name')
       .skip((page - 1) * limit)
       .limit(limit)
