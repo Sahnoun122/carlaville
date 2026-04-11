@@ -17,7 +17,7 @@ import {
   Navigation,
   Circle,
 } from 'lucide-react';
-import { useMemo, useRef, type ComponentType, type SVGProps } from 'react';
+import { useMemo, type ComponentType, type SVGProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
@@ -140,7 +140,6 @@ export const ReservationDetailsModal = ({
   isActionPending,
 }: ReservationDetailsModalProps) => {
   const queryClient = useQueryClient();
-  const manualStatusRef = useRef<HTMLSelectElement>(null);
 
   const confirmPaymentMutation = useMutation({
     mutationFn: (data: { paymentMethod: string; amountCollected: number }) => 
@@ -199,10 +198,21 @@ export const ReservationDetailsModal = ({
   const waitingForHandoffBeforeCash =
     reservation.paymentStatus === 'unpaid' && !canCollectCash;
 
-  const handleApplyStatusChange = () => {
-    const manualTargetStatus =
-      (manualStatusRef.current?.value as ReservationStatus | undefined) ||
-      reservation.status;
+  const isTargetBlockedByVehicle = (targetStatus: ReservationStatus) => {
+    const targetNeedsOperationalVehicle =
+      targetStatus === ReservationStatus.READY_FOR_DELIVERY ||
+      targetStatus === ReservationStatus.IN_DELIVERY ||
+      targetStatus === ReservationStatus.DELIVERED ||
+      targetStatus === ReservationStatus.ACTIVE_RENTAL;
+
+    return vehicleBlocked && targetNeedsOperationalVehicle;
+  };
+
+  const availableStepActions = manualOptions.filter(
+    (statusOption) => statusOption !== reservation.status,
+  );
+
+  const handleApplyStatusChange = (manualTargetStatus: ReservationStatus) => {
 
     if (!manualTargetStatus || manualTargetStatus === reservation.status) {
       toast.info('Choisissez un statut different avant de valider.');
@@ -214,13 +224,7 @@ export const ReservationDetailsModal = ({
       return;
     }
 
-    const targetNeedsOperationalVehicle =
-      manualTargetStatus === ReservationStatus.READY_FOR_DELIVERY ||
-      manualTargetStatus === ReservationStatus.IN_DELIVERY ||
-      manualTargetStatus === ReservationStatus.DELIVERED ||
-      manualTargetStatus === ReservationStatus.ACTIVE_RENTAL;
-
-    if (vehicleBlocked && targetNeedsOperationalVehicle) {
+    if (isTargetBlockedByVehicle(manualTargetStatus)) {
       toast.error(`Impossible: le vehicule est en ${availabilityLabel.toLowerCase()}.`);
       return;
     }
@@ -460,38 +464,39 @@ export const ReservationDetailsModal = ({
             )}
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 md:p-5">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Changement manuel</p>
-                  <p className="text-xs font-semibold text-slate-600">
-                    Modifiez le statut directement depuis cette fenetre.
-                  </p>
-                </div>
-
-                <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row md:items-center">
-                  <select
-                    ref={manualStatusRef}
-                    key={`${rid}-${reservation.status}`}
-                    defaultValue={reservation.status}
-                    className="h-10 min-w-[220px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-100"
-                    disabled={isActionPending}
-                  >
-                    {manualOptions.map((optionStatus) => (
-                      <option key={optionStatus} value={optionStatus}>
-                        {statusConfig[optionStatus]?.label || optionStatus}
-                      </option>
-                    ))}
-                  </select>
-
-                  <Button
-                    onClick={handleApplyStatusChange}
-                    disabled={isActionPending}
-                    className="h-10 rounded-xl bg-slate-900 px-5 text-xs font-black uppercase tracking-wider text-white hover:bg-slate-800"
-                  >
-                    Appliquer
-                  </Button>
-                </div>
+              <div className="mb-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pilotage des etapes (Admin)</p>
+                <p className="text-xs font-semibold text-slate-600">
+                  Toutes les actions de statut sont disponibles ici dans cette popup.
+                </p>
               </div>
+
+              {availableStepActions.length === 0 ? (
+                <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-500">
+                  Aucun changement disponible pour ce statut.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {availableStepActions.map((targetStatus) => {
+                    const isBlockedTarget = isTargetBlockedByVehicle(targetStatus);
+
+                    return (
+                      <Button
+                        key={targetStatus}
+                        onClick={() => handleApplyStatusChange(targetStatus)}
+                        disabled={isActionPending || isBlockedTarget}
+                        variant="outline"
+                        className={cn(
+                          'h-10 justify-start rounded-xl border-slate-200 bg-white px-3 text-xs font-black uppercase tracking-wider text-slate-700 hover:bg-slate-100',
+                          isBlockedTarget && 'opacity-60',
+                        )}
+                      >
+                        {statusConfig[targetStatus]?.label || targetStatus}
+                      </Button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
