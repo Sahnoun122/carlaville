@@ -124,19 +124,37 @@ export class ReservationsController {
     return this.reservationsService.markReadyForDelivery(id);
   }
 
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
+  @Patch(':id/in-delivery')
+  markInDelivery(@Param('id') id: string) {
+    return this.reservationsService.markInDelivery(id);
+  }
+
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/delivered
    */
-  @Roles(Role.DELIVERY_AGENT)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER, Role.DELIVERY_AGENT)
   @Patch(':id/delivered')
   markDelivered(@Param('id') id: string) {
     return this.reservationsService.markDelivered(id);
   }
 
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
+  @Patch(':id/active-rental')
+  markActiveRental(@Param('id') id: string) {
+    return this.reservationsService.markActiveRental(id);
+  }
+
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
+  @Patch(':id/return-scheduled')
+  markReturnScheduled(@Param('id') id: string) {
+    return this.reservationsService.markReturnScheduled(id);
+  }
+
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/returned
    */
-  @Roles(Role.DELIVERY_AGENT)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER, Role.DELIVERY_AGENT)
   @Patch(':id/returned')
   markReturned(@Param('id') id: string) {
     return this.reservationsService.markReturned(id);
@@ -145,7 +163,7 @@ export class ReservationsController {
   /**
    * @example PATCH http://localhost:3000/admin/reservations/60f7e1b3b3b3b3b3b3b3b3b3/complete
    */
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.RESERVATION_MANAGER)
   @Patch(':id/complete')
   complete(@Param('id') id: string) {
     return this.reservationsService.complete(id);

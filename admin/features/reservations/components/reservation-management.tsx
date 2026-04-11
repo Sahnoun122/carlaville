@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { 
   Plus, 
-  Search, 
   Filter, 
   RefreshCcw, 
   Check,
@@ -24,24 +23,43 @@ import {
   CheckCircle2,
   Timer
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { getCars } from '@/features/cars/services/car-service';
-import { getAgencies } from '@/features/agencies/services/agency-service';
 import {
   confirmPayment,
   confirmReservation,
   createReservation,
   getReservations,
+  markReservationActiveRental,
+  markReservationCompleted,
+  markReservationDelivered,
+  markReservationInDelivery,
   markReservationPending,
+  markReservationReadyForDelivery,
+  markReservationReturnScheduled,
+  markReservationReturned,
   rejectReservation,
   verifyReservationPayment,
 } from '@/features/reservations/services/reservation-service';
 import { useAuth } from '@/providers/auth-provider';
 import { Car, Reservation, ReservationStatus, Role } from '@/types';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 import { ReservationDetailsModal } from './ReservationDetailsModal';
+
+const resolveErrorMessage = (error: unknown, fallback: string) => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message?: unknown }).message === 'string'
+  ) {
+    return (error as { message: string }).message;
+  }
+
+  return fallback;
+};
 
 const resolveCarId = (car: Car) => car.id || (car as Car & { _id?: string })._id || '';
 
@@ -62,13 +80,20 @@ const formatDateOrFallback = (value: unknown) => {
   return Number.isNaN(date.getTime()) ? 'Date invalide' : date.toLocaleDateString();
 };
 
-const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+const statusConfig: Record<string, { label: string; class: string; icon: LucideIcon }> = {
   [ReservationStatus.PENDING]: { label: 'En attente', class: 'border-amber-200 bg-amber-50 text-amber-700 shadow-sm shadow-amber-100/50', icon: Clock },
   [ReservationStatus.CONFIRMED]: { label: 'Confirmée', class: 'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50', icon: ShieldCheck },
   [ReservationStatus.REJECTED]: { label: 'Rejetée', class: 'border-rose-200 bg-rose-50 text-rose-700 shadow-sm shadow-rose-100/50', icon: AlertCircle },
+  [ReservationStatus.READY_FOR_DELIVERY]: { label: 'Prête livraison', class: 'border-sky-200 bg-sky-50 text-sky-700 shadow-sm shadow-sky-100/50', icon: Navigation },
+  [ReservationStatus.IN_DELIVERY]: { label: 'En livraison', class: 'border-indigo-200 bg-indigo-50 text-indigo-700 shadow-sm shadow-indigo-100/50', icon: Navigation },
+  [ReservationStatus.DELIVERED]: { label: 'Livrée', class: 'border-violet-200 bg-violet-50 text-violet-700 shadow-sm shadow-violet-100/50', icon: CheckCircle2 },
+  [ReservationStatus.ACTIVE_RENTAL]: { label: 'Location active', class: 'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50', icon: ShieldCheck },
+  [ReservationStatus.RETURN_SCHEDULED]: { label: 'Retour prévu', class: 'border-amber-200 bg-amber-50 text-amber-700 shadow-sm shadow-amber-100/50', icon: CalendarIcon },
+  [ReservationStatus.RETURNED]: { label: 'Restituée', class: 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100/50', icon: CheckCircle2 },
+  [ReservationStatus.COMPLETED]: { label: 'Terminée', class: 'border-slate-200 bg-slate-100 text-slate-700 shadow-sm shadow-slate-100/50', icon: CheckCircle2 },
 };
 
-const paymentConfig: Record<string, { label: string; class: string; icon?: any }> = {
+const paymentConfig: Record<string, { label: string; class: string; icon?: LucideIcon }> = {
   'paid': { label: 'Payé (En ligne)', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: CheckCircle2 },
   'paid-on-delivery': { label: 'Encaissé (Local)', class: 'border-blue-200 bg-blue-50 text-blue-700', icon: Wallet },
   'unpaid': { label: 'À encaisser', class: 'border-slate-200 bg-slate-50 text-slate-500', icon: Timer },
@@ -122,11 +147,6 @@ export const ReservationManagement = () => {
     queryFn: () => getCars({ page: 1, limit: 100 }),
   });
 
-  const agenciesQuery = useQuery({
-    queryKey: ['agencies', 'reservation-create'],
-    queryFn: () => getAgencies({ page: 1, limit: 100 }),
-  });
-
   const createMutation = useMutation({
     mutationFn: createReservation,
     onSuccess: () => {
@@ -149,8 +169,8 @@ export const ReservationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
       toast.success('Réservation enregistrée');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Échec de la réservation.');
+    onError: (error: unknown) => {
+      toast.error(resolveErrorMessage(error, 'Échec de la réservation.'));
     },
   });
 
@@ -160,7 +180,7 @@ export const ReservationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
       toast.success('Réservation confirmée');
     },
-    onError: (error: any) => toast.error(error.message || 'Erreur'),
+    onError: (error: unknown) => toast.error(resolveErrorMessage(error, 'Erreur')),
   });
 
   const rejectMutation = useMutation({
@@ -169,7 +189,7 @@ export const ReservationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
       toast.error('Réservation rejetée');
     },
-    onError: (error: any) => toast.error(error.message || 'Erreur'),
+    onError: (error: unknown) => toast.error(resolveErrorMessage(error, 'Erreur')),
   });
 
   const pendingMutation = useMutation({
@@ -178,7 +198,7 @@ export const ReservationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
       toast.info('Réservation mise en attente');
     },
-    onError: (error: any) => toast.error(error.message || 'Erreur'),
+    onError: (error: unknown) => toast.error(resolveErrorMessage(error, 'Erreur')),
   });
 
   const verifyMutation = useMutation({
@@ -187,7 +207,8 @@ export const ReservationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
       toast.success('Paiement vérifié');
     },
-    onError: (error: any) => toast.error(error.message || 'Vérification échouée'),
+    onError: (error: unknown) =>
+      toast.error(resolveErrorMessage(error, 'Vérification échouée')),
   });
 
   const settleMutation = useMutation({
@@ -198,7 +219,53 @@ export const ReservationManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['revenues'] });
       toast.success('Règlement effectué avec succès');
     },
-    onError: (error: any) => toast.error(error.message || 'Erreur lors du règlement'),
+    onError: (error: unknown) =>
+      toast.error(resolveErrorMessage(error, 'Erreur lors du règlement')),
+  });
+
+  const progressMutation = useMutation({
+    mutationFn: (data: { id: string; nextStatus: ReservationStatus }) => {
+      switch (data.nextStatus) {
+        case ReservationStatus.READY_FOR_DELIVERY:
+          return markReservationReadyForDelivery(data.id);
+        case ReservationStatus.IN_DELIVERY:
+          return markReservationInDelivery(data.id);
+        case ReservationStatus.DELIVERED:
+          return markReservationDelivered(data.id);
+        case ReservationStatus.ACTIVE_RENTAL:
+          return markReservationActiveRental(data.id);
+        case ReservationStatus.RETURN_SCHEDULED:
+          return markReservationReturnScheduled(data.id);
+        case ReservationStatus.RETURNED:
+          return markReservationReturned(data.id);
+        case ReservationStatus.COMPLETED:
+          return markReservationCompleted(data.id);
+        default:
+          throw new Error('Transition de statut non supportee');
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+
+      const successText: Record<ReservationStatus, string> = {
+        [ReservationStatus.PENDING]: 'Mise a jour effectuee',
+        [ReservationStatus.CONFIRMED]: 'Mise a jour effectuee',
+        [ReservationStatus.REJECTED]: 'Mise a jour effectuee',
+        [ReservationStatus.READY_FOR_DELIVERY]: 'Reservation prete pour livraison',
+        [ReservationStatus.IN_DELIVERY]: 'Reservation en cours de livraison',
+        [ReservationStatus.DELIVERED]: 'Reservation marquee comme livree',
+        [ReservationStatus.ACTIVE_RENTAL]: 'Location activee',
+        [ReservationStatus.RETURN_SCHEDULED]: 'Retour programme',
+        [ReservationStatus.RETURNED]: 'Reservation marquee comme restituee',
+        [ReservationStatus.CANCELLED]: 'Mise a jour effectuee',
+        [ReservationStatus.COMPLETED]: 'Dossier de reservation cloture',
+      };
+
+      toast.success(successText[variables.nextStatus] || 'Statut mis a jour');
+    },
+    onError: (error: unknown) => {
+      toast.error(resolveErrorMessage(error, 'Impossible de changer le statut'));
+    },
   });
 
   const isActionPending =
@@ -206,7 +273,8 @@ export const ReservationManagement = () => {
     rejectMutation.isPending || 
     pendingMutation.isPending || 
     verifyMutation.isPending ||
-    settleMutation.isPending;
+    settleMutation.isPending ||
+    progressMutation.isPending;
 
   const handleCreateReservation = () => {
     if (!formData.customerName || !formData.carId) {
@@ -260,7 +328,7 @@ export const ReservationManagement = () => {
             Réservations
           </h1>
           <p className="mt-2 text-slate-500">
-            Suivez et gérez l'ensemble des demandes de location en temps réel.
+            Suivez et gérez l&apos;ensemble des demandes de location en temps réel.
           </p>
         </div>
         <Button
@@ -299,6 +367,13 @@ export const ReservationManagement = () => {
             <option value="all">Tous les statuts</option>
             <option value={ReservationStatus.PENDING}>En attente</option>
             <option value={ReservationStatus.CONFIRMED}>Confirmée</option>
+            <option value={ReservationStatus.READY_FOR_DELIVERY}>Prête livraison</option>
+            <option value={ReservationStatus.IN_DELIVERY}>En livraison</option>
+            <option value={ReservationStatus.DELIVERED}>Livrée</option>
+            <option value={ReservationStatus.ACTIVE_RENTAL}>Location active</option>
+            <option value={ReservationStatus.RETURN_SCHEDULED}>Retour prévu</option>
+            <option value={ReservationStatus.RETURNED}>Restituée</option>
+            <option value={ReservationStatus.COMPLETED}>Terminée</option>
             <option value={ReservationStatus.REJECTED}>Rejetée</option>
           </select>
         </div>
@@ -556,6 +631,9 @@ export const ReservationManagement = () => {
         onConfirm={(id) => confirmMutation.mutate(id)}
         onReject={(id) => rejectMutation.mutate(id)}
         onSuspend={(id) => pendingMutation.mutate(id)}
+        onProgress={(id, nextStatus) =>
+          progressMutation.mutate({ id, nextStatus })
+        }
         isActionPending={isActionPending}
       />
     </div>

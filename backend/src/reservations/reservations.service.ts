@@ -24,6 +24,7 @@ import { RevenueService } from '../revenue/revenue.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { PaymentStatus } from '../common/enums/payment-status.enum';
 import { getMediaBaseUrl, normalizeMediaUrls } from '../common/utils/media-url';
+import { AvailabilityStatus } from '../common/enums/car.enum';
 
 const toPlainObject = <T>(value: T): T => {
   if (value && typeof value === 'object' && 'toObject' in (value as object)) {
@@ -345,13 +346,25 @@ export class ReservationsService {
   async markReadyForDelivery(id: string): Promise<Reservation> {
     return this.updateStatus(id, ReservationStatus.READY_FOR_DELIVERY, [
       ReservationStatus.CONFIRMED,
-    ]);
+    ], {
+      requireOperationalVehicle: true,
+    });
+  }
+
+  async markInDelivery(id: string): Promise<Reservation> {
+    return this.updateStatus(id, ReservationStatus.IN_DELIVERY, [
+      ReservationStatus.READY_FOR_DELIVERY,
+    ], {
+      requireOperationalVehicle: true,
+    });
   }
 
   async markDelivered(id: string): Promise<Reservation> {
     const updated = await this.updateStatus(id, ReservationStatus.DELIVERED, [
       ReservationStatus.IN_DELIVERY,
-    ]);
+    ], {
+      requireOperationalVehicle: true,
+    });
 
     if (updated.paymentStatus === PaymentStatus.PAID_ON_DELIVERY) {
        await this.revenueService.recognizeFromReservation(updated as any);
@@ -360,17 +373,36 @@ export class ReservationsService {
     return updated;
   }
 
+  async markActiveRental(id: string): Promise<Reservation> {
+    return this.updateStatus(id, ReservationStatus.ACTIVE_RENTAL, [
+      ReservationStatus.DELIVERED,
+    ], {
+      requireOperationalVehicle: true,
+      setCarAvailability: AvailabilityStatus.RENTED,
+    });
+  }
+
+  async markReturnScheduled(id: string): Promise<Reservation> {
+    return this.updateStatus(id, ReservationStatus.RETURN_SCHEDULED, [
+      ReservationStatus.ACTIVE_RENTAL,
+    ]);
+  }
+
   async markReturned(id: string): Promise<Reservation> {
     return this.updateStatus(id, ReservationStatus.RETURNED, [
       ReservationStatus.ACTIVE_RENTAL,
       ReservationStatus.RETURN_SCHEDULED,
-    ]);
+    ], {
+      setCarAvailability: AvailabilityStatus.AVAILABLE,
+    });
   }
 
   async complete(id: string): Promise<Reservation> {
     return this.updateStatus(id, ReservationStatus.COMPLETED, [
       ReservationStatus.RETURNED,
-    ]);
+    ], {
+      setCarAvailability: AvailabilityStatus.AVAILABLE,
+    });
   }
 
   async addInternalNote(id: string, note: string): Promise<Reservation> {
@@ -393,6 +425,10 @@ export class ReservationsService {
     id: string,
     newStatus: ReservationStatus,
     allowedInitialStatuses: ReservationStatus[],
+    options?: {
+      requireOperationalVehicle?: boolean;
+      setCarAvailability?: AvailabilityStatus;
+    },
   ): Promise<Reservation> {
     const reservation = await this.findById(id);
     if (!allowedInitialStatuses.includes(reservation.status)) {
@@ -400,6 +436,43 @@ export class ReservationsService {
         `Cannot transition from ${reservation.status} to ${newStatus}`,
       );
     }
+
+    let carDocument: CarDocument | null = null;
+    const needsCarLookup =
+      options?.requireOperationalVehicle ||
+      options?.setCarAvailability !== undefined;
+
+    if (needsCarLookup) {
+      const carId = this.resolveReservationCarId(reservation);
+
+      if (!carId) {
+        throw new BadRequestException(
+          'Cannot update reservation status without an assigned vehicle.',
+        );
+      }
+
+      carDocument = await this.carModel
+        .findById(carId)
+        .select('availabilityStatus')
+        .exec();
+
+      if (!carDocument) {
+        throw new NotFoundException(`Car with id ${carId} not found`);
+      }
+    }
+
+    if (
+      options?.requireOperationalVehicle &&
+      carDocument &&
+      [AvailabilityStatus.MAINTENANCE, AvailabilityStatus.UNAVAILABLE].includes(
+        carDocument.availabilityStatus as AvailabilityStatus,
+      )
+    ) {
+      throw new BadRequestException(
+        'Le vehicule est indisponible. Mettez son etat a disponible avant de poursuivre cette etape.',
+      );
+    }
+
     const updated = await this.reservationModel.findByIdAndUpdate(
       id,
       { status: newStatus },
@@ -408,7 +481,38 @@ export class ReservationsService {
     if (!updated) {
       throw new NotFoundException(`Reservation with id ${id} not found`);
     }
+
+    if (carDocument && options?.setCarAvailability !== undefined) {
+      carDocument.availabilityStatus = options.setCarAvailability;
+      await carDocument.save();
+    }
+
     return updated;
+  }
+
+  private resolveReservationCarId(reservation: Reservation): string {
+    const carRef = (reservation as { carId?: unknown }).carId;
+
+    if (typeof carRef === 'string') {
+      return carRef;
+    }
+
+    if (!carRef || typeof carRef !== 'object') {
+      return '';
+    }
+
+    const carRecord = carRef as { id?: unknown; _id?: unknown };
+    const rawId = carRecord._id ?? carRecord.id;
+
+    if (typeof rawId === 'string') {
+      return rawId;
+    }
+
+    if (rawId && typeof rawId === 'object' && 'toString' in rawId) {
+      return rawId.toString();
+    }
+
+    return '';
   }
 
   async confirmPayment(id: string, dto: ConfirmPaymentDto): Promise<Reservation> {

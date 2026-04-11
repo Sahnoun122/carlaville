@@ -243,6 +243,34 @@ export const markReservationPending = async (id: string) => {
   return patch<Reservation>(`/admin/reservations/${id}/pending`);
 };
 
+export const markReservationReadyForDelivery = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/ready-for-delivery`);
+};
+
+export const markReservationInDelivery = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/in-delivery`);
+};
+
+export const markReservationDelivered = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/delivered`);
+};
+
+export const markReservationActiveRental = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/active-rental`);
+};
+
+export const markReservationReturnScheduled = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/return-scheduled`);
+};
+
+export const markReservationReturned = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/returned`);
+};
+
+export const markReservationCompleted = async (id: string) => {
+  return patch<Reservation>(`/admin/reservations/${id}/complete`);
+};
+
 export const verifyReservationPayment = async (id: string) => {
   return post<Record<string, unknown>>(`/payments/${id}/verify`, {});
 };

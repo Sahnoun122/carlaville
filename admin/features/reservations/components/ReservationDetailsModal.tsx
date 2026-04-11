@@ -14,14 +14,17 @@ import {
   Fuel,
   Settings,
   Info,
+  Navigation,
+  Circle,
 } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { confirmPayment } from '../services/reservation-service';
 import { toast } from 'sonner';
-import { Car, Reservation, ReservationStatus } from '@/types';
+import { AvailabilityStatus, Car, Reservation, ReservationStatus } from '@/types';
 
 interface ReservationDetailsModalProps {
   isOpen: boolean;
@@ -30,14 +33,85 @@ interface ReservationDetailsModalProps {
   onConfirm?: (id: string) => void;
   onReject?: (id: string) => void;
   onSuspend?: (id: string) => void;
+  onProgress?: (id: string, nextStatus: ReservationStatus) => void;
   isActionPending?: boolean;
 }
 
-const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+type IconComponent = ComponentType<{ size?: number; className?: string }>;
+
+const statusConfig: Record<string, { label: string; class: string; icon: IconComponent }> = {
   [ReservationStatus.PENDING]: { label: 'En attente', class: 'border-amber-200 bg-amber-50 text-amber-700', icon: Clock },
   [ReservationStatus.CONFIRMED]: { label: 'Confirmée', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: Check },
   [ReservationStatus.REJECTED]: { label: 'Rejetée', class: 'border-rose-200 bg-rose-50 text-rose-700', icon: X },
+  [ReservationStatus.READY_FOR_DELIVERY]: { label: 'Prête livraison', class: 'border-sky-200 bg-sky-50 text-sky-700', icon: Navigation },
+  [ReservationStatus.IN_DELIVERY]: { label: 'En livraison', class: 'border-indigo-200 bg-indigo-50 text-indigo-700', icon: Navigation },
+  [ReservationStatus.DELIVERED]: { label: 'Livrée', class: 'border-violet-200 bg-violet-50 text-violet-700', icon: Check },
+  [ReservationStatus.ACTIVE_RENTAL]: { label: 'Location active', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: Check },
+  [ReservationStatus.RETURN_SCHEDULED]: { label: 'Retour programmé', class: 'border-amber-200 bg-amber-50 text-amber-700', icon: CalendarIcon },
+  [ReservationStatus.RETURNED]: { label: 'Restituée', class: 'border-blue-200 bg-blue-50 text-blue-700', icon: Check },
+  [ReservationStatus.COMPLETED]: { label: 'Terminée', class: 'border-slate-200 bg-slate-100 text-slate-700', icon: Check },
+  [ReservationStatus.CANCELLED]: { label: 'Annulée', class: 'border-slate-200 bg-slate-100 text-slate-700', icon: X },
 };
+
+const workflowSteps: Array<{ status: ReservationStatus; label: string }> = [
+  { status: ReservationStatus.PENDING, label: 'Validation' },
+  { status: ReservationStatus.CONFIRMED, label: 'Confirmée' },
+  { status: ReservationStatus.READY_FOR_DELIVERY, label: 'Préparation' },
+  { status: ReservationStatus.IN_DELIVERY, label: 'Livraison' },
+  { status: ReservationStatus.DELIVERED, label: 'Remise' },
+  { status: ReservationStatus.ACTIVE_RENTAL, label: 'Location' },
+  { status: ReservationStatus.RETURN_SCHEDULED, label: 'Retour prévu' },
+  { status: ReservationStatus.RETURNED, label: 'Restitution' },
+  { status: ReservationStatus.COMPLETED, label: 'Clôturée' },
+];
+
+const nextTransitionMap: Partial<Record<ReservationStatus, { next: ReservationStatus; cta: string }>> = {
+  [ReservationStatus.CONFIRMED]: {
+    next: ReservationStatus.READY_FOR_DELIVERY,
+    cta: 'Préparer livraison',
+  },
+  [ReservationStatus.READY_FOR_DELIVERY]: {
+    next: ReservationStatus.IN_DELIVERY,
+    cta: 'Démarrer livraison',
+  },
+  [ReservationStatus.IN_DELIVERY]: {
+    next: ReservationStatus.DELIVERED,
+    cta: 'Marquer livrée',
+  },
+  [ReservationStatus.DELIVERED]: {
+    next: ReservationStatus.ACTIVE_RENTAL,
+    cta: 'Activer location',
+  },
+  [ReservationStatus.ACTIVE_RENTAL]: {
+    next: ReservationStatus.RETURN_SCHEDULED,
+    cta: 'Programmer retour',
+  },
+  [ReservationStatus.RETURN_SCHEDULED]: {
+    next: ReservationStatus.RETURNED,
+    cta: 'Marquer restituée',
+  },
+  [ReservationStatus.RETURNED]: {
+    next: ReservationStatus.COMPLETED,
+    cta: 'Clôturer dossier',
+  },
+};
+
+interface DetailItemProps {
+  icon: IconComponent;
+  label: string;
+  value?: string | number;
+  className?: string;
+}
+
+const DetailItem = ({ icon: Icon, label, value, className }: DetailItemProps) => (
+  <div className={cn('flex flex-col gap-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-100/50', className)}>
+    <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+      <Icon size={12} className="text-slate-300" />
+      {label}
+    </div>
+    <div className="text-sm font-bold text-slate-900 truncate">{value || 'N/A'}</div>
+  </div>
+);
 
 export const ReservationDetailsModal = ({
   isOpen,
@@ -46,6 +120,7 @@ export const ReservationDetailsModal = ({
   onConfirm,
   onReject,
   onSuspend,
+  onProgress,
   isActionPending,
 }: ReservationDetailsModalProps) => {
   const queryClient = useQueryClient();
@@ -68,16 +143,45 @@ export const ReservationDetailsModal = ({
   const rid = reservation.id || reservation._id || '';
   const status = statusConfig[reservation.status] || { label: reservation.status, class: 'bg-slate-100 text-slate-600', icon: Info };
   const car = typeof reservation.carId === 'object' ? (reservation.carId as Car) : null;
+  const carRegistration =
+    (car as (Car & { registrationNumber?: string }) | null)?.registrationNumber ||
+    'NON DÉFINI';
+  const currentStepIndex = workflowSteps.findIndex((step) => step.status === reservation.status);
+  const nextTransition = nextTransitionMap[reservation.status];
 
-  const DetailItem = ({ icon: Icon, label, value, className }: any) => (
-    <div className={cn("flex flex-col gap-1.5 p-4 rounded-2xl bg-slate-50 border border-slate-100/50", className)}>
-      <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-        <Icon size={12} className="text-slate-300" />
-        {label}
-      </div>
-      <div className="text-sm font-bold text-slate-900 truncate">{value || 'N/A'}</div>
-    </div>
-  );
+  const vehicleBlocked =
+    car?.availabilityStatus === AvailabilityStatus.MAINTENANCE ||
+    car?.availabilityStatus === AvailabilityStatus.UNAVAILABLE;
+
+  const nextStepNeedsOperationalVehicle =
+    nextTransition?.next === ReservationStatus.READY_FOR_DELIVERY ||
+    nextTransition?.next === ReservationStatus.IN_DELIVERY ||
+    nextTransition?.next === ReservationStatus.DELIVERED ||
+    nextTransition?.next === ReservationStatus.ACTIVE_RENTAL;
+
+  const canAdvanceWorkflow =
+    Boolean(nextTransition) &&
+    !(vehicleBlocked && nextStepNeedsOperationalVehicle);
+
+  const availabilityLabel =
+    car?.availabilityStatus === AvailabilityStatus.AVAILABLE
+      ? 'Disponible'
+      : car?.availabilityStatus === AvailabilityStatus.RENTED
+        ? 'Loué'
+        : car?.availabilityStatus === AvailabilityStatus.MAINTENANCE
+          ? 'Maintenance'
+          : car?.availabilityStatus === AvailabilityStatus.UNAVAILABLE
+            ? 'Indisponible'
+            : 'Non défini';
+
+  const availabilityClass =
+    car?.availabilityStatus === AvailabilityStatus.AVAILABLE
+      ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+      : car?.availabilityStatus === AvailabilityStatus.RENTED
+        ? 'bg-indigo-50 text-indigo-700 border-indigo-100'
+        : car?.availabilityStatus === AvailabilityStatus.MAINTENANCE
+          ? 'bg-amber-50 text-amber-700 border-amber-100'
+          : 'bg-slate-100 text-slate-700 border-slate-200';
 
   return (
     <Modal
@@ -203,15 +307,77 @@ export const ReservationDetailsModal = ({
 
               {/* Status & Action in card */}
               <div className="h-full border-l border-slate-200 pl-8 flex flex-col justify-center gap-4 min-w-[200px]">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Etat véhicule</span>
+                    <span
+                     className={cn(
+                      'text-[11px] font-black uppercase rounded-xl border px-3 py-1.5 text-center',
+                      availabilityClass,
+                     )}
+                    >
+                     {availabilityLabel}
+                    </span>
+                  </div>
                  <div className="flex flex-col gap-2">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Matricule</span>
                     <span className="text-sm font-mono font-black text-slate-900 bg-white px-3 py-1.5 rounded-xl border border-slate-200 text-center">
-                       {/* Hardcoding or using car.registration if exists */}
-                       {(car as any).registrationNumber || 'NON DÉFINI'}
+                        {carRegistration}
                     </span>
                  </div>
               </div>
             </div>
+          </div>
+
+          {/* Workflow Tracking */}
+          <div className="space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 flex items-center justify-center rounded-xl bg-sky-50 text-sky-600 shadow-sm border border-sky-100">
+                <Navigation size={18} />
+              </div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-slate-900">
+                Suivi des étapes
+              </h3>
+            </div>
+
+            <div className="rounded-[2rem] border border-slate-200 bg-white p-6 md:p-8">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+                {workflowSteps.map((step, index) => {
+                  const isCompleted = currentStepIndex >= 0 && index < currentStepIndex;
+                  const isCurrent = currentStepIndex === index;
+
+                  return (
+                    <div key={step.status} className="flex items-center gap-3">
+                      <span
+                        className={cn(
+                          'inline-flex h-8 w-8 items-center justify-center rounded-full border-2 text-[10px] font-black',
+                          isCompleted
+                            ? 'border-emerald-500 bg-emerald-500 text-white'
+                            : isCurrent
+                              ? 'border-red-500 bg-red-50 text-red-700'
+                              : 'border-slate-200 bg-slate-50 text-slate-400',
+                        )}
+                      >
+                        {isCompleted ? <Check size={12} /> : <Circle size={12} />}
+                      </span>
+                      <span
+                        className={cn(
+                          'text-[11px] font-black uppercase tracking-wider',
+                          isCurrent ? 'text-slate-900' : 'text-slate-400',
+                        )}
+                      >
+                        {step.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {vehicleBlocked && nextStepNeedsOperationalVehicle && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                Impossible d&apos;avancer: le véhicule est en {availabilityLabel.toLowerCase()}.
+              </div>
+            )}
           </div>
 
           <hr className="border-slate-100" />
@@ -304,15 +470,31 @@ export const ReservationDetailsModal = ({
                 </Button>
               </>
             ) : (
-                <Button
-                  onClick={() => onSuspend?.(rid)}
-                  disabled={isActionPending}
-                  variant="outline"
-                  className="h-12 px-8 rounded-xl border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all"
-                >
-                  <Clock size={18} className="mr-2" />
-                  Suspendre
-                </Button>
+              <>
+                {(reservation.status === ReservationStatus.CONFIRMED ||
+                  reservation.status === ReservationStatus.REJECTED) && (
+                  <Button
+                    onClick={() => onSuspend?.(rid)}
+                    disabled={isActionPending}
+                    variant="outline"
+                    className="h-12 px-8 rounded-xl border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all"
+                  >
+                    <Clock size={18} className="mr-2" />
+                    Suspendre
+                  </Button>
+                )}
+
+                {nextTransition && (
+                  <Button
+                    onClick={() => onProgress?.(rid, nextTransition.next)}
+                    disabled={isActionPending || !canAdvanceWorkflow}
+                    className="h-12 px-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black shadow-xl shadow-slate-200 transition-all disabled:opacity-60"
+                  >
+                    <Navigation size={18} className="mr-2" />
+                    {nextTransition.cta}
+                  </Button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -321,7 +503,7 @@ export const ReservationDetailsModal = ({
   );
 };
 
-const DollarSign = (props: any) => (
+const DollarSign = (props: SVGProps<SVGSVGElement>) => (
   <svg
     {...props}
     xmlns="http://www.w3.org/2000/svg"
