@@ -46,9 +46,9 @@ const statusConfig: Record<string, { label: string; class: string; icon: IconCom
   [ReservationStatus.READY_FOR_DELIVERY]: { label: 'Prête livraison', class: 'border-sky-200 bg-sky-50 text-sky-700', icon: Navigation },
   [ReservationStatus.IN_DELIVERY]: { label: 'En route', class: 'border-indigo-200 bg-indigo-50 text-indigo-700', icon: Navigation },
   [ReservationStatus.DELIVERED]: { label: 'Arrivée', class: 'border-violet-200 bg-violet-50 text-violet-700', icon: Check },
-  [ReservationStatus.ACTIVE_RENTAL]: { label: 'Location active', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: Check },
+  [ReservationStatus.ACTIVE_RENTAL]: { label: 'Client a pris la voiture', class: 'border-emerald-200 bg-emerald-50 text-emerald-700', icon: Check },
   [ReservationStatus.RETURN_SCHEDULED]: { label: 'Retour programmé', class: 'border-amber-200 bg-amber-50 text-amber-700', icon: CalendarIcon },
-  [ReservationStatus.RETURNED]: { label: 'Restituée', class: 'border-blue-200 bg-blue-50 text-blue-700', icon: Check },
+  [ReservationStatus.RETURNED]: { label: 'Voiture retournée', class: 'border-blue-200 bg-blue-50 text-blue-700', icon: Check },
   [ReservationStatus.COMPLETED]: { label: 'Terminée', class: 'border-slate-200 bg-slate-100 text-slate-700', icon: Check },
   [ReservationStatus.CANCELLED]: { label: 'Annulée', class: 'border-slate-200 bg-slate-100 text-slate-700', icon: X },
 };
@@ -59,6 +59,10 @@ const workflowSteps: Array<{ status: ReservationStatus; label: string }> = [
   { status: ReservationStatus.READY_FOR_DELIVERY, label: 'Prête livraison' },
   { status: ReservationStatus.IN_DELIVERY, label: 'En route' },
   { status: ReservationStatus.DELIVERED, label: 'Arrivée' },
+  { status: ReservationStatus.ACTIVE_RENTAL, label: 'Prise véhicule' },
+  { status: ReservationStatus.RETURN_SCHEDULED, label: 'Retour prévu' },
+  { status: ReservationStatus.RETURNED, label: 'Retournée' },
+  { status: ReservationStatus.COMPLETED, label: 'Clôturée' },
 ];
 
 const manualTransitionMap: Partial<Record<ReservationStatus, ReservationStatus[]>> = {
@@ -66,6 +70,10 @@ const manualTransitionMap: Partial<Record<ReservationStatus, ReservationStatus[]
   [ReservationStatus.CONFIRMED]: [ReservationStatus.READY_FOR_DELIVERY],
   [ReservationStatus.READY_FOR_DELIVERY]: [ReservationStatus.IN_DELIVERY],
   [ReservationStatus.IN_DELIVERY]: [ReservationStatus.DELIVERED],
+  [ReservationStatus.DELIVERED]: [ReservationStatus.ACTIVE_RENTAL],
+  [ReservationStatus.ACTIVE_RENTAL]: [ReservationStatus.RETURN_SCHEDULED],
+  [ReservationStatus.RETURN_SCHEDULED]: [ReservationStatus.RETURNED],
+  [ReservationStatus.RETURNED]: [ReservationStatus.COMPLETED],
 };
 
 const actionLabelMap: Partial<Record<ReservationStatus, string>> = {
@@ -74,6 +82,10 @@ const actionLabelMap: Partial<Record<ReservationStatus, string>> = {
   [ReservationStatus.READY_FOR_DELIVERY]: 'Marquer prête livraison',
   [ReservationStatus.IN_DELIVERY]: 'Mettre en route',
   [ReservationStatus.DELIVERED]: 'Marquer arrivée',
+  [ReservationStatus.ACTIVE_RENTAL]: 'Confirmer prise véhicule',
+  [ReservationStatus.RETURN_SCHEDULED]: 'Programmer retour',
+  [ReservationStatus.RETURNED]: 'Marquer voiture retournée',
+  [ReservationStatus.COMPLETED]: 'Clôturer réservation',
 };
 
 interface DetailItemProps {
@@ -132,22 +144,7 @@ export const ReservationDetailsModal = ({
   const carRegistration =
     (car as (Car & { registrationNumber?: string }) | null)?.registrationNumber ||
     'NON DÉFINI';
-  const currentStepIndex = (() => {
-    const index = workflowSteps.findIndex((step) => step.status === reservation.status);
-    if (index !== -1) return index;
-
-    // Consider later lifecycle states as "Arrivée" reached.
-    if (
-      reservation.status === ReservationStatus.ACTIVE_RENTAL ||
-      reservation.status === ReservationStatus.RETURN_SCHEDULED ||
-      reservation.status === ReservationStatus.RETURNED ||
-      reservation.status === ReservationStatus.COMPLETED
-    ) {
-      return workflowSteps.findIndex((step) => step.status === ReservationStatus.DELIVERED);
-    }
-
-    return -1;
-  })();
+  const currentStepIndex = workflowSteps.findIndex((step) => step.status === reservation.status);
 
   const vehicleBlocked =
     car?.availabilityStatus === AvailabilityStatus.MAINTENANCE ||
@@ -170,6 +167,10 @@ export const ReservationDetailsModal = ({
     return vehicleBlocked && targetNeedsOperationalVehicle;
   };
 
+  const paymentRequiredForTarget = (targetStatus: ReservationStatus) =>
+    targetStatus === ReservationStatus.ACTIVE_RENTAL &&
+    reservation.paymentStatus === 'unpaid';
+
   const availableStepActions = manualOptions.filter(
     (statusOption) => statusOption !== reservation.status,
   );
@@ -188,6 +189,11 @@ export const ReservationDetailsModal = ({
 
     if (isTargetBlockedByVehicle(manualTargetStatus)) {
       toast.error(`Impossible: le vehicule est en ${availabilityLabel.toLowerCase()}.`);
+      return;
+    }
+
+    if (paymentRequiredForTarget(manualTargetStatus)) {
+      toast.error('Confirmez d abord le paiement cash a l etape Arrivee.');
       return;
     }
 
@@ -441,18 +447,19 @@ export const ReservationDetailsModal = ({
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {availableStepActions.map((targetStatus) => {
                     const isBlockedTarget = isTargetBlockedByVehicle(targetStatus);
+                    const needsPaymentFirst = paymentRequiredForTarget(targetStatus);
 
                     return (
                       <Button
                         key={targetStatus}
                         onClick={() => handleApplyStatusChange(targetStatus)}
-                        disabled={isActionPending || isBlockedTarget}
+                        disabled={isActionPending || isBlockedTarget || needsPaymentFirst}
                         variant="outline"
                         className={cn(
                           'h-10 justify-start rounded-xl border-slate-200 bg-white px-3 text-xs font-black uppercase tracking-wider text-slate-700 hover:bg-slate-100',
                           targetStatus === ReservationStatus.REJECTED && 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100',
                           targetStatus === ReservationStatus.CONFIRMED && 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100',
-                          isBlockedTarget && 'opacity-60',
+                          (isBlockedTarget || needsPaymentFirst) && 'opacity-60',
                         )}
                       >
                         {actionLabelMap[targetStatus] || statusConfig[targetStatus]?.label || targetStatus}

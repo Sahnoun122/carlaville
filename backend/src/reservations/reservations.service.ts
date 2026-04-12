@@ -374,6 +374,14 @@ export class ReservationsService {
   }
 
   async markActiveRental(id: string): Promise<Reservation> {
+    const reservation = await this.findById(id);
+
+    if (reservation.paymentStatus === PaymentStatus.UNPAID) {
+      throw new BadRequestException(
+        'Confirmez le paiement avant de marquer que le client a pris le vehicule.',
+      );
+    }
+
     return this.updateStatus(id, ReservationStatus.ACTIVE_RENTAL, [
       ReservationStatus.DELIVERED,
     ], {
