@@ -23,6 +23,7 @@ import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { confirmPayment } from '../services/reservation-service';
+import { updateCarAvailabilityStatus } from '@/features/cars/services/car-service';
 import { toast } from 'sonner';
 import { AvailabilityStatus, Car, Reservation, ReservationStatus } from '@/types';
 
@@ -130,6 +131,19 @@ export const ReservationDetailsModal = ({
     }
   });
 
+  const markCarAvailableMutation = useMutation({
+    mutationFn: (carId: string) =>
+      updateCarAvailabilityStatus(carId, AvailabilityStatus.AVAILABLE),
+    onSuccess: () => {
+      toast.success('Véhicule mis en disponible. Vous pouvez continuer les étapes.');
+      queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      queryClient.invalidateQueries({ queryKey: ['cars'] });
+    },
+    onError: () => {
+      toast.error('Impossible de mettre le véhicule en disponible.');
+    },
+  });
+
   const manualOptions = useMemo(() => {
     if (!reservation) return [] as ReservationStatus[];
     const transitions = manualTransitionMap[reservation.status] || [];
@@ -144,6 +158,10 @@ export const ReservationDetailsModal = ({
   const carRegistration =
     (car as (Car & { registrationNumber?: string }) | null)?.registrationNumber ||
     'NON DÉFINI';
+  const carId =
+    (car as (Car & { _id?: string }) | null)?.id ||
+    (car as (Car & { _id?: string }) | null)?._id ||
+    '';
   const currentStepIndex = workflowSteps.findIndex((step) => step.status === reservation.status);
 
   const vehicleBlocked =
@@ -428,6 +446,23 @@ export const ReservationDetailsModal = ({
             {vehicleBlocked && (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
                 Attention: certaines étapes livraison sont bloquées car le véhicule est en {availabilityLabel.toLowerCase()}.
+              </div>
+            )}
+
+            {vehicleBlocked && carId && (
+              <div className="rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <p className="text-sm font-semibold text-indigo-800">
+                    Déblocage rapide: passez le véhicule à l&apos;état disponible pour continuer le workflow.
+                  </p>
+                  <Button
+                    onClick={() => markCarAvailableMutation.mutate(carId)}
+                    disabled={isActionPending || markCarAvailableMutation.isPending}
+                    className="h-10 rounded-xl bg-indigo-600 px-4 text-xs font-black uppercase tracking-wider text-white hover:bg-indigo-700"
+                  >
+                    {markCarAvailableMutation.isPending ? 'Mise à jour...' : 'Mettre le véhicule disponible'}
+                  </Button>
+                </div>
               </div>
             )}
 

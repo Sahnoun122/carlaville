@@ -6,7 +6,6 @@ import {
   FuelType,
   MaintenanceRecord,
   Transmission,
-  Agency,
 } from '@/types';
 
 export interface CarFormValues {
@@ -95,6 +94,13 @@ export const updateCar = async (data: UpdateCarPayload) => {
   }
 
   return patch<Car>(`/admin/cars/${id}`, normalizedPayload);
+};
+
+export const updateCarAvailabilityStatus = async (
+  id: string,
+  availabilityStatus: AvailabilityStatus,
+) => {
+  return patch<Car>(`/admin/cars/${id}`, { availabilityStatus });
 };
 
 export const deleteCar = async (id: string) => {

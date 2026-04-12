@@ -107,7 +107,8 @@ export const ReservationManagement = () => {
   const [selectedCarId, setSelectedCarId] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
+  const [selectedReservationSnapshot, setSelectedReservationSnapshot] = useState<Reservation | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
@@ -307,7 +308,8 @@ export const ReservationManagement = () => {
   };
   
   const handleViewDetails = (reservation: Reservation) => {
-    setSelectedReservation(reservation);
+    setSelectedReservationId(resolveReservationId(reservation));
+    setSelectedReservationSnapshot(reservation);
     setIsDetailsModalOpen(true);
   };
 
@@ -319,6 +321,20 @@ export const ReservationManagement = () => {
       })),
     [carsQuery.data?.cars],
   );
+
+  const selectedReservation = useMemo(() => {
+    if (!selectedReservationId) return null;
+
+    const refreshed = reservationsQuery.data?.reservations?.find(
+      (item) => resolveReservationId(item) === selectedReservationId,
+    );
+
+    return refreshed || selectedReservationSnapshot;
+  }, [
+    reservationsQuery.data?.reservations,
+    selectedReservationId,
+    selectedReservationSnapshot,
+  ]);
 
   return (
     <div className="w-full space-y-8 pb-12">
@@ -626,7 +642,11 @@ export const ReservationManagement = () => {
 
       <ReservationDetailsModal
         isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
+        onClose={() => {
+          setIsDetailsModalOpen(false);
+          setSelectedReservationId(null);
+          setSelectedReservationSnapshot(null);
+        }}
         reservation={selectedReservation}
         onConfirm={(id) => confirmMutation.mutate(id)}
         onReject={(id) => rejectMutation.mutate(id)}
