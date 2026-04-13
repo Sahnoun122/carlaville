@@ -247,14 +247,18 @@ export const ReservationManagement = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['reservations'] });
+      queryClient.invalidateQueries({ queryKey: ['revenues'] });
+      queryClient.invalidateQueries({ queryKey: ['revenue-analytics'] });
+      queryClient.invalidateQueries({ queryKey: ['revenue-rankings'] });
+      queryClient.invalidateQueries({ queryKey: ['revenue-timeframe-analytics'] });
 
       const successText: Record<ReservationStatus, string> = {
         [ReservationStatus.PENDING]: 'Mise a jour effectuee',
         [ReservationStatus.CONFIRMED]: 'Mise a jour effectuee',
         [ReservationStatus.REJECTED]: 'Mise a jour effectuee',
         [ReservationStatus.READY_FOR_DELIVERY]: 'Reservation prete pour livraison',
-        [ReservationStatus.IN_DELIVERY]: 'Reservation en cours de livraison',
-        [ReservationStatus.DELIVERED]: 'Reservation marquee comme livree',
+        [ReservationStatus.IN_DELIVERY]: 'Reservation en route',
+        [ReservationStatus.DELIVERED]: 'Arrivee marquee: paiement valide automatiquement et ajoute en revenus',
         [ReservationStatus.ACTIVE_RENTAL]: 'Location activee',
         [ReservationStatus.RETURN_SCHEDULED]: 'Retour programme',
         [ReservationStatus.RETURNED]: 'Reservation marquee comme restituee',

@@ -23,6 +23,7 @@ import { Car, CarDocument } from '../cars/schemas/car.schema';
 import { RevenueService } from '../revenue/revenue.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { PaymentStatus } from '../common/enums/payment-status.enum';
+import { PaymentMethod } from '../common/enums/payment-method.enum';
 import { getMediaBaseUrl, normalizeMediaUrls } from '../common/utils/media-url';
 import { AvailabilityStatus } from '../common/enums/car.enum';
 
@@ -360,14 +361,45 @@ export class ReservationsService {
   }
 
   async markDelivered(id: string): Promise<Reservation> {
-    const updated = await this.updateStatus(id, ReservationStatus.DELIVERED, [
+    let updated = await this.updateStatus(id, ReservationStatus.DELIVERED, [
       ReservationStatus.IN_DELIVERY,
     ], {
       requireOperationalVehicle: true,
     });
 
-    if (updated.paymentStatus === PaymentStatus.PAID_ON_DELIVERY) {
-       await this.revenueService.recognizeFromReservation(updated as any);
+    // Professional automation: when vehicle arrives, validate cash payment automatically
+    // if the reservation is still unpaid, then recognize revenue right away.
+    if (updated.paymentStatus === PaymentStatus.UNPAID) {
+      const pricing = updated.pricingBreakdown || {};
+      const autoCollectedAmount = Number(
+        pricing.total || pricing.totalAmount || pricing.estimatedTotal || 0,
+      );
+
+      const paidReservation = await this.reservationModel.findByIdAndUpdate(
+        id,
+        {
+          paymentStatus: PaymentStatus.PAID_ON_DELIVERY,
+          paymentMethod: PaymentMethod.CASH,
+          amountCollected: Number.isFinite(autoCollectedAmount)
+            ? autoCollectedAmount
+            : 0,
+          paidAt: new Date(),
+        },
+        { new: true },
+      );
+
+      if (!paidReservation) {
+        throw new NotFoundException(`Reservation with id ${id} not found`);
+      }
+
+      updated = paidReservation as unknown as Reservation;
+    }
+
+    if (
+      updated.paymentStatus === PaymentStatus.PAID_ON_DELIVERY ||
+      updated.paymentStatus === PaymentStatus.PAID
+    ) {
+      await this.revenueService.recognizeFromReservation(updated as any);
     }
 
     return updated;

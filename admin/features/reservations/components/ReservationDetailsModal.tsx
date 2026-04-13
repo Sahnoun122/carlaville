@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { confirmPayment } from '../services/reservation-service';
 import { updateCarAvailabilityStatus } from '@/features/cars/services/car-service';
 import { toast } from 'sonner';
 import { AvailabilityStatus, Car, Reservation, ReservationStatus } from '@/types';
@@ -118,19 +117,6 @@ export const ReservationDetailsModal = ({
 }: ReservationDetailsModalProps) => {
   const queryClient = useQueryClient();
 
-  const confirmPaymentMutation = useMutation({
-    mutationFn: (data: { paymentMethod: string; amountCollected: number }) => 
-      confirmPayment(reservation?.id || reservation?._id || '', data),
-    onSuccess: () => {
-      toast.success('Paiement confirmé avec succès');
-      queryClient.invalidateQueries({ queryKey: ['reservations'] });
-      queryClient.invalidateQueries({ queryKey: ['revenue'] });
-    },
-    onError: () => {
-      toast.error('Erreur lors de la confirmation du paiement');
-    }
-  });
-
   const markCarAvailableMutation = useMutation({
     mutationFn: (carId: string) =>
       updateCarAvailabilityStatus(carId, AvailabilityStatus.AVAILABLE),
@@ -172,8 +158,20 @@ export const ReservationDetailsModal = ({
     reservation.paymentStatus === 'unpaid' &&
     reservation.status === ReservationStatus.DELIVERED;
 
-  const waitingForHandoffBeforeCash =
+  const waitingForArrivalForAutoCash =
     reservation.paymentStatus === 'unpaid' && !canCollectCash;
+
+  const postArrivalStatuses: ReservationStatus[] = [
+    ReservationStatus.DELIVERED,
+    ReservationStatus.ACTIVE_RENTAL,
+    ReservationStatus.RETURN_SCHEDULED,
+    ReservationStatus.RETURNED,
+    ReservationStatus.COMPLETED,
+  ];
+
+  const hasAutoCashValidated =
+    reservation.paymentStatus === 'paid-on-delivery' &&
+    postArrivalStatuses.includes(reservation.status);
 
   const isTargetBlockedByVehicle = (targetStatus: ReservationStatus) => {
     const targetNeedsOperationalVehicle =
@@ -211,7 +209,7 @@ export const ReservationDetailsModal = ({
     }
 
     if (paymentRequiredForTarget(manualTargetStatus)) {
-      toast.error('Confirmez d abord le paiement cash a l etape Arrivee.');
+      toast.error('Paiement automatique en cours a l etape Arrivee. Patientez la mise a jour.');
       return;
     }
 
@@ -543,28 +541,24 @@ export const ReservationDetailsModal = ({
             </div>
 
             {/* Payment Collection Action Card */}
-            {waitingForHandoffBeforeCash && (
+            {waitingForArrivalForAutoCash && (
               <div className="mt-6 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-800">
-                Encaissement cash disponible uniquement apres l&apos;etape Arrivee.
+                Le paiement cash sera valide automatiquement des que la reservation passe a l&apos;etape Arrivee.
               </div>
             )}
 
             {canCollectCash && (
-              <div className="mt-6 p-8 rounded-[2rem] border-2 border-dashed border-emerald-200 bg-emerald-50/30 flex flex-col md:flex-row items-center justify-between gap-6 transition-all hover:bg-emerald-50/50">
-                <div className="space-y-1">
-                  <h4 className="text-lg font-black text-emerald-900">Encaissement au Client</h4>
-                  <p className="text-emerald-700/70 text-sm font-medium">Le client est marque Arrivee. Confirmez maintenant la reception du cash de maniere officielle.</p>
-                </div>
-                <Button 
-                   onClick={() => confirmPaymentMutation.mutate({ 
-                     paymentMethod: 'cash', 
-                     amountCollected: reservation.pricingBreakdown?.total || 0 
-                   })}
-                   disabled={confirmPaymentMutation.isPending || isActionPending}
-                   className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-xl shadow-emerald-200 shrink-0"
-                >
-                  {confirmPaymentMutation.isPending ? 'Confirmation...' : 'Confirmer le Paiement (Cash)'}
-                </Button>
+              <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+                Arrivee detectee: validation automatique du paiement cash en cours...
+              </div>
+            )}
+
+            {hasAutoCashValidated && (
+              <div className="mt-6 p-6 rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-800">
+                <p className="text-sm font-black uppercase tracking-wider">Paiement cash valide automatiquement</p>
+                <p className="mt-1 text-sm font-medium">
+                  La transaction a ete enregistree et la ligne de revenus a ete ajoutee automatiquement.
+                </p>
               </div>
             )}
           </div>
