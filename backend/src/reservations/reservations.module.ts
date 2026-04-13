@@ -33,6 +33,7 @@ import { RevenueModule } from '../revenue/revenue.module';
     PublicReservationsController,
   ],
   providers: [ReservationsService],
+  exports: [ReservationsService],
 })
 
 export class ReservationsModule {}

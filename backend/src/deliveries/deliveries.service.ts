@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	ConflictException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Delivery, DeliveryDocument } from './schemas/delivery.schema';
@@ -7,7 +12,22 @@ import { CreateDeliveryDto } from './dto/create-delivery.dto';
 import { FilterDeliveryDto } from './dto/filter-delivery.dto';
 import { UpdateDeliveryStatusDto } from './dto/update-delivery-status.dto';
 import { DeliveryStatus, DeliveryType } from '../common/enums/delivery.enum';
-import { ReservationStatus } from '../common/enums/reservation-status.enum';
+import { ReservationsService } from '../reservations/reservations.service';
+
+const allowedTransitions: Partial<Record<DeliveryStatus, DeliveryStatus[]>> = {
+	[DeliveryStatus.PENDING]: [
+		DeliveryStatus.ASSIGNED,
+		DeliveryStatus.ON_THE_WAY,
+		DeliveryStatus.CANCELLED,
+	],
+	[DeliveryStatus.ASSIGNED]: [
+		DeliveryStatus.ON_THE_WAY,
+		DeliveryStatus.CANCELLED,
+		DeliveryStatus.FAILED,
+	],
+	[DeliveryStatus.ON_THE_WAY]: [DeliveryStatus.ARRIVED, DeliveryStatus.FAILED],
+	[DeliveryStatus.ARRIVED]: [DeliveryStatus.CONFIRMED, DeliveryStatus.FAILED],
+};
 
 @Injectable()
 export class DeliveriesService {
@@ -16,6 +36,7 @@ export class DeliveriesService {
 		private deliveryModel: Model<DeliveryDocument>,
 		@InjectModel(Reservation.name)
 		private reservationModel: Model<ReservationDocument>,
+		private readonly reservationsService: ReservationsService,
 	) {}
 
 	async create(createDeliveryDto: CreateDeliveryDto): Promise<Delivery> {
@@ -51,11 +72,15 @@ export class DeliveriesService {
 		reservation.assignedDeliveryAgentId = createDeliveryDto.assignedAgentId as never;
 
 		if (createDeliveryDto.type === DeliveryType.PICKUP) {
-			reservation.status = ReservationStatus.READY_FOR_DELIVERY;
+			await this.reservationsService.markReadyForDelivery(
+				createDeliveryDto.reservationId,
+			);
 		}
 
 		if (createDeliveryDto.type === DeliveryType.RETURN) {
-			reservation.status = ReservationStatus.RETURN_SCHEDULED;
+			await this.reservationsService.markReturnScheduled(
+				createDeliveryDto.reservationId,
+			);
 		}
 
 		await reservation.save();
@@ -139,6 +164,8 @@ export class DeliveriesService {
 			throw new BadRequestException('This delivery is not assigned to you.');
 		}
 
+		this.assertTransitionAllowed(delivery.status as DeliveryStatus, updateDto.status);
+
 		delivery.status = updateDto.status;
 
 		if (updateDto.notes) {
@@ -159,32 +186,47 @@ export class DeliveriesService {
 			delivery.actualDateTime = new Date();
 			delivery.confirmedBy = agentId as never;
 
-			const reservation = await this.reservationModel
-				.findById(delivery.reservationId)
-				.exec();
-
-			if (reservation) {
-				reservation.status =
-					delivery.type === DeliveryType.PICKUP
-						? ReservationStatus.ACTIVE_RENTAL
-						: ReservationStatus.RETURNED;
-				await reservation.save();
+			if (delivery.type === DeliveryType.PICKUP) {
+				await this.reservationsService.markActiveRental(
+					String(delivery.reservationId),
+				);
+			} else {
+				await this.reservationsService.markReturned(
+					String(delivery.reservationId),
+				);
 			}
 		}
 
 		if (updateDto.status === DeliveryStatus.ON_THE_WAY) {
-			const reservation = await this.reservationModel
-				.findById(delivery.reservationId)
-				.exec();
+			if (delivery.type === DeliveryType.PICKUP) {
+				await this.reservationsService.markInDelivery(
+					String(delivery.reservationId),
+				);
+			}
+		}
 
-			if (reservation) {
-				reservation.status = ReservationStatus.IN_DELIVERY;
-				await reservation.save();
+		if (updateDto.status === DeliveryStatus.ARRIVED) {
+			if (delivery.type === DeliveryType.PICKUP) {
+				// This step now auto-validates cash payment and recognizes revenue.
+				await this.reservationsService.markDelivered(String(delivery.reservationId));
 			}
 		}
 
 		await delivery.save();
 
 		return this.findById(id);
+	}
+
+	private assertTransitionAllowed(current: DeliveryStatus, next: DeliveryStatus) {
+		if (current === next) {
+			return;
+		}
+
+		const allowed = allowedTransitions[current] || [];
+		if (!allowed.includes(next)) {
+			throw new ConflictException(
+				`Cannot transition delivery from ${current} to ${next}`,
+			);
+		}
 	}
 }

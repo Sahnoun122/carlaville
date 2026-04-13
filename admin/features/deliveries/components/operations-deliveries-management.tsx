@@ -8,6 +8,7 @@ import {
   updateOperationsDeliveryStatus,
 } from '@/features/deliveries/services/delivery-service';
 import { Delivery, DeliveryStatus } from '@/types';
+import { toast } from 'sonner';
 
 const resolveDeliveryId = (delivery: Delivery) =>
   delivery.id || delivery._id || '';
@@ -20,12 +21,22 @@ const resolveReservationLabel = (delivery: Delivery) => {
   return 'N/A';
 };
 
-const nextStatuses: DeliveryStatus[] = [
-  DeliveryStatus.ON_THE_WAY,
-  DeliveryStatus.ARRIVED,
-  DeliveryStatus.CONFIRMED,
-  DeliveryStatus.FAILED,
-];
+const statusLabels: Record<DeliveryStatus, string> = {
+  [DeliveryStatus.PENDING]: 'En attente',
+  [DeliveryStatus.ASSIGNED]: 'Assignee',
+  [DeliveryStatus.ON_THE_WAY]: 'En route',
+  [DeliveryStatus.ARRIVED]: 'Arrivee',
+  [DeliveryStatus.CONFIRMED]: 'Confirmee',
+  [DeliveryStatus.FAILED]: 'Echec',
+  [DeliveryStatus.CANCELLED]: 'Annulee',
+};
+
+const nextStatusesByCurrent: Partial<Record<DeliveryStatus, DeliveryStatus[]>> = {
+  [DeliveryStatus.PENDING]: [DeliveryStatus.ASSIGNED, DeliveryStatus.CANCELLED],
+  [DeliveryStatus.ASSIGNED]: [DeliveryStatus.ON_THE_WAY, DeliveryStatus.FAILED],
+  [DeliveryStatus.ON_THE_WAY]: [DeliveryStatus.ARRIVED, DeliveryStatus.FAILED],
+  [DeliveryStatus.ARRIVED]: [DeliveryStatus.CONFIRMED, DeliveryStatus.FAILED],
+};
 
 export const OperationsDeliveriesManagement = () => {
   const queryClient = useQueryClient();
@@ -45,9 +56,16 @@ export const OperationsDeliveriesManagement = () => {
 
   const updateMutation = useMutation({
     mutationFn: updateOperationsDeliveryStatus,
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       setActionError(null);
       queryClient.invalidateQueries({ queryKey: ['operations-deliveries'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-deliveries'] });
+
+      if (variables.status === DeliveryStatus.ARRIVED) {
+        toast.success('Arrivee marquee. Paiement et revenu seront traites automatiquement.');
+      } else {
+        toast.success(`Statut mis a jour: ${statusLabels[variables.status] || variables.status}`);
+      }
     },
     onError: (error: unknown) => {
       const message =
@@ -103,7 +121,7 @@ export const OperationsDeliveriesManagement = () => {
         >
           <option value="all">tous</option>
           {Object.values(DeliveryStatus).map((status) => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>{statusLabels[status as DeliveryStatus]}</option>
           ))}
         </select>
       </div>
@@ -124,21 +142,27 @@ export const OperationsDeliveriesManagement = () => {
                       {delivery.type} • {new Date(delivery.scheduledDate).toLocaleDateString()} {delivery.scheduledTime}
                     </p>
                   </div>
-                  <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">{delivery.status}</span>
+                  <span className="inline-flex rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
+                    {statusLabels[delivery.status] || delivery.status}
+                  </span>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {nextStatuses.map((status) => (
-                    <Button
-                      key={status}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleQuickStatus(deliveryId, status)}
-                      disabled={updateMutation.isPending}
-                    >
-                      {status}
-                    </Button>
-                  ))}
+                  {(nextStatusesByCurrent[delivery.status] || []).length === 0 ? (
+                    <span className="text-xs font-medium text-slate-400">Aucune action disponible</span>
+                  ) : (
+                    (nextStatusesByCurrent[delivery.status] || []).map((status) => (
+                      <Button
+                        key={status}
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleQuickStatus(deliveryId, status)}
+                        disabled={updateMutation.isPending}
+                      >
+                        {statusLabels[status] || status}
+                      </Button>
+                    ))
+                  )}
                 </div>
 
                 <form
@@ -147,7 +171,7 @@ export const OperationsDeliveriesManagement = () => {
                 >
                   <select name="status" className="rounded-md border border-slate-300 bg-white px-3 py-2 text-slate-800 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-200">
                     {Object.values(DeliveryStatus).map((status) => (
-                      <option key={status} value={status}>{status}</option>
+                      <option key={status} value={status}>{statusLabels[status as DeliveryStatus]}</option>
                     ))}
                   </select>
                   <input

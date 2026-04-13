@@ -1,21 +1,14 @@
 'use client';
 
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { 
   Plus, 
-  Search, 
   Filter, 
   RefreshCcw, 
   Truck, 
   User, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  FileText, 
-  CheckCircle2, 
-  AlertCircle, 
-  MapPin,
   ClipboardList
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,6 +38,19 @@ const resolveAgentLabel = (delivery: Delivery) => {
   return 'N/A';
 };
 
+const resolveErrorMessage = (error: unknown, fallback: string) => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as { message?: unknown }).message === 'string'
+  ) {
+    return (error as { message: string }).message;
+  }
+
+  return fallback;
+};
+
 const statusConfig: Record<string, { label: string; class: string }> = {
   [DeliveryStatus.PENDING]: { label: 'En attente', class: 'border-amber-200 bg-amber-50 text-amber-700 shadow-sm shadow-amber-100/50' },
   [DeliveryStatus.ASSIGNED]: { label: 'Assignée', class: 'border-blue-200 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100/50' },
@@ -53,6 +59,16 @@ const statusConfig: Record<string, { label: string; class: string }> = {
   [DeliveryStatus.CONFIRMED]: { label: 'Confirmée', class: 'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100/50 shadow-emerald-100/50' },
   [DeliveryStatus.FAILED]: { label: 'Échec', class: 'border-rose-200 bg-rose-50 text-rose-700 shadow-sm shadow-rose-100/50' },
   [DeliveryStatus.CANCELLED]: { label: 'Annulée', class: 'border-slate-200 bg-slate-50 text-slate-500 shadow-sm shadow-slate-100/50' },
+};
+
+const deliveryStatusLabels: Record<DeliveryStatus, string> = {
+  [DeliveryStatus.PENDING]: 'En attente',
+  [DeliveryStatus.ASSIGNED]: 'Assignee',
+  [DeliveryStatus.ON_THE_WAY]: 'En route',
+  [DeliveryStatus.ARRIVED]: 'Arrivee',
+  [DeliveryStatus.CONFIRMED]: 'Confirmee',
+  [DeliveryStatus.FAILED]: 'Echec',
+  [DeliveryStatus.CANCELLED]: 'Annulee',
 };
 
 export const AdminDeliveriesManagement = () => {
@@ -88,8 +104,8 @@ export const AdminDeliveriesManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-deliveries'] });
       toast.success('Livraison créée et attribuée');
     },
-    onError: (error: any) => {
-      toast.error(error.message || 'Échec de la création.');
+    onError: (error: unknown) => {
+      toast.error(resolveErrorMessage(error, 'Échec de la création.'));
     },
   });
 
@@ -189,7 +205,7 @@ export const AdminDeliveriesManagement = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Date d'opération</label>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider ml-1">Date d&apos;opération</label>
               <input name="scheduledDate" type="date" className="w-full h-12 px-4 bg-slate-50 border-none rounded-xl font-bold" />
             </div>
 
@@ -203,7 +219,7 @@ export const AdminDeliveriesManagement = () => {
                className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-xl shadow-red-100 transition-all active:scale-95" 
                disabled={createMutation.isPending}
             >
-              Lancer l'opération
+              Lancer l&apos;opération
             </Button>
           </form>
         </div>
@@ -216,18 +232,20 @@ export const AdminDeliveriesManagement = () => {
                    <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-colors group-focus-within:text-red-500" />
                    <select 
                      value={statusFilter} 
-                     onChange={(e) => setStatusFilter(e.target.value as any)}
+                     onChange={(e) => setStatusFilter(e.target.value as 'all' | DeliveryStatus)}
                      className="w-full h-12 pl-11 pr-10 bg-slate-50 border-none rounded-xl font-bold text-slate-900 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xlmns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20stroke%3D%22%2364748b%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M7%207l3%203%203-3%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat cursor-pointer"
                    >
                      <option value="all">Tous les statuts</option>
-                     {Object.values(DeliveryStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                      {Object.values(DeliveryStatus).map((s) => (
+                        <option key={s} value={s}>{deliveryStatusLabels[s as DeliveryStatus]}</option>
+                      ))}
                    </select>
                 </div>
                 <div className="relative flex-1 group">
                    <ClipboardList className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 transition-colors group-focus-within:text-red-500" />
                    <select 
                      value={typeFilter} 
-                     onChange={(e) => setTypeFilter(e.target.value as any)}
+                     onChange={(e) => setTypeFilter(e.target.value as 'all' | DeliveryType)}
                      className="w-full h-12 pl-11 pr-10 bg-slate-50 border-none rounded-xl font-bold text-slate-900 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xlmns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20stroke%3D%22%2364748b%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M7%207l3%203%203-3%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat cursor-pointer"
                    >
                      <option value="all">Tous types</option>

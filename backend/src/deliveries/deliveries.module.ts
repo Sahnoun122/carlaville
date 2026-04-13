@@ -7,6 +7,7 @@ import {
   Reservation,
   ReservationSchema,
 } from '../reservations/schemas/reservation.schema';
+import { ReservationsModule } from '../reservations/reservations.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import {
       { name: Delivery.name, schema: DeliverySchema },
       { name: Reservation.name, schema: ReservationSchema },
     ]),
+    ReservationsModule,
   ],
   controllers: [DeliveriesController],
   providers: [DeliveriesService],
